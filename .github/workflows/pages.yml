@@ -26,7 +26,7 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Refresh roadmap, status blocks and navigation
         run: python tools/curriculum.py refresh
-      - name: Build (strict: broken links fail the build)
+      - name: Build (strict mode, broken links fail the build)
         run: mkdocs build --strict
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
