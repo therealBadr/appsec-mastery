@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supply Chain Security Research — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 5</div>
+  <h1>Supply Chain Security Research</h1>
+  <div class="subtitle">Subject 6 of 7 — Advanced Specialization</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Software Composition Analysis and Supply Chain Security built the practitioner's defensive skill: scan, triage, and manage dependency risk. This specialization lane studies the offense side directly — how real supply-chain attacks are actually constructed, and the emerging provenance/attestation techniques built specifically to make them harder.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Foreword</a></li>
+      <li><a href="#ch1">Introduction</a></li>
+      <li><a href="#ch2">Theory</a>
+        <ol class="toc-sub">
+          <li><a href="#t0">Build pipeline compromise</a></li>
+          <li><a href="#t1">Dependency-confusion and typosquatting at scale</a></li>
+          <li><a href="#t2">Build provenance and artifact signing (SLSA, Sigstore)</a></li>
+          <li><a href="#t3">Reproducible builds</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch3">Practical Outputs</a></li>
+      <li><a href="#ch4">Common Delusions</a></li>
+      <li><a href="#ch5">Exit Gate</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Foreword</div>
+    <p class="foreword">"The most efficient attack against a well-defended target is rarely a zero-day against the target itself. It's a normal-looking dependency update the target's own build pipeline will trust and pull in automatically."</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Introduction</div>
+    <h2>Why This Subject</h2>
+    <p>This lane goes past SCA's scanning-and-triage discipline into the mechanics an attacker actually uses to compromise a supply chain, and the current best practice — build provenance, artifact signing, and reproducible builds — for making that mechanism structurally harder, which is exactly the kind of "make the secure choice the default" thinking Security Architecture and Engineering formalized a stage earlier.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Theory</div>
+    <h2>What You Must Understand</h2>
+    <div class="topic-block" id="t0">
+      <h4>Build pipeline compromise</h4>
+      <div class="tbody">
+        <p>An attacker's highest-leverage target is rarely the shipped artifact itself but the pipeline that produces it — a compromised CI runner, an overprivileged CI credential, or a malicious pre-build/post-build script injected via a seemingly unrelated PR — because compromising the pipeline compromises every future build automatically.</p>
+<ul>
+          <li>CI/CD credentials with broad, long-lived access (the DevSecOps Pipeline Engineering subject's own secrets-in-the-pipeline concern) are a direct, high-value target once an attacker has any foothold in the build environment</li>
+          <li>A build script sourced from a third-party action/plugin (e.g. a GitHub Action from an unverified publisher) is itself a supply-chain dependency, subject to the identical trust question as any code dependency</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t1">
+      <h4>Dependency-confusion and typosquatting at scale</h4>
+      <div class="tbody">
+        <p>Software Composition Analysis and Supply Chain Security introduced these; this subject studies them as an attacker actually would — systematically identifying internal package names likely to exist (via leaked build configs, job postings, or public references) as realistic targets for a dependency-confusion attempt in a research/authorized context.</p>
+<ul>
+          <li>Internal package naming conventions are frequently discoverable via the exact OSINT techniques from Advanced Reconnaissance and OSINT — leaked internal references, public build logs, or job postings</li>
+          <li>A researcher publishing a benign, telemetry-only "proof of confusion" package (with responsible, pre-arranged authorization) is the standard, real-world way this class of finding gets reported and fixed</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t2">
+      <h4>Build provenance and artifact signing (SLSA, Sigstore)</h4>
+      <div class="tbody">
+        <p>The emerging structural defense: cryptographically verifiable claims about exactly how and where an artifact was built (SLSA provenance) plus keyless, transparency-logged artifact signing (Sigstore/cosign) so a consumer can verify an artifact actually came from the expected pipeline, not just that it has the expected name and version.</p>
+<ul>
+          <li>SLSA defines graduated levels of build-pipeline trustworthiness (from basic provenance metadata up to fully verified, tamper-resistant build processes) — a maturity model a real organization can adopt incrementally</li>
+          <li>Sigstore's keyless signing model reuses PKI/trust-chain concepts directly from Cryptography Fundamentals, substituting a transparency log and short-lived certificates for long-lived private keys developers would otherwise have to protect indefinitely</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t3">
+      <h4>Reproducible builds</h4>
+      <div class="tbody">
+        <p>The strongest structural guarantee available: if a build process is fully deterministic, any third party can independently rebuild from the same source and cryptographically verify the published artifact matches — meaning a compromised build pipeline that silently injects malicious code becomes detectable by comparison, not just by trust.</p>
+<ul>
+          <li>Reproducibility is a genuinely hard engineering property (compiler timestamps, build-path embedding, and non-deterministic dependency resolution all break it by default) — real projects that achieve it treat it as an ongoing discipline, not a one-time setting</li>
+          <li>Reproducible builds and SLSA/Sigstore are complementary, not competing: provenance says who built it and how; reproducibility lets anyone independently check that claim</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Practical Outputs</h2>
+    <div class="outputs-block">
+      <span class="block-label lbl-mandatory">Practical Outputs</span>
+      <ul>
+          <li>A simulated build-pipeline compromise in your own lab (a CI configuration you deliberately weaken, e.g. an overprivileged runner credential or an unpinned third-party action) exploited to demonstrate a malicious artifact being produced and shipped through an otherwise-normal-looking pipeline run.</li>
+          <li>A responsible, pre-authorized dependency-confusion research exercise: identify a plausible internal package name via OSINT techniques (against your own organization or a permitted target) and document the finding through the correct responsible-disclosure channel — never squatting a real target's name without authorization.</li>
+          <li>A working SLSA-provenance-and-Sigstore-signing integration for one of your own published tools (from Tool Building and Publishing), with a consumer-side verification step demonstrated actually rejecting a tampered/unsigned artifact.</li>
+          <li>A written case study of a real historical supply-chain attack, analyzed specifically through the build-pipeline-compromise lens from this subject's first topic, distinct from the incident-summary level of Software Composition Analysis's earlier case-study output.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Common Delusions</h2>
+    <div class="delusions-block">
+      <span class="block-label lbl-delusions">Common Delusions at This Stage</span>
+      <ul>
+          <li>"Supply chain security is just dependency scanning." Scanning addresses known-vulnerable code already in a dependency; it does nothing against a compromised pipeline injecting new malicious code into an otherwise-legitimate artifact.</li>
+          <li>"Signing an artifact proves it's safe." Signing proves provenance (who/what produced it) — it says nothing about whether the build pipeline itself was compromised at the moment of signing, which is exactly why provenance and reproducibility are complementary, not substitutes for each other.</li>
+          <li>"This is only relevant to huge, high-profile open-source projects." Any organization's internal build pipeline is exactly as viable a target, and often far less scrutinized than a popular public package's.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Exit Gate</h2>
+    <div class="exitgate-block">
+      <span class="block-label lbl-exitgate">Exit Gate — must do all of this without notes</span>
+      <ul>
+          <li>Walk through your simulated build-pipeline compromise end to end, identifying the specific weakness that enabled it.</li>
+          <li>Explain the precise difference between what SLSA provenance and what reproducible builds each independently guarantee.</li>
+          <li>Demonstrate a consumer correctly rejecting a tampered artifact via your Sigstore verification setup, live.</li>
+          <li>Present your historical supply-chain case study through the build-pipeline-compromise lens specifically, not just as a narrative summary.</li>
+        </ul>
+    </div>
+  </section>
+
+
+</div>
+
+<footer class="endcap">
+  Supply Chain Security Research · AppSec Mastery Roadmap · Stage 5, Subject 6 of 7 · 1/1
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied Cryptographic Attacks — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 1</div>
+  <h1>Applied Cryptographic Attacks</h1>
+  <div class="subtitle">Subject 3 of 7 — Security Fundamentals</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Four attacks that show up repeatedly in real CVEs and bug bounty reports, executed for real against your own vulnerable targets: the padding oracle, hash-length-extension, a timing side-channel, and weak-RNG token prediction.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — paddingoracle0</a></li>
+          <li><a href="#ex01">Ex. 01 — lengthextend0</a></li>
+          <li><a href="#ex02">Ex. 02 — timingleak0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: timingbypass</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"A cryptographic system doesn't fail because the math was wrong. It fails because the implementation answered a question — even a very quiet one, like "how long did that take?" — that it should never have answered at all."</p>
+    <p>Cryptography Fundamentals taught you to recognize misuse in source code. This subject executes four of the most consequential misuse patterns as full attacks against targets you build, because recognizing "this looks risky" and actually extracting a plaintext or forging an authenticated message are different skills, and the second one is what makes the first one credible in a report.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will decrypt a full CBC-mode ciphertext byte by byte using only a padding-error oracle, forge a valid MAC over an extended message without ever seeing the secret key via hash-length-extension, statistically extract a secret through response-timing differences, and predict session tokens generated from a weak PRNG seed. The capstone chains a timing side-channel into a full authentication bypass.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this is exploitable" or "this fix works" must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation in this subject targets DVWA, Juice Shop, WebGoat, or an application you wrote — running locally or on a VPS you own. Never a third party without written authorization.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>No hand-rolled primitives.</strong> As in Cryptography Fundamentals — you attack real, correctly-implemented-except-for-one-flaw targets using real library primitives; you never reimplement AES/SHA yourself.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">paddingoracle0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>applied_crypto_attacks/ex00/</dd>
+        <dt>Files</dt><dd>paddingoracle0.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>requests/sockets against your own CBC+verbose-padding-error target</dd>
+        <dt>Forbidden</dt><dd>PadBuster or any existing padding-oracle tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A full padding-oracle attack against a deliberately vulnerable CBC-mode endpoint that leaks padding-validity through distinguishable error responses — decrypting an entire ciphertext block by block without ever knowing the key.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A target endpoint (you build it) that decrypts an attacker-supplied CBC-mode ciphertext and returns a distinguishable response for "padding valid" versus "padding invalid" (an explicit error message, a different status code, or even just a timing difference — your primary implementation should use an explicit oracle, with timing as the bonus path).</li>
+          <li>Implement the byte-at-a-time padding-oracle algorithm yourself: manipulate the previous ciphertext block's bytes to produce each possible padding value, use the oracle's valid/invalid signal to recover one intermediate-state byte at a time, and XOR against the real previous-block ciphertext to recover plaintext — for a full multi-block ciphertext, not a single block toy case.</li>
+          <li>A written, precise explanation of <em>why</em> this works: what CBC decryption's XOR-with-previous-ciphertext-block structure has to do with the ability to manipulate plaintext bytes by manipulating ciphertext bytes, and why the oracle only needs to say yes/no about padding to leak the entire plaintext.</li>
+          <li>Demonstrate the attack fully recovering a multi-block secret (e.g. a session token or a short message) end to end, verified against the known plaintext you planted.</li>
+          <li>A written fix: what specifically closes this (authenticated encryption / constant-time, uniform error responses) and why "just make the error messages identical" is necessary but insufficient without also addressing timing.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>PadBuster or any existing padding-oracle exploitation tool.</li>
+          <li>A target with a real oracle that you happen to already know the plaintext for, with no actual byte-recovery algorithm implemented.</li>
+          <li>Claiming the attack works without showing full recovery of a plaintext you didn't already know going in (blind to your own exploit code, verified only against the planted secret afterward).</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: oracle-query, single-byte-recovery, and full-block/full-message orchestration each in their own function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Extend the same algorithm to also <em>forge</em> a valid ciphertext for an attacker-chosen plaintext (full CBC-mode plaintext-and-ciphertext control via padding oracle, not just decryption).</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">lengthextend0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>applied_crypto_attacks/ex01/</dd>
+        <dt>Files</dt><dd>lengthextend0.py, EXPLOIT.md</dd>
+        <dt>Allowed</dt><dd>hashlib for the underlying hash only; you implement the extension logic</dd>
+        <dt>Forbidden</dt><dd>hashpumpy or any existing length-extension tool as your core logic (comparing against it afterward is fine)</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A hash-length-extension attack against a naive <code>MAC = SHA256(secret || message)</code> authentication scheme: forge a valid MAC over an attacker-extended message without ever learning the secret, by exploiting the Merlin-Damgård construction directly.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A target (you build it) that authenticates messages using <code>SHA256(secret || message)</code> as a MAC, where <code>secret</code> is fixed and unknown to your attack code, and accepts a <code>(message, mac)</code> pair as valid only if the MAC matches.</li>
+          <li>Implement Merkle–Damgård length-extension yourself: given one valid <code>(message, mac)</code> pair and the secret's <em>length</em> (a realistic real-world assumption — often guessable or discoverable), compute the correct glue padding and derive a valid MAC for <code>message || glue_padding || attacker_suffix</code> for an attacker-chosen suffix — without ever learning the secret value itself.</li>
+          <li>A written, precise explanation of exactly why this works: SHA-256's internal state after processing <code>secret || message || padding</code> is a complete, resumable starting point for hashing further data, because the Merkle–Damgård construction has no distinct "finalization" step that scrambles the final state irreversibly.</li>
+          <li>Demonstrate a real consequence: the target application treats the extended message as authentic (e.g. a URL with <code>&admin=true</code> appended past the original authenticated message), and your forged MAC is accepted, granting the extended privilege.</li>
+          <li>A written fix: why <code>HMAC(secret, message)</code> (not <code>SHA256(secret || message)</code>) closes this specific attack, tying back to HMAC's actual construction (the nested inner/outer hash) rather than just asserting "HMAC is safer."</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>hashpumpy or any existing length-extension library as your forging logic.</li>
+          <li>A target using HMAC correctly from the start — the vulnerable construction must be the naive <code>secret || message</code> concatenation.</li>
+          <li>Skipping the glue-padding derivation and hardcoding it for one specific secret length "because you already knew it."</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: MD-padding calculation, internal-state resumption, and forged-MAC construction each in their own function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate the same attack against SHA-1 or MD5 for comparison and note which underlying property (shared by all Merkle–Damgård hashes) makes this attack independent of which specific hash function is used.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">timingleak0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>applied_crypto_attacks/ex02/</dd>
+        <dt>Files</dt><dd>timingleak0.py, ANALYSIS.md, evidence/</dd>
+        <dt>Allowed</dt><dd>requests/sockets, statistics module</dd>
+        <dt>Forbidden</dt><dd>none beyond the global list</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A statistical timing side-channel attack that extracts a secret token character by character purely from measured response-time differences of a non-constant-time string comparison — proving the attack with real measurements and real statistics, not a theoretical description.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A target (you build it) that compares an attacker-supplied token against a secret using a naive, non-constant-time comparison (e.g. Python's <code>==</code> on strings, which short-circuits on the first mismatched byte) rather than <code>hmac.compare_digest</code> or equivalent.</li>
+          <li>Implement a character-by-character extraction: for each position, send enough requests with each candidate byte in that position (holding prior recovered bytes correct) to measure a statistically significant timing difference between a correct-so-far prefix and an incorrect one, using proper statistics (mean/median with enough samples to beat network jitter — not a single request per guess).</li>
+          <li>A written explanation of your statistical methodology: how many samples per guess, how you handled outliers/jitter, and what confidence threshold you used to accept a byte as correct before moving to the next position — with a plot or table of the actual timing distributions you measured.</li>
+          <li>Demonstrate full recovery of a secret token of realistic length (8+ characters) purely from timing, verified against the known planted value.</li>
+          <li>A demonstration that the same attack fails (or becomes statistically indistinguishable from noise within a reasonable request budget) against the same target once the comparison is switched to <code>hmac.compare_digest</code>, run head to head as a real before/after.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Reporting success without the underlying timing-distribution evidence (raw measurements or a summary statistic table) in ANALYSIS.md.</li>
+          <li>A single-sample-per-guess implementation that "happens to work" once due to noise — the exercise requires demonstrating statistical rigor.</li>
+          <li>Running this against any target you do not control, on a network you do not control (local loopback or your own lab network only — real timing attacks are extremely sensitive to network jitter, and this must be reproducible).</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: measurement, statistical-comparison, and byte-recovery-orchestration each in their own function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Repeat the extraction over a simulated higher-jitter network path (e.g. artificial random delay injected server-side) and show how many more samples per guess were needed to still succeed.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> the statistical extraction methodology from Exercise 02 and the forgery mechanics from Exercises 00-01 (constructing a valid credential once you have the secret material), applied end to end against one coherent target rather than three separate toy demonstrations. A timing leak that only proves "I can tell characters apart statistically" is a research curiosity; chaining it into an actual forged, accepted request is what makes it a finding a report can rate as Critical rather than Informational — the gap between "theoretically exploitable" and "here is the authenticated request I should not have been able to make" is exactly what separates a real vulnerability report from a false-positive scanner alert.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">timingbypass</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>applied_crypto_attacks/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A full authentication-bypass chain: use the timing side-channel technique from Exercise 02 to extract a valid API key or session-signing secret from a target application byte by byte, then use that recovered secret to forge a valid authenticated request — proving a timing leak is not an academic curiosity but a direct path to full compromise.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A target application (you build it) protecting an admin action behind either an API-key comparison or a signed-token check, implemented with a non-constant-time comparison as the vulnerable point.</li>
+          <li>Full statistical timing extraction of the complete secret (API key or signing key), reusing and extending your Exercise 02 methodology, including a documented sample-size/confidence strategy and the full timing-distribution evidence for at least three recovered byte positions.</li>
+          <li>Using the fully recovered secret, construct a valid, accepted request to the protected admin action — either directly (recovered API key) or by using the recovered signing secret to forge a valid signature/MAC over an attacker-chosen payload (reusing Exercise 01's forgery mechanics if the target uses a MAC construction, or straightforward key reuse if it's a plain API key).</li>
+          <li>A complete, reproducible attack script that runs unattended from "no knowledge of the secret" to "successful forged admin request," with progress logged at each stage.</li>
+          <li>A written incident-style report: what was recovered, how, how long it took (wall-clock and request count), and — critically — the actual fix (constant-time comparison, and why timing-safe comparison is a specific, learnable code-review pattern rather than a vague "use better crypto" gesture).</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Skipping straight to using a pre-known secret for the forgery step — the secret must be genuinely recovered by your own timing attack in this run.</li>
+          <li>A "recovery" that is actually brute force unrelated to timing (e.g. guessing a short key by exhaustive search) — the exercise specifically requires the timing side-channel to be the extraction mechanism.</li>
+          <li>Claiming success without the full distribution evidence proving the extraction was statistically sound, not lucky.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: extraction and forgery remain separable, independently-runnable stages with a clean handoff (recovered secret as a single artifact passed between them).</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Add a rate-limiter to the target and demonstrate/discuss how a realistic rate limit changes the attack's practical wall-clock feasibility, including any evasion or patience-based adaptation you attempt.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">applied_crypto_attacks/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live against your own reproducible target, re-run from a fresh process so timing and oracle behavior are not artifacts of a warmed-up cache from your development runs. The capstone's full chain is run live, unattended, start to finish, during the defense.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — paddingoracle0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through recovering one plaintext byte, live, narrating each padding-guess and what the oracle's response told you.</li>
+          <li>Why does this attack need zero knowledge of the encryption key at any point — what is it actually exploiting?</li>
+          <li>What happens to your attack if the error responses are made identical text but the invalid-padding path takes measurably longer to compute — is your implementation resilient to that, or is that explicitly out of scope for the mandatory part?</li>
+          <li>Why is switching to an AEAD mode (like GCM) a complete fix rather than a mitigation — what disappears from the attack surface entirely?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — lengthextend0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through your glue-padding calculation live for a specific secret length — derive it, don't recite it.</li>
+          <li>Explain, at the level of SHA-256's internal compression function, why resuming from a known digest is possible at all.</li>
+          <li>Why does HMAC's inner/outer double-hash structure specifically prevent this, when HMAC is still "just SHA-256 underneath"?</li>
+          <li>What real-world assumption does this attack depend on (secret length known or guessable) and how realistic is that assumption in practice — give a concrete scenario where an attacker would know or could brute-force-guess it.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — timingleak0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me your raw timing measurements for one byte position — walk through how you decided which candidate was actually correct.</li>
+          <li>Why does Python's default <code>==</code> on strings leak timing information at all — what's happening at the byte-comparison level?</li>
+          <li>What does <code>hmac.compare_digest</code> do differently, mechanically, that defeats this?</li>
+          <li>Why is this attack dramatically harder over a real internet path than over loopback, and what does that imply about its practical exploitability against a real remote target versus a same-datacenter attacker?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: timingbypass</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run the full chain live, start to finish, narrating each stage.</li>
+          <li>Show me the timing-distribution evidence for the hardest-to-distinguish byte position you recovered — what made it hard, and how did you resolve the ambiguity?</li>
+          <li>Walk through exactly how the recovered secret becomes a forged, accepted request — what does the target actually check, and why does your forged value pass that check?</li>
+          <li>What single code change closes this entire chain, and why does it need to happen at the comparison, not anywhere else in the flow?</li>
+          <li>How would a rate limit change your approach, and is a rate limit alone a sufficient fix on its own?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>A byte position where two candidates produce statistically indistinguishable timing (a genuine tie within your measurement precision): your tool's behavior on this (more samples, flagged as ambiguous, or explicit failure) is documented and justified.</li>
+          <li>Network jitter spike during extraction (simulated): does not silently corrupt a recovered byte — outlier handling is visible in your methodology.</li>
+          <li>The forged request accepted but for the wrong recovered secret (an off-by-one in your extraction): your validation step catches this before declaring success, rather than reporting a false "compromise."</li>
+          <li>Target restarts mid-extraction and secret rotates: extraction correctly fails/restarts rather than silently mixing partial data from two different secrets.</li>
+          <li>A secret containing repeated/adjacent similar bytes: extraction still correctly distinguishes them, not just the "easy" high-timing-delta cases.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Applied Cryptographic Attacks · AppSec Mastery Roadmap · Stage 1, Subject 3 of 7 · 1/1
+</footer>
+
+</body>
+</html>

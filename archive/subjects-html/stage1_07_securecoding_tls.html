@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Coding Principles and TLS Configuration — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 1</div>
+  <h1>Secure Coding Principles and TLS Configuration</h1>
+  <div class="subtitle">Subject 7 of 7 — Security Fundamentals</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    The closing Stage 1 subject: the general principles underneath every specific vulnerability class covered so far — input validation, output encoding, least privilege, defense in depth — plus TLS configuration audit at the level a real engagement report demands, and a capstone that proves the whole stage by taking DVWA end to end.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — principledapp0</a></li>
+          <li><a href="#ex01">Ex. 01 — tlsaudit0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: dvwa_fullsweep</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"Every vulnerability in this stage was a specific instance of a general failure: trusting input, over-privileging a component, or having exactly one layer of defense between an attacker and the target. Name the general failure and you can find the next specific instance yourself, without a tutorial."</p>
+    <p>This subject is deliberately the synthesis point for Stage 1. Input validation, output encoding, least privilege, and defense in depth are not a checklist to memorize — they are the four lenses that, applied together, would have prevented or contained every single vulnerability in the six subjects before this one. The exit gate for this subject is DVWA end to end, because by now there should be nothing on it you haven't already broken once.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will build and defend a small app against a battery of your own Stage 1 attacks using only the four general principles (not vulnerability-specific patches), audit a real TLS configuration to the depth a professional pentest report requires, and then take DVWA from a fresh instance to fully exploited across every category the roadmap has covered — SQLi, XSS, CSRF, command injection, broken auth, broken access control — in one sitting, with a written report for each.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this is exploitable" or "this fix works" must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation in this subject targets DVWA, Juice Shop, WebGoat, or an application you wrote — running locally or on a VPS you own. Never a third party without written authorization.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>Certification note.</strong> This is the Stage 1 exit gate. eJPT (~$249, confirm current price) is appropriate once every exercise and the capstone are cleared without notes — not before.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">principledapp0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>securecoding_tls/ex00/</dd>
+        <dt>Files</dt><dd>app.py, THREATNOTES.md</dd>
+        <dt>Allowed</dt><dd>Flask/minimal WSGI, an output-encoding library (e.g. Jinja2 autoescaping) used correctly</dd>
+        <dt>Forbidden</dt><dd>any vulnerability-specific patch library (a WAF, an XSS-filter package) as a substitute for architectural principles</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A small multi-feature app (login, a comment feature, a file-reference feature, an admin action) built from the start using input validation, output encoding, least privilege, and defense in depth as explicit, named design decisions — then attacked with your own Stage 1 exploit techniques and shown to hold.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Input validation: every user-supplied value is validated against an explicit allow-pattern (type, length, charset) at the boundary, before it reaches any business logic — not scattered ad hoc checks.</li>
+          <li>Output encoding: every point where user data is rendered back (HTML, into a shell command if any, into a SQL query) uses context-appropriate encoding or parameterization — reusing your parameterized-query pattern from SQL and Database Internals and your Jinja2 autoescaping (never manual string-building) for HTML.</li>
+          <li>Least privilege: the app's own database user has only the permissions its queries actually need (no DROP/ALTER on a login-only feature), and any shelled-out command (if present) runs as a dedicated low-privilege OS account, not the app's main process user — both demonstrated, not just configured.</li>
+          <li>Defense in depth: at least one feature is protected by two independent layers that would each, alone, have stopped a specific attack (e.g. parameterized queries <em>and</em> a least-privilege DB user together — demonstrate that even if the parameterization were somehow bypassed, the DB user's restricted grants would still block the worst-case outcome).</li>
+          <li>A THREATNOTES.md mapping each of your own Stage 1 exploit techniques (SQLi, XSS, CSRF, command injection, session fixation, IDOR) against this specific app, and for each, which of the four principles is the reason it fails here — with the failed exploit attempt captured as evidence for at least four of the six.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>A WAF, filter library, or other bolt-on defense presented as satisfying "defense in depth" instead of genuine independent architectural layers.</li>
+          <li>An input-validation scheme that is really just an XSS/SQLi blocklist wearing a different name.</li>
+          <li>Claiming a technique "fails" against this app without actually attempting it and capturing the failure.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: validation, encoding, and privilege configuration each clearly separated and independently inspectable/auditable.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Add a rate-limiting layer as a fifth, orthogonal defense against the login endpoint specifically, and demonstrate it independently blocking a credential-stuffing simulation even if the password policy were otherwise weak.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">tlsaudit0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>securecoding_tls/ex01/</dd>
+        <dt>Files</dt><dd>AUDIT_REPORT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>your Networking Depth tlsinspect tool, openssl s_client, testssl.sh for cross-checking only</dd>
+        <dt>Forbidden</dt><dd>testssl.sh/sslyze as your primary evidence source — your own tooling must produce the core findings</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A professional-grade TLS configuration audit of a real host (your own VPS) using your own tooling from Networking Depth and Cryptography Fundamentals, written up exactly as a pentest report would present it — finding, evidence, risk, remediation.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Full protocol/cipher enumeration: which TLS versions the server accepts (flagging any below 1.2), and the actual cipher suites negotiated for each, using your own <code>tlsinspect</code>/<code>chaininspect</code> tooling, with <code>openssl s_client -connect host:443 -tls1</code> (and similar per-version flags) used to individually confirm which legacy versions are actually rejected versus accepted.</li>
+          <li>Certificate chain audit reusing Cryptography Fundamentals' <code>chaininspect</code>: full chain validity, signature algorithm strength (flagging SHA-1 anywhere in the chain), key size, and expiry — with expiry specifically checked against a "renews with enough lead time" policy you define and justify.</li>
+          <li>HSTS and mixed-content posture: <code>Strict-Transport-Security</code> header presence/value (reusing HTTP Internals' header work), and whether any HTTP→HTTPS redirect chain has an insecure hop, with the exact request/response evidence.</li>
+          <li>A finding severity model applied consistently: at minimum, distinguish "actively exploitable now" (e.g. TLS 1.0 still accepted) from "best-practice gap, not currently exploitable" (e.g. HSTS present but missing <code>preload</code>), and justify the distinction in writing for each finding.</li>
+          <li>A written remediation section per finding specific enough that an engineer could act on it directly (exact config directive/change), not a generic "upgrade your TLS configuration."</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>testssl.sh/sslyze output presented as your own analysis — cross-checking your findings against them afterward is expected and good practice, but the core evidence must come from your own tooling.</li>
+          <li>A report with findings but no evidence (request/response, openssl output, or your tool's captured output) attached per finding.</li>
+          <li>Auditing any host you do not own.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: AUDIT_REPORT.md follows a consistent professional structure — executive summary, findings table, detailed findings with evidence and remediation, appendix with raw tool output.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Compare the same host's configuration against the current Mozilla TLS configuration guidelines (Modern/Intermediate/Old) and classify which tier it actually meets.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> literally everything from Stage 0 and Stage 1 at once, against one real (if intentionally vulnerable) application, under DVWA's "high" difficulty setting specifically because it adds partial mitigations to each category — DVWA at "low" difficulty tests whether you memorized a payload; DVWA at "high" tests whether you understand the underlying mechanism well enough to adapt when the obvious payload is blocked, which is the entire point of everything this stage has built toward.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">dvwa_fullsweep</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>securecoding_tls/capstone/</dd>
+        <dt>Files</dt><dd>REPORT.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A complete, professional-report-style engagement against a fresh DVWA instance: every category the roadmap has built toward so far — SQL injection, XSS (stored/reflected), CSRF, command injection, broken authentication, and IDOR/broken access control — exploited manually at DVWA's "high" security level, written up as one coherent report.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>SQL injection exploited manually (no SQLMap) against DVWA "high," including bypassing its input-length/character restrictions at that level, extracting the full <code>users</code> table.</li>
+          <li>Stored and reflected XSS exploited against DVWA "high," including bypassing its regex-based filtering, each ending in a real payload (not just an alert) — session-token exfiltration to a listener you control, reusing your Client-Side Injection capstone tooling if helpful.</li>
+          <li>CSRF exploited against DVWA "high" (the password-change function), including working around its anti-CSRF-token implementation's specific weakness at that level (DVWA "high" uses a token that has a real, documented flaw worth rediscovering rather than being told).</li>
+          <li>Command injection exploited against DVWA "high," bypassing its input filtering using a technique from your Server-Side Injection work.</li>
+          <li>Broken authentication/brute-force and broken access control (IDOR) both demonstrated against the relevant DVWA modules, each with the specific missing/broken check identified precisely, as in Access Control and IDOR.</li>
+          <li>One consolidated REPORT.md: executive summary, a findings table (category, severity, DVWA module), and one detailed finding per category with request/response evidence and remediation — written as if for a client who has never seen DVWA and needs to understand real risk, not "I completed the DVWA challenge."</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>SQLMap, XSStrike, commix, or any automated exploitation tool anywhere in this capstone — every finding must be manually driven, even if you reuse your own capstone tooling from earlier subjects as an assist.</li>
+          <li>Testing at DVWA "low" or "medium" and reporting it as equivalent — "high" is the mandatory bar specifically because its partial mitigations are what separate memorized payloads from real understanding.</li>
+          <li>A report that reads as a walkthrough ("click here, then here") instead of a findings-and-risk report a client could act on.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: REPORT.md follows the same professional structure as Exercise 01's TLS audit, extended to cover six finding categories instead of one.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Repeat the full sweep against Juice Shop or WebGoat as a second target, and note in writing at least three ways its vulnerable-by-design patterns differ from DVWA's (different framework, different specific mistakes) despite the underlying vulnerability classes being identical.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">securecoding_tls/
+├── ex00/
+├── ex01/
+└── capstone/</pre>
+    <p>Each exercise is defended live. The capstone is defended against a freshly reset DVWA instance at "high" security level, with the evaluator free to reset individual modules mid-defense and request re-exploitation — this is the Stage 1 exit gate and is graded to that standard: every category, unaided, without notes.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — principledapp0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Attack this app live with three of your own Stage 1 techniques — narrate which specific design decision stops each one.</li>
+          <li>Show me your defense-in-depth example — walk through what would actually happen if the first layer were somehow bypassed.</li>
+          <li>Why is your least-privilege DB user a real independent control and not just "the same parameterization wearing a different hat"?</li>
+          <li>Pick one principle and explain a vulnerability class from an earlier Stage 1 subject that it alone would not have stopped, and what the missing second principle would have to be.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — tlsaudit0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through one finding exactly as you'd present it in a client-facing report — finding, evidence, risk, fix.</li>
+          <li>Why does distinguishing "actively exploitable" from "best-practice gap" matter for how a client prioritizes remediation work?</li>
+          <li>Show your own tool's output for the certificate chain finding and explain what it caught that a plain browser padlock icon would not show a user.</li>
+          <li>If this host showed TLS 1.0 still accepted alongside TLS 1.3, what would you actually recommend — disable 1.0 immediately, or is there ever a legitimate reason to keep it, and how would you find out?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — Capstone: dvwa_fullsweep</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Pick one finding at random from your report and re-exploit it live, from a fresh DVWA reset, at "high" difficulty.</li>
+          <li>For the CSRF finding specifically, explain the exact weakness in DVWA "high"'s anti-CSRF token implementation that you exploited.</li>
+          <li>Walk through your report's executive summary as if I were a non-technical client — does it communicate real business risk, or just a list of bug names?</li>
+          <li>Which of your six findings would you rate highest severity for a real production application, and why — defend the ranking.</li>
+          <li>What's the single biggest difference between exploiting DVWA at "low" versus "high" difficulty, in terms of what it actually tests about your understanding?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>A DVWA reset between attempts (session/state cleared): every exploit reproducible from a clean instance, not dependent on leftover state from a previous run.</li>
+          <li>The evaluator changes DVWA's security level live between two categories during the defense: you correctly identify the new level's specific mitigation before attempting exploitation, rather than reflexively reusing a "high"-level payload that may not even be necessary at "medium."</li>
+          <li>A finding where the "high"-level mitigation genuinely defeats your first three payload attempts: your report/defense shows the iterative adaptation process, not just the final working payload with no trace of the reasoning that got you there.</li>
+          <li>The evaluator asks you to explain why a given DVWA "impossible" level (if enabled) fully closes a category: you can articulate the fix at the same depth as Exercise 00's principled app, connecting DVWA's actual source-level fix back to input validation/output encoding/least privilege/defense in depth.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Secure Coding Principles and TLS Configuration · AppSec Mastery Roadmap · Stage 1, Subject 7 of 7 · 1/1
+</footer>
+
+</body>
+</html>

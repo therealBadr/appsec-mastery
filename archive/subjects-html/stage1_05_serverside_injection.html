@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server-Side Injection: Command Injection, XXE and SSRF — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 1</div>
+  <h1>Server-Side Injection: Command Injection, XXE and SSRF</h1>
+  <div class="subtitle">Subject 5 of 7 — Security Fundamentals</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Three vulnerability classes united by one shape: user input crosses a trust boundary into something that interprets it as instructions rather than data — a shell, an XML parser, or the server's own outbound network stack.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — cmdinject0</a></li>
+          <li><a href="#ex01">Ex. 01 — xxeharvest0</a></li>
+          <li><a href="#ex02">Ex. 02 — ssrfmeta0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: injecttriage</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"SQL injection taught you the pattern. These three are the same idea wearing different clothes: a shell, a parser, and a network stack, each willing to treat your data as someone else's command."</p>
+    <p>SQL and Database Internals covered SQL injection at parser-level depth. This subject applies the identical mental model — data crossing into syntax — to three more interpreters an application routinely hands untrusted input to: the OS shell (command injection), an XML parser with entity expansion enabled (XXE), and the application's own HTTP client acting on the server's behalf (SSRF). SSRF is the one most worth extra care, because in a cloud environment it is routinely a straight line to full infrastructure compromise via the metadata service.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will exploit a deliberately vulnerable command-execution feature with and without a naive input filter (and prove why blocklisting shell metacharacters fails), extract local files and pivot to SSRF through XML external entities against a vulnerable XML parser, and turn a URL-fetching feature into cloud credential theft via the instance metadata service. The capstone builds a single scanner that fingerprints and probes all three classes against one target.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this is exploitable" or "this fix works" must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation in this subject targets DVWA, Juice Shop, WebGoat, or an application you wrote — running locally or on a VPS you own. Never a third party without written authorization.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">cmdinject0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>serverside_injection/ex00/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>Python subprocess, your own vulnerable app</dd>
+        <dt>Forbidden</dt><dd>commix or any automated command-injection tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A deliberately vulnerable feature that shells out to a system command with unsanitized user input (e.g. a "ping this host" diagnostic tool), exploited manually, then defeated again after a naive blocklist filter is added — proving why blocklists fail against this class specifically.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A vulnerable endpoint built with <code>subprocess.run(f"ping -c 1 {host}", shell=True)</code> or equivalent — <code>shell=True</code> with string-interpolated input is the deliberate bug.</li>
+          <li>Working exploitation via at least three separate shell-metacharacter techniques: command chaining (<code>;</code> or <code>&&</code>), command substitution (<code>$(...)</code> or backticks), and output redirection/piping — each demonstrated running an attacker-chosen command (e.g. <code>id</code>, <code>whoami</code>, reading a file) with its output captured in the application's response.</li>
+          <li>After adding a naive blocklist filter (stripping/rejecting <code>;</code>, <code>&</code>, <code>|</code>) to the target, demonstrate at least one working bypass — e.g. newline injection, a character the blocklist missed, or command substitution syntax the filter didn't anticipate — proving blocklisting is fundamentally reactive and incomplete.</li>
+          <li>Fix the vulnerability correctly: rewrite the vulnerable call using <code>subprocess.run([...], shell=False)</code> with argument-list form and strict input validation (e.g. the host argument matched against a hostname/IP regex) — and re-run your original exploits against the fixed version, captured failing.</li>
+          <li>A written root-cause explanation of exactly why <code>shell=False</code> with a list of arguments closes this permanently: there is no shell interpreting metacharacters at all in that call path, not merely a shell that's harder to reach.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>commix or any automated command-injection exploitation tool.</li>
+          <li>A "fix" that is just a slightly bigger blocklist — the mandatory fix must be architectural (<code>shell=False</code> + validation), with the blocklist bypass demonstrated as a separate, explicitly inadequate step.</li>
+          <li>Testing against any target other than your own local app.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: vulnerable-call, exploit-payloads, and fixed-call each clearly separated and independently runnable.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>A blind command-injection variant (no output reflected) exploited via an out-of-band technique (e.g. triggering a DNS lookup or HTTP callback to a listener you control) to confirm execution without seeing output directly.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">xxeharvest0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>serverside_injection/ex01/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>a Python/Java XML parser configured (insecurely, deliberately) with external entity resolution enabled</dd>
+        <dt>Forbidden</dt><dd>any automated XXE-exploitation tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A deliberately vulnerable XML-accepting endpoint (e.g. a file-upload feature parsing an XML manifest) exploited for local file disclosure via classic XXE, then extended into SSRF via XXE's external-entity URL-fetching capability.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A vulnerable endpoint parsing user-supplied XML with a parser configured to resolve external entities (e.g. <code>lxml</code> with <code>resolve_entities=True</code> and no <code>DTD</code> restriction, or an equivalently misconfigured Java <code>DocumentBuilderFactory</code>) — the specific insecure configuration flag must be identified in your writeup.</li>
+          <li>Classic file-disclosure XXE: a crafted XML payload defining an external entity pointing at a local file (e.g. <code>/etc/passwd</code> or a planted secret file) that gets read into the parsed document and reflected back in the response.</li>
+          <li>Blind/out-of-band XXE: for a case where the response is not reflected, demonstrate exfiltrating file contents via an out-of-band channel (an external entity that triggers a request to a listener you control, carrying the file contents in the request — e.g. via a parameter-entity technique).</li>
+          <li>XXE-to-SSRF: a payload whose external entity URL points not at a local file but at an internal-only or otherwise interesting network resource (e.g. an internal service on localhost, or — foreshadowing Exercise 02 — the cloud metadata endpoint if your lab environment has one), demonstrating that XXE is also a network-request-forgery primitive, not only a file-read primitive.</li>
+          <li>The correct fix applied and verified: disabling external entity resolution and DTD processing entirely at the parser configuration level (not filtering payload content), with your original exploits re-run and shown failing.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any automated XXE tool.</li>
+          <li>A fix that filters payload strings (blocking the word "ENTITY") instead of disabling the parser feature at the configuration level.</li>
+          <li>Skipping the blind/OOB variant — many real-world XXE bugs are blind, and the technique is specifically assessed.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the vulnerable parser configuration isolated in one clearly-labeled function so the fix is a one-line, defensible diff.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Billion-laughs-style entity-expansion denial-of-service demonstrated (and explicitly not left running against anything but your own throwaway instance), with a note on why disabling external entities alone doesn't stop this variant — internal entity expansion limits are a separate control.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">ssrfmeta0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>serverside_injection/ex02/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>a URL-fetching feature you build, a simulated or real cloud metadata endpoint in your lab</dd>
+        <dt>Forbidden</dt><dd>any automated SSRF scanner</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A deliberately vulnerable "fetch this URL and show me a preview" feature (a common real-world SSRF source: image proxies, webhook validators, PDF-from-URL generators) exploited to reach internal-only resources, culminating in reading a simulated cloud instance-metadata endpoint for credentials.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A vulnerable endpoint that server-side-fetches an attacker-supplied URL (e.g. to generate a link preview) with no restriction on destination.</li>
+          <li>Demonstrate reaching an internal-only service that is not reachable from the public internet but is reachable from the server itself (e.g. an internal admin service you stand up on <code>localhost</code> or an internal-only Docker network) — proving SSRF's core value to an attacker: it borrows the server's network position.</li>
+          <li>Demonstrate reaching a simulated cloud instance-metadata endpoint (stand up a minimal local HTTP server on <code>169.254.169.254</code> — routable via a lab network namespace/route — or a faithful stand-in on localhost mimicking the same response shape) and extracting simulated temporary credentials from it, with a written explanation of why this endpoint is unauthenticated by design in real cloud environments (it's meant to be reachable only from the instance itself) and exactly why that design assumption is what SSRF breaks.</li>
+          <li>Demonstrate at least one SSRF-filter bypass technique against a naive defense (e.g. a blocklist on the string "169.254.169.254" bypassed via a decimal/hex IP representation, a DNS name that resolves to the internal IP, or a redirect chain landing on the blocked address after the filter's initial check passed) — proving, as with command injection, that input-side blocklisting is the wrong layer of defense.</li>
+          <li>The correct fix applied and verified: an allowlist of permitted destination schemes/hosts (not a denylist), enforced by actually resolving and checking the destination IP against private/link-local ranges at request time (not just string-matching the URL) — with your bypasses re-run and shown failing.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any automated SSRF-scanning tool.</li>
+          <li>Targeting a real cloud provider's actual metadata endpoint from anywhere other than an instance you provisioned yourself for this exercise.</li>
+          <li>A "fix" that blocklists specific strings/IPs instead of allowlisting permitted destinations and validating the resolved IP.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: URL validation, DNS resolution, and the actual fetch each in their own function, so the allowlist fix is inserted at exactly the right point (after resolution, before the fetch — never trusting the pre-resolution hostname alone).</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate a DNS-rebinding SSRF bypass: a hostname that resolves to a safe IP at validation time and a forbidden internal IP at fetch time (a TOCTOU race), tying directly back to the DNS-rebinding lab in Networking Depth.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> all three injection classes' distinct payload shapes and confirmation techniques, plus a single shared idea that makes the tool coherent rather than three unrelated modules bolted together: out-of-band (OOB) confirmation. A blind command injection, a blind XXE, and an SSRF are all confirmed the same way in real engagements — by getting the target to reach back to infrastructure you control — and building one OOB listener and reusing it across all three probe types is the actual synthesis this capstone requires, not just running three separate exercises' code back to back.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">injecttriage</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>serverside_injection/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A single scanner that, given a target application's endpoints, probes for command injection, XXE, and SSRF using safe, non-destructive out-of-band canary techniques for all three — confirming exploitability through a listener you control rather than causing real damage, the way a responsible engagement actually operates.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A single OOB listener (a minimal DNS and/or HTTP server you run, reusing your Networking Depth <code>dnsresolve0</code>/socket experience) that logs every inbound callback with a unique per-probe token, so a hit can be traced back to exactly which probe triggered it.</li>
+          <li>Command-injection module: for each target parameter, injects an OOB-callback payload (e.g. <code>; curl http://TOKEN.your-listener/</code>) using multiple metacharacter techniques from Exercise 00, and reports a finding only when the corresponding token is actually observed at the listener — not merely on a suspicious response.</li>
+          <li>XXE module: for each XML-accepting endpoint, injects an OOB external-entity payload (both direct and blind/parameter-entity variants from Exercise 01) and reports a finding only on a confirmed listener hit.</li>
+          <li>SSRF module: for each URL-accepting parameter, submits your listener's own URL as the target and confirms the finding via an inbound hit, then — only for confirmed-vulnerable endpoints — separately attempts the internal-resource and metadata-endpoint reachability tests from Exercise 02 against your own lab targets.</li>
+          <li>One consolidated report: per finding, the injection class, the exact payload, the OOB token and timestamp of the confirming callback, and severity (SSRF reaching metadata > SSRF reaching only internal services > blind confirmation only > no confirmation).</li>
+          <li>Demonstrated end to end against your own Exercise 00/01/02 vulnerable targets, correctly confirming each via the shared OOB listener, plus a clean/fixed target set showing zero false positives.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>commix, any XXE tool, or any SSRF scanner doing the probing for you.</li>
+          <li>Reporting a finding based on response-content heuristics alone without an actual OOB confirmation — this produces exactly the false-positive noise that gets AppSec tools ignored.</li>
+          <li>A shared listener that can't disambiguate which probe triggered which callback (no per-probe token) — this makes the report unusable for triage.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the OOB listener is one shared module used by all three probe modules, not three separate listeners; token generation/tracking centralized.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Extend the SSRF module with automatic cloud-provider fingerprinting (AWS vs. GCP vs. Azure metadata endpoint shape) once internal reachability is confirmed, choosing the correct metadata-extraction path per provider.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">serverside_injection/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live against your own reproducible vulnerable target. The capstone is run live against a target set the evaluator selects from your three vulnerable apps plus their fixed counterparts, and is expected to distinguish between them correctly using only OOB-confirmed evidence.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — cmdinject0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run your three exploitation techniques live against the vulnerable version, then show all three failing against the fixed version.</li>
+          <li>Show me your blocklist bypass — what specifically did the filter author fail to anticipate?</li>
+          <li>Why does <code>shell=False</code> with an argument list eliminate this class of bug structurally rather than just making it harder?</li>
+          <li>If the application genuinely needs to run a user-influenced shell pipeline (not just a single command), what's the actual safe pattern — and is there one?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — xxeharvest0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me the exact parser configuration flag responsible for this vulnerability, and the one-line fix.</li>
+          <li>Walk through your blind XXE payload — trace exactly how the file contents end up leaving the server via the out-of-band channel.</li>
+          <li>Why is XXE fundamentally also an SSRF primitive — what do the two techniques have in common under the hood?</li>
+          <li>Why doesn't sanitizing the XML input (stripping suspicious strings) actually fix this the way disabling the parser feature does?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — ssrfmeta0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through your metadata-endpoint exploitation live and explain, precisely, why that endpoint has no authentication in real cloud environments.</li>
+          <li>Show your filter-bypass technique and explain why validating the URL <em>string</em> is insufficient — what has to be validated instead, and at what point in the request lifecycle?</li>
+          <li>Why is an allowlist structurally different from a denylist here, in the same way it was for command injection's fix?</li>
+          <li>Explain the DNS-rebinding variant (bonus or not) and why "validate the hostname" and "validate the IP you actually connect to" are not the same check.</li>
+          <li>What's the real-world blast radius difference between an SSRF that only reads local files versus one that reaches a cloud metadata endpoint?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: injecttriage</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run the full scanner live against all three of your vulnerable targets, narrating the OOB callbacks as they arrive.</li>
+          <li>Show me how your token scheme lets you attribute a specific callback to a specific probe when multiple probes are in flight concurrently.</li>
+          <li>Why is OOB confirmation specifically the right unifying technique across three otherwise-different vulnerability classes?</li>
+          <li>Run it against your clean/fixed targets — walk through why it correctly reports no findings.</li>
+          <li>What would a false positive look like for your command-injection module if it relied on response timing instead of OOB confirmation, and why did you choose not to build it that way?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>A target that blocks outbound DNS but allows outbound HTTP (or vice versa): the tool correctly falls back to whichever OOB channel is actually viable, or reports the constraint explicitly.</li>
+          <li>Two probes fired close together producing near-simultaneous callbacks: tokens correctly disambiguate which is which.</li>
+          <li>A target where the vulnerable parameter only accepts a fixed set of characters (partial input filtering): the tool reports "probed, no confirmation" rather than a false negative presented as a clean bill of health with no nuance.</li>
+          <li>An SSRF finding that reaches an internal service but explicitly fails to reach the metadata endpoint (network-segmented lab): correctly reported at the lower severity tier, not conflated with full metadata compromise.</li>
+          <li>A listener that receives a callback with a malformed/unexpected token (noise, e.g. from background internet scanning if publicly reachable): not mistakenly attributed to one of your probes.</li>
+          <li>XXE OOB confirmation on a parser that blocks external DTDs but still resolves parameter entities in a different way: the module's behavior here (finds it, or explicitly documents the miss) is accurate, not falsely reassuring.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Server-Side Injection: Command Injection, XXE and SSRF · AppSec Mastery Roadmap · Stage 1, Subject 5 of 7 · 1/1
+</footer>
+
+</body>
+</html>

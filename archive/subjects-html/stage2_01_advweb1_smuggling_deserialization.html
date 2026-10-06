@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Web Exploitation I: Request Smuggling and Deserialization — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 2</div>
+  <h1>Advanced Web Exploitation I: Request Smuggling and Deserialization</h1>
+  <div class="subtitle">Subject 1 of 7 — Hands-On Web Security + Code Review</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Two attack classes that live in the gap between what a component believes about a message and what actually happens when a different component parses the same bytes differently — a front-end proxy versus a back-end server, and a serializer versus whatever code runs when the object comes back.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — smuggle0</a></li>
+          <li><a href="#ex01">Ex. 01 — deserialize0</a></li>
+          <li><a href="#ex02">Ex. 02 — smugglechain</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: smuggledetect</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"Request smuggling isn't a bug in either server. It's a disagreement between two servers that both parsed the same bytes correctly, by their own rules."</p>
+    <p>HTTP Internals gave you the anatomy of one request between one client and one server. Real infrastructure chains multiple HTTP parsers together — a CDN, a load balancer, an app server — and every parser is free to interpret an ambiguous message its own way. Deserialization has the identical shape one layer up the stack: an object graph reconstructed from bytes, where the reconstruction process itself can be hijacked into doing something the original object never did.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will build a deliberately mismatched proxy/backend pair and smuggle a request past the front end, exploit insecure deserialization in a Python/Java-style vulnerable endpoint to achieve remote code execution, and chain the two: a smuggled request that reaches an internal deserialization endpoint the front end was supposed to protect. The capstone builds a differential-parsing detector that finds smuggling-prone configurations automatically.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of exploitability or of a fix working must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation targets DVWA, Juice Shop, WebGoat, PortSwigger Academy labs, HackTheBox/lab machines, or an application you wrote — never a third party without written authorization.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">smuggle0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>advweb1_smuggling_deserialization/ex00/</dd>
+        <dt>Files</dt><dd>proxy_stack/, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>nginx or a Python proxy you configure/build, raw sockets for crafted requests, Burp</dd>
+        <dt>Forbidden</dt><dd>Smuggler or any automated request-smuggling scanner</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A two-tier proxy/backend stack you deliberately misconfigure to disagree about request boundaries, exploited for CL.TE and TE.CL request smuggling — sending one request that the two tiers parse as a different number of requests.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A front-end proxy and a back-end server, each parsing <code>Content-Length</code> and <code>Transfer-Encoding</code> headers with different precedence (e.g. front end honors <code>Content-Length</code> when both are present, back end honors <code>Transfer-Encoding</code>) — the deliberate misconfiguration, documented explicitly.</li>
+          <li>CL.TE smuggling: craft a single raw request (built with your own socket code, reusing HTTP Internals' <code>httpanatomy0</code>) that the front end forwards as one request but the back end interprets as two, with the smuggled second "request" demonstrated landing in a subsequent, unrelated victim's response (a classic response-queue-poisoning proof) or at minimum reaching an endpoint the front end should have blocked.</li>
+          <li>TE.CL smuggling: the reverse misconfiguration, with an equivalent working exploit.</li>
+          <li>A packet/byte-level walkthrough (reusing your Wireshark annotation skill from Networking Depth) showing exactly where the two tiers' interpretations diverge — the literal byte offset at which "this is the end of request one" differs between them.</li>
+          <li>The fix applied and verified: reconfigure both tiers to agree (e.g. reject ambiguous requests with both headers present, per RFC 7230's guidance) and show your smuggling payloads failing afterward.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Smuggler, or any existing request-smuggling detection/exploitation tool.</li>
+          <li>A "smuggled" request you can't explain byte-by-byte in terms of the two tiers' differing parse.</li>
+          <li>Leaving the deliberately vulnerable proxy stack running anywhere reachable beyond your own lab.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: raw request construction, and the CL.TE and TE.CL payload builders, each isolated.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>A third smuggling variant: TE.TE, where both tiers honor <code>Transfer-Encoding</code> but can be tricked into disagreeing about whether a given <code>Transfer-Encoding</code> header is even valid (e.g. via an obfuscated value like <code>Transfer-Encoding: chunked, identity</code> or embedded whitespace/casing tricks).</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">deserialize0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>advweb1_smuggling_deserialization/ex01/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>Python pickle (deliberately, for the vulnerable target), a safe alternative (JSON) for the fix</dd>
+        <dt>Forbidden</dt><dd>ysoserial as a black box — reading it for technique ideas is fine, your Python gadget/payload must be your own</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A deliberately vulnerable endpoint that deserializes attacker-supplied data using an unsafe deserializer (Python <code>pickle</code>), exploited for remote code execution via a crafted malicious pickle payload you construct yourself, understanding exactly how deserialization becomes code execution.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A vulnerable endpoint that accepts a base64-encoded blob (e.g. a "saved preferences" or "session state" feature) and deserializes it with <code>pickle.loads()</code> with no integrity check.</li>
+          <li>A hand-crafted malicious payload exploiting <code>__reduce__</code> (or an equivalent object-reconstruction hook) to execute an arbitrary command when the object is deserialized — not merely a data-tampering payload, actual code execution, demonstrated with output (e.g. a planted file created, or an OOB callback reusing your Server-Side Injection listener) proving the command ran on the server.</li>
+          <li>A written, precise explanation of the mechanism: <em>why</em> deserialization is fundamentally different from parsing (e.g. JSON) — the deserializer is executing instructions embedded in the serialized stream to reconstruct arbitrary object graphs, and a class's own reconstruction hooks are attacker-reachable code paths the moment attacker-controlled bytes reach the deserializer.</li>
+          <li>A demonstration that a naive mitigation — a blocklist on dangerous-looking bytes in the blob — is bypassable (encode/obfuscate the payload to avoid the specific bytes blocked), reinforcing the same blocklist-fails-structurally lesson from every earlier injection subject.</li>
+          <li>The correct fix applied and verified: replace <code>pickle</code> with a data-only format (JSON) for this feature entirely, with your exploit payload shown failing (as invalid JSON, or as inert data with no execution hooks) against the fixed endpoint.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>ysoserial or any prebuilt payload-generation tool used as a black box without understanding the generated gadget chain.</li>
+          <li>A payload that only proves data tampering (e.g. changing a stored value) rather than actual code execution.</li>
+          <li>A "fix" that keeps <code>pickle</code> but adds a blocklist/signature check as the sole defense — the mandatory fix is architectural (stop deserializing untrusted data with an executable-format deserializer).</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: payload construction and the vulnerable/fixed endpoints each clearly separated.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate the equivalent vulnerability class conceptually in a different ecosystem you research (e.g. Java's <code>ObjectInputStream</code> or PHP's <code>unserialize</code> with a magic <code>__wakeup</code>/<code>__destruct</code> method) — a written gadget-chain walkthrough is acceptable here even without a full working exploit, since ysoserial's Java gadget chains are legitimately out of reach without a JVM lab.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">smugglechain</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>advweb1_smuggling_deserialization/ex02/</dd>
+        <dt>Files</dt><dd>EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>your own proxy stack and deserialization endpoint from Ex. 00/01, combined</dd>
+        <dt>Forbidden</dt><dd>automated tools for either half of the chain</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A chained attack: use request smuggling to reach an internal-only deserialization endpoint that the front-end proxy was specifically configured to block from direct external access — proving smuggling's real value is bypassing front-end security controls, not just confusing two servers for its own sake.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Configure your Exercise 00 front-end proxy to explicitly block direct external requests to your Exercise 01 deserialization endpoint's path (a realistic control — "this internal endpoint is only reachable by other backend services").</li>
+          <li>Demonstrate the block working: a direct external request to the protected path is rejected by the front end as expected.</li>
+          <li>Construct a smuggled request (reusing Exercise 00's technique) whose smuggled second request targets the protected deserialization path directly against the back end, bypassing the front end's path-based block entirely, and carrying your Exercise 01 malicious payload — demonstrated achieving the same code-execution proof as Exercise 01, but through the smuggled path this time.</li>
+          <li>A written explanation of exactly why path-based access control implemented only at the front-end proxy is insufficient defense in depth, and what would have stopped this chain even with the smuggling vulnerability still present (e.g. the back end also enforcing the restriction, independent of the proxy).</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Skipping the "block works when tested directly" step — the chain's significance only lands if the direct path was genuinely blocked first.</li>
+          <li>Any tool automating either half of this chain.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the chain is demonstrated as one continuous, reproducible script from smuggled-request construction through observed code execution.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Add the smuggling fix from Exercise 00 back and show the chain now fails at the smuggling step specifically, isolating exactly which of the two vulnerabilities the fix closed.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> the byte-level request construction from Exercise 00, timing-based inference (the same statistical discipline from Applied Cryptographic Attacks' timing side channel — a smuggling probe that isn't detected via an obvious victim response has to be inferred from response timing instead, since a "hanging" back end waiting for a smuggled request's phantom remaining bytes is a measurable delay), and enough understanding of common serialization formats' magic bytes/headers (Exercise 01) to flag likely deserialization endpoints from the outside without a source-code view. No single exercise above needed statistical timing inference; this capstone does, because the safe, non-destructive way to confirm smuggling against a target you don't control the back end of is to observe timing, not to attempt response-queue poisoning against unknown victims.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">smuggledetect</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>advweb1_smuggling_deserialization/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A differential-parsing detector: given a target behind a front-end/back-end stack, systematically probes for CL.TE/TE.CL/TE.TE disagreement using timing-based detection (a technique that works even when there's no obvious response-queue-poisoning victim to observe), and separately fingerprints any reachable endpoint that appears to accept a serialized-object format for potential deserialization risk.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>CL.TE/TE.CL timing probe: sends a request designed so that, if the target is vulnerable, the back end will hang waiting for bytes that never arrive (a smuggled "request" with a declared body longer than what's sent) — and measures response time against a baseline, using the statistical methodology from Applied Cryptographic Attacks (multiple samples, documented threshold) rather than a single request.</li>
+          <li>TE.TE probe: sends a small set of obfuscated <code>Transfer-Encoding</code> header variations and detects behavioral differences suggesting the two tiers disagree on which are valid.</li>
+          <li>Serialized-format fingerprinting: for any endpoint accepting a body, checks for recognizable serialization-format signatures (e.g. a pickle opcode preamble, a Java-serialization magic-byte header <code>0xACED</code>, a suspiciously structured base64 blob) and flags it as a candidate deserialization risk worth manual follow-up — explicitly not attempting exploitation automatically, since a wrong guess here risks actually executing an unintended payload against a target you don't fully control.</li>
+          <li>Safety governor: every timing probe is rate-limited and capped in total requests per target, with a hard stop and clear reporting if early probes suggest the target might be produring real, unbounded back-end hangs (a smuggling probe that works can also resemble a mini denial-of-service if run carelessly at volume).</li>
+          <li>One consolidated report: per-target smuggling-likelihood (with confidence from the timing evidence), and any flagged candidate deserialization endpoints — explicitly labeled as requiring manual confirmation, not auto-exploited.</li>
+          <li>Demonstrated against your own Exercise 00 vulnerable and fixed proxy stacks, correctly distinguishing them via timing evidence alone (no response-queue-poisoning victim setup required for detection), plus your Exercise 01 endpoint correctly flagged as a serialization-format candidate.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Smuggler or any existing detection tool.</li>
+          <li>Automatically attempting a deserialization exploit against a fingerprinted candidate endpoint — detection and exploitation are deliberately kept separate here for safety.</li>
+          <li>A probe with no rate limit or request cap that could turn a detection scan into an unintended denial-of-service.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: timing-probe, TE.TE-probe, and serialization-fingerprint each in their own module with a shared rate-governed request layer.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>A confirmation mode (opt-in, clearly separated from the default safe scan) that, only against your own explicitly-owned lab targets, attempts the full Exercise 00 response-queue-poisoning proof once timing evidence suggests a likely finding.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">advweb1_smuggling_deserialization/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live against your own proxy stack, which the evaluator may reconfigure (swap which header each tier honors) immediately before the defense. The capstone is run live and must justify its confidence level from actual timing evidence shown during the defense, not from a pre-recorded run.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — smuggle0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through your CL.TE payload byte by byte — show me exactly where the front end and back end disagree.</li>
+          <li>Why does response-queue poisoning make this attack affect victims other than the attacker's own request — trace the mechanism.</li>
+          <li>What single configuration change on both tiers closes CL.TE and TE.CL simultaneously, and why?</li>
+          <li>Why is request smuggling specifically a multi-component infrastructure problem that can't be found by testing either server in isolation?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — deserialize0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through your malicious pickle payload byte by byte, or at minimum opcode by opcode — what does the deserializer actually execute and when?</li>
+          <li>Why is this fundamentally not fixable by "just validating the deserialized data afterward" — where in the process does the damage already happen?</li>
+          <li>Show your blocklist bypass — same lesson as command injection and XSS, in your own words, applied to this class.</li>
+          <li>Why is switching to JSON a complete fix here rather than a mitigation — what capability disappears entirely?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — smugglechain</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run the full chain live: direct block first, then the smuggled bypass achieving code execution.</li>
+          <li>Why does this chain illustrate defense-in-depth failure specifically — name the second, independent control that would have stopped it.</li>
+          <li>Which of the two underlying bugs (smuggling or deserialization) is the "root cause" here, and does fixing only one fully close the chain — defend your answer.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: smuggledetect</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run the timing probe against your vulnerable and fixed Exercise 00 stacks live — show the measurable difference and your confidence threshold.</li>
+          <li>Why is timing-based detection the safer default here compared to attempting response-queue poisoning against a target whose other traffic/victims you don't control?</li>
+          <li>Walk through your serialization-format fingerprinting on your Exercise 01 endpoint — what specific bytes triggered the flag?</li>
+          <li>Why does this capstone deliberately not auto-exploit a fingerprinted deserialization candidate — what could go wrong if it did?</li>
+          <li>What's your rate-limit/request-cap policy, and how did you choose the numbers?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>A target with naturally high/variable baseline latency: timing probe correctly reports lower confidence rather than a false positive, mirroring the calibration discipline from earlier timing work.</li>
+          <li>A back end that returns an error quickly on a malformed smuggling probe instead of hanging (a partially-hardened target): correctly classified as likely-not-vulnerable, not misread as "inconclusive."</li>
+          <li>A serialization-format false-positive candidate: a base64 blob that's actually just an encoded image or JWT, not a pickle/Java-serialized object: fingerprinting logic specific enough to avoid flagging it, or explicitly documented as a known limitation.</li>
+          <li>Target stops responding entirely mid-scan (real or simulated outage): tool reports the interruption clearly and does not silently mark remaining probes as "not vulnerable."</li>
+          <li>Two different back-end pool members behind a load balancer with different configurations (one patched, one not): tool's behavior/limitation here (result may flap between requests) is explicitly documented rather than presented as one confident answer.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Advanced Web Exploitation I: Request Smuggling and Deserialization · AppSec Mastery Roadmap · Stage 2, Subject 1 of 7 · 1/1
+</footer>
+
+</body>
+</html>

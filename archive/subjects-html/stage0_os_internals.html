@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Internals — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 0</div>
+  <h1>OS Internals</h1>
+  <div class="subtitle">Subject 4 of 6 — Foundations Reset</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Cross the line from "I wrote C that ran" to "I know exactly what the kernel and the loader did with the bytes I wrote" — memory layout, syscalls, the dynamic linker, and the exact mechanics that turn a bounds-checking mistake into a hijacked return address.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — memmap0</a></li>
+          <li><a href="#ex01">Ex. 01 — straceit</a></li>
+          <li><a href="#ex02">Ex. 02 — stackoverflow0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: crashtriage</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"A buffer overflow is not a bug in your program. It is your program's memory obeying physics your mental model never accounted for."</p>
+    <p>Software engineering trains you to think in variables, functions, and types. None of that exists at runtime — there is only a flat address space, a stack that grows down, a heap that grows up, and a return address sitting exactly where an attacker wants it. This subject rebuilds that ground-truth model from raw observation, not from a diagram in a textbook.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will observe your own process's memory layout directly, trace syscalls with <code>strace</code>, deliberately overflow a stack buffer and find the overwritten return address in GDB, and build an <code>LD_PRELOAD</code> shim that instruments allocation calls in a running process you do not control the source of. The capstone forces all of it into one artifact: a memory-safety triage tool that classifies a crash the way a security engineer would on day one of an incident.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input, an unreachable host, or unexpected data. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline), applies to every exercise.</strong> Functions do one thing and are named for what they do. No magic numbers — ports, offsets, thresholds, and protocol constants are named constants, never bare literals. No block of code you cannot explain, unprompted, line by line, during defense. Every non-obvious line carries a comment explaining why, not what.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this detects X" or "this parses Y correctly" must be backed by a reproducible capture, transcript, or log — captured in your turn-in. Assertions without evidence are treated as unmet requirements during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct. A single mandatory-part flaw — even a minor one — zeroes the bonus evaluation for that exercise, no exceptions.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Evaluation environment.</strong> A Linux VM or container with ASLR togglable, GDB, GCC, and <code>strace</code> installed. Disabling ASLR system-wide for demonstration purposes is expected and must be re-enabled and noted afterward.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>Scope.</strong> Every vulnerable binary in this subject is one you wrote or were given explicitly for this exercise. None of this authorizes probing memory-safety bugs in software you don't own or a CTF you weren't invited to.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">memmap0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>os_internals/ex00/</dd>
+        <dt>Files</dt><dd>memmap0.c, README.md, evidence/</dd>
+        <dt>Allowed</dt><dd>C, gcc, /proc/self/maps</dd>
+        <dt>Forbidden</dt><dd>any memory-introspection library</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A C program that prints the runtime address of a stack variable, a heap allocation, a global variable, a function pointer, and an environment variable, then reads and annotates its own <code>/proc/self/maps</code> — with and without ASLR — to show the layout matches reality, not just the textbook diagram.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Prints, in one run: the address of a local (stack) variable, a <code>malloc()</code>'d block (heap), a global variable (BSS/data depending on initialization), the address of a function you wrote (text segment), and the address of an environment variable accessed via <code>environ</code>.</li>
+          <li>Cross-references each printed address against the corresponding region in <code>/proc/self/maps</code>, read and parsed by your own code, labeling which mapped region each address falls in.</li>
+          <li>Run twice with ASLR enabled and twice with it disabled (<code>echo 0 &gt; /proc/sys/kernel/randomize_va_space</code>, restored after), capturing all four runs as evidence, with a written explanation of exactly which regions move between runs and which stay fixed even with ASLR off (and why).</li>
+          <li>A written explanation of why the heap sits above the BSS/data segment and grows upward while the stack sits near the top of the user address space and grows downward, and what security consequence follows from a stack overflow versus a heap overflow given that layout.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any address-introspection library instead of your own pointer-printing and <code>/proc/self/maps</code> parsing.</li>
+          <li>Leaving ASLR disabled on the system after the exercise.</li>
+          <li>Asserting the stack/heap growth direction from memory instead of demonstrating it with printed addresses across multiple calls.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: one function per memory-region demonstration; <code>/proc/self/maps</code> parsing isolated in its own function with named field offsets.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate and explain stack-canary placement (<code>-fstack-protector</code>) by comparing disassembly with and without the flag.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">straceit</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>os_internals/ex01/</dd>
+        <dt>Files</dt><dd>REPORT.md, traces/</dd>
+        <dt>Allowed</dt><dd>strace, any program you choose to trace</dd>
+        <dt>Forbidden</dt><dd>ltrace as a substitute (may be used supplementally, not as your primary evidence)</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> Trace five different programs with <code>strace</code>, and produce a report that reads each trace like a security engineer doing triage — not a transcript with no interpretation.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Trace at least: <code>ls</code>, <code>curl</code> against a real URL, your own compiled webserv/HTTP binary from Exercise 00 of HTTP Internals (or any C network program you've written), <code>ssh</code> connecting to a host, and <code>python3 -c "..."</code> running a short script that opens a file and a socket.</li>
+          <li>For each trace, identify and annotate: every file opened (<code>openat</code>) and whether it plausibly should have been, every network syscall (<code>socket</code>/<code>connect</code>/<code>sendto</code>) and the destination, and every process-spawning syscall (<code>execve</code>/<code>fork</code>/<code>clone</code>) if present.</li>
+          <li>For the network-facing programs, identify the exact syscall sequence of a TCP connection setup (socket → connect, or socket → bind → listen → accept) and map it back to the three-way handshake from Networking Depth.</li>
+          <li>A written section: "if this program's behavior were unexpected for its name" — pick one trace and describe, concretely, what a suspicious deviation would look like (e.g. <code>ls</code> making a network connection) and why that's exactly the signal a syscall-monitoring EDR looks for.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Pasting raw strace output with no annotation or interpretation.</li>
+          <li>Skipping a trace because "it's obvious what it does."</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: one section per trace, consistent structure (command → annotated excerpt → interpretation).</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Use <code>strace -c</code> to produce a syscall-frequency summary for one long-running program and explain what the distribution tells you about its workload.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">stackoverflow0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>os_internals/ex02/</dd>
+        <dt>Files</dt><dd>vuln.c, exploit_notes.md, evidence/</dd>
+        <dt>Allowed</dt><dd>C, gcc (with protections disabled for the demo), gdb</dd>
+        <dt>Forbidden</dt><dd>existing exploit-development frameworks (pwntools may be used only for the bonus, not the mandatory GDB walkthrough)</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A deliberately vulnerable C program with a stack buffer overflow, compiled with protections off, exploited far enough in GDB to overwrite the saved return address and prove it — plus a written explanation of exactly why each disabled protection was necessary to get there.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A minimal vulnerable program using an unbounded copy (e.g. <code>gets()</code> or <code>strcpy</code> with attacker-controlled length) into a fixed stack buffer, compiled with <code>-fno-stack-protector -z execstack -no-pie</code> and ASLR disabled for the demo, with every disabled protection listed and justified in writing (what it would otherwise have stopped).</li>
+          <li>In GDB: set a breakpoint at function entry, show the stack frame layout (buffer, saved base pointer, saved return address) via <code>x/</code> examine commands, then supply an input long enough to overwrite the saved return address with a recognizable marker value, and show the corrupted return address in the register/stack dump before the function returns.</li>
+          <li>Show the program crashing (SIGSEGV) when the overwritten "return address" is not a valid mapped address, and explain in writing what the next step toward a working exploit would be (redirecting to a known address, e.g. shellcode or a ROP gadget) without necessarily completing it.</li>
+          <li>A written, precise explanation of the exact offset (in bytes) from the start of your input to the start of the saved return address, and how you determined it (e.g. a cyclic/De Bruijn pattern or manual calculation from the struct layout) — not a number you guessed and got lucky with.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Attacking any binary other than one you wrote for this exercise.</li>
+          <li>Leaving compiled vulnerable binaries or protection-disabling flags in any shared/production environment.</li>
+          <li>Asserting the offset without showing the derivation.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the vulnerable function isolated and minimal, no unrelated code obscuring the stack frame.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>With ASLR and the stack canary re-enabled one at a time, show the exploit failing against each individually and explain precisely what detects/blocks it in each case (canary check on return vs. address-space unpredictability).</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> the full memory layout model (to recognize which region a faulting address falls in), syscall-level observation (to see what the process was doing right before the crash), the mechanics of stack overflows from Exercise 02 (to recognize the signature of a smashed return address versus a wild pointer), and the <code>LD_PRELOAD</code>/dynamic-linking model (to instrument allocations without source access) — all at once, automatically, on an input the tool has never seen. Someone who only knows GDB can triage one crash manually; this tool has to encode the reasoning a human would use into rules that work on a crash the author didn't hand-pick.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">crashtriage</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>os_internals/capstone/</dd>
+        <dt>Files</dt><dd>src/, samples/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A triage tool that takes a crashing binary plus a crashing input, runs it under GDB in batch mode, and automatically classifies the crash — stack overflow vs. heap corruption vs. null-deref vs. something else — the way a security engineer's first fifteen minutes on a fuzzer-found crash actually goes, including a syscall-trace and LD_PRELOAD-based allocation-tracking module for the heap cases.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Given a target binary and a crashing input file, runs the binary under GDB in batch/script mode (no manual interaction), captures the signal, the faulting instruction, and the register state at crash time.</li>
+          <li>Classifies the crash into one of: stack-buffer-overflow (return address or saved frame pointer corrupted with attacker-influenced bytes — verify by checking whether crash-time stack bytes match the input), null-pointer-dereference (faulting address is near zero), wild-pointer/heap-corruption (faulting address is a plausible heap address but not matching the input directly), or unclassified — never silently guessing.</li>
+          <li>For binaries linked dynamically, uses an <code>LD_PRELOAD</code> shim (built for this capstone, not copied) that logs every <code>malloc</code>/<code>free</code> call with size and pointer, so a heap-corruption classification can additionally report the allocation history leading up to the crash.</li>
+          <li>Runs the target once under <code>strace</code> alongside the GDB run and includes the last N syscalls before the crash in its report, to distinguish "crashed while processing network input" from "crashed on startup" from "crashed handling a file."</li>
+          <li>Produces one structured report per crash: classification, confidence reasoning (which specific evidence supports the classification), faulting address and instruction, relevant register/stack state, and (for heap cases) the allocation history.</li>
+          <li>Demonstrated against at least four different crashing inputs you produce: one clean stack-overflow (reusing/extending Exercise 02's vulnerable binary), one null-pointer-dereference, one heap-based corruption (a simple use-after-free or double-free you write for this purpose), and one crash that your tool correctly reports as unclassified rather than guessing wrong.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>AFL, libFuzzer, or any existing fuzzer/triage tool doing the classification for you — you may use one to *find* an interesting crash for testing, never to classify it.</li>
+          <li>GDB's own <code>exploitable</code>/<code>exploitable.py</code> plugin as your classification engine — read it for ideas, do not depend on it.</li>
+          <li>Guessing a classification when the evidence is ambiguous instead of reporting "unclassified" with the evidence shown.</li>
+          <li>Silently failing on a statically-linked binary instead of explicitly reporting that the <code>LD_PRELOAD</code> module could not attach and why.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: GDB-driving, syscall-tracing, allocation-tracking, and classification each in their own module, with a single dispatcher; classification heuristics as named, documented functions, not one giant conditional.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Extend classification to detect a likely format-string vulnerability (crash pattern consistent with attacker-controlled format specifiers); a minimal report-to-HTML renderer.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">os_internals/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live from a clean terminal on your VM/container. For Exercise 02 and the capstone, the evaluator may supply an additional crashing input built from a variant of your own vulnerable programs, and expects either a correct classification or an honest "unclassified" — a confident wrong answer is a failure regardless of how the rest of the demo went.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — memmap0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me your four captures — which addresses moved between ASLR-on runs and which didn't, and why?</li>
+          <li>Why does a heap overflow typically corrupt allocator metadata rather than a return address directly — what does that metadata corruption actually let an attacker eventually achieve?</li>
+          <li>Point to a line in <code>/proc/self/maps</code> and tell me exactly what's mapped there and why it has those permission bits.</li>
+          <li>What specifically does PIE (position-independent executables) add on top of stack/heap ASLR?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — straceit</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Pick a trace at random from your report — walk me through five consecutive syscalls without looking at your annotations first.</li>
+          <li>What's the difference between <code>fork()</code>+<code>execve()</code> and <code>vfork()</code>, and why would an attacker analyzing a sandboxed process care about which one is used?</li>
+          <li>Show me the exact syscalls corresponding to a TCP handshake in your network trace and map each one to a packet you'd see in Wireshark.</li>
+          <li>What would a syscall trace of a program doing something it has no business doing (e.g., a calculator reading <code>/etc/shadow</code>) look like, concretely, in this same format?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — stackoverflow0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me your offset calculation live — derive it in front of me, don't read it from your notes.</li>
+          <li>Walk me through the stack frame in GDB right before the overflow and right after — point to the exact bytes that changed.</li>
+          <li>If I re-enable the stack canary only, what specifically breaks in your exploit and where does the program detect the corruption?</li>
+          <li>If I re-enable ASLR only, what specifically breaks, and why does a stack-only overflow with no info leak become far harder?</li>
+          <li>Why does <code>execstack</code> matter here even though you're not executing shellcode yet — what would the next step need it for?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: crashtriage</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run your tool live against a crash I hand you — narrate its classification reasoning as it runs.</li>
+          <li>Show me the exact evidence your stack-overflow classifier checks for, and explain a case where that evidence could be misleading (a false positive).</li>
+          <li>Walk through your <code>LD_PRELOAD</code> shim — why does it need to preserve the real <code>malloc</code>/<code>free</code> behavior exactly, not just log and no-op?</li>
+          <li>What does your tool do differently for a statically-linked binary, and why can't <code>LD_PRELOAD</code> help there?</li>
+          <li>Give me a crash your tool correctly refuses to classify — walk through why the evidence was genuinely ambiguous.</li>
+          <li>How does the syscall trace change your confidence in a classification — give a concrete example from your four demonstrated crashes.</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>Statically-linked crashing binary: <code>LD_PRELOAD</code> module explicitly reported as inapplicable, tool does not crash or silently skip the whole report.</li>
+          <li>A crash with a completely garbage/unmapped faulting address (wild jump): classified with low confidence and evidence shown, not force-fit into a category.</li>
+          <li>A crashing input that does not actually crash on this run (a timing-dependent bug): reported as "did not reproduce," not a false classification.</li>
+          <li>A binary that catches SIGSEGV itself via a signal handler: GDB still intercepts and reports correctly, or the limitation is explicitly documented.</li>
+          <li>Multiple threads, one of which crashes: correct thread's register state reported, not thread 0 by default if thread 0 didn't crash.</li>
+          <li>A heap corruption where the allocation log shows a clean double-free (same pointer freed twice): classified specifically as double-free, not generic heap corruption.</li>
+          <li>An input file that is empty or zero bytes: tool reports "no crash" or "invalid input," never hangs.</li>
+          <li>GDB itself failing to attach (e.g. permissions): reported clearly as a tool-environment failure, distinct from a crash-classification failure.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  OS Internals · AppSec Mastery Roadmap · Stage 0, Subject 4 of 6 · 1/1
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Race Conditions and Business Logic Abuse — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 2</div>
+  <h1>Race Conditions and Business Logic Abuse</h1>
+  <div class="subtitle">Subject 7 of 7 — Hands-On Web Security + Code Review</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    The closing Stage 2 subject, and the one hardest to find with any scanner: bugs that exist only in the gap between two requests arriving close together, or in a workflow an attacker can reorder, skip a step of, or repeat — nothing here is a malformed payload, every request is individually well-formed.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — couponrace0</a></li>
+          <li><a href="#ex01">Ex. 01 — workflowbypass0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: racefuzz</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"A race condition isn't an attacker breaking your code. It's an attacker arriving at the one moment your code assumed no one else would."</p>
+    <p>Every vulnerability class before this one had a payload — a string, a header, a crafted object — that a scanner could plausibly generate and a WAF could plausibly block. Race conditions and business-logic abuse have neither. The requests are perfectly valid; the vulnerability is in the sequencing and the assumptions, which is exactly why these bugs survive in mature, well-tested applications long after the "easy" classes have been scanned away, and why they command outsized bug bounty payouts.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will exploit a classic TOCTOU race condition to redeem a limited-use discount code more than once through concurrent requests, abuse a multi-step checkout/workflow by skipping or reordering steps to reach a state the application never validated directly, and exploit a single-use-token race (the same coupon-redemption idea applied to password reset or email verification, where winning the race has account-takeover consequences instead of financial ones). The capstone builds a concurrency-fuzzing harness that finds race windows automatically.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of exploitability or of a fix working must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation targets DVWA, Juice Shop, WebGoat, PortSwigger Academy labs, HackTheBox/lab machines, or an application you wrote — never a third party without written authorization.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">couponrace0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>race_conditions_business_logic/ex00/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>Python (threading/asyncio for concurrent requests), Burp's "Send group in parallel"</dd>
+        <dt>Forbidden</dt><dd>any prebuilt race-condition exploitation tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A deliberately vulnerable single-use discount-code redemption endpoint, exploited via a classic TOCTOU (time-of-check-to-time-of-use) race: fire many redemption requests for the same code at once and redeem it far more than once.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A vulnerable endpoint implementing "check if code is unused, then mark it used, then apply the discount" as separate, non-atomic steps (e.g. a read-then-write pattern with no locking/transaction) — the deliberate, realistic bug (this exact pattern is extremely common in real code).</li>
+          <li>Fire a genuinely concurrent burst of requests (not sequential-but-fast — actual simultaneous dispatch, using threading/asyncio or Burp's parallel-send feature) redeeming the same single-use code, and demonstrate the code being successfully applied more than once, with the exact count of successful redemptions captured as evidence.</li>
+          <li>A written explanation of the race window precisely: between the "check" and the "use" steps, multiple requests can all pass the check before any of them completes the use step — with your own request timing/ordering evidence (not just the final "it redeemed twice" result) showing the interleaving actually happened.</li>
+          <li>A demonstration that the race becomes measurably harder to win (lower success rate) as request concurrency decreases, and easier as it increases — proving you understand the race's mechanics quantitatively, not just qualitatively.</li>
+          <li>The correct fix applied and verified: make the check-and-use atomic (a database transaction with appropriate isolation level, or a single atomic <code>UPDATE ... WHERE used=false</code> statement whose affected-row-count tells you definitively whether you won the race), with your concurrent-burst attack re-run and shown succeeding only once no matter the concurrency level.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any prebuilt race-condition tool.</li>
+          <li>A "concurrent" attack that's actually sequential requests fired quickly — genuine simultaneous dispatch is required and must be evidenced.</li>
+          <li>A fix that just adds a delay/sleep instead of actual atomicity — this doesn't fix the race, it only narrows the window.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the vulnerable check-then-use logic and the concurrent-request dispatcher each isolated.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Exploit the same race via HTTP/2 request multiplexing (single connection, multiplexed streams) instead of multiple TCP connections, and note any difference in reliability.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">workflowbypass0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>race_conditions_business_logic/ex01/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>Burp, a multi-step workflow app you build (e.g. checkout: cart → shipping → payment → confirm)</dd>
+        <dt>Forbidden</dt><dd>none beyond the global list</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A multi-step business workflow (e.g. a checkout process) where server-side state is only checked at the final step, exploited by skipping or reordering steps to reach a favorable end state the application never actually validated the path to.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A vulnerable multi-step workflow (e.g. cart → apply-discount → shipping-address → payment → confirm) where each step is its own endpoint, and the final confirm step trusts client-supplied state (e.g. a total price passed from the client) rather than recomputing it server-side from the actual cart/discount/shipping state.</li>
+          <li>A step-skipping exploit: call the confirm endpoint directly, skipping the payment step entirely, and demonstrate the order completing without payment ever having been processed.</li>
+          <li>A parameter-tampering-across-steps exploit: manipulate a value passed between steps (e.g. the price or an item quantity) that the final step trusts instead of recomputing, and demonstrate an order completing at an attacker-favorable price.</li>
+          <li>A step-repetition exploit: replay an early step (e.g. "apply discount") multiple times to see whether the discount stacks when it shouldn't (e.g. applying a 10%-off code three times for 30% off, or applying a single-use code across multiple orders because the workflow never marked it consumed at the right point).</li>
+          <li>The correct fix applied and verified: the server recomputes and re-validates all critical state (price, discount validity, item availability) at the final confirm step from its own source of truth, ignoring client-supplied values for anything security/financially relevant — with all three exploits re-run and shown failing.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>A workflow where the final step already recomputes everything server-side from the start — the vulnerability (trusting client state at the final step) must be real and demonstrated first.</li>
+          <li>Claiming a bypass without showing the actual completed end state (e.g. a confirmed order) as evidence, not just an unusual intermediate response.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: each workflow step as its own clearly-labeled endpoint/function, so the eventual fix (recompute at the end) is a clean, auditable change.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Combine this with Exercise 00: a workflow-bypass exploit that also races the discount-code redemption step for a compounded price manipulation.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> the genuine-concurrency dispatch mechanics and statistical race-detection reasoning from Exercise 00 (the same underlying skill as Applied Cryptographic Attacks' timing statistics — deciding whether an observed outcome distribution is consistent with "no race" or indicates a real window — but applied to concurrency outcomes instead of timing measurements), plus the business-logic-state awareness from Exercise 01 (a race-fuzzer that fires bursts at random endpoints with no understanding of which ones represent a limited/single-use resource will waste enormous effort on endpoints that can't meaningfully race). Someone who can fire concurrent requests but doesn't know which endpoints are worth targeting produces noise; someone who understands business logic but can't reliably achieve true concurrent dispatch never actually triggers the race window to observe it.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">racefuzz</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>race_conditions_business_logic/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A concurrency-fuzzing harness: given a set of candidate endpoints (especially ones involving limited resources — codes, tokens, inventory counts, single-use actions), automatically fires calibrated concurrent bursts at each and statistically detects race-condition windows by comparing observed outcomes (e.g. redemption count) against the expected single-winner outcome — turning the manual "fire a burst and count" technique from Exercise 00 into a repeatable scanner.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Candidate identification: given a list of endpoints (from a captured HAR/spec, reusing your API Authorization capstone's spec-ingestion approach if convenient), flags likely race-condition candidates by heuristic — endpoints whose naming/behavior suggests a limited resource or single-use action (redeem, claim, apply, use-once, transfer, withdraw) — rather than blindly firing bursts at every endpoint.</li>
+          <li>Calibrated concurrent dispatch: for each candidate, fires a genuinely concurrent burst (reusing Exercise 00's dispatch mechanics) at multiple concurrency levels (e.g. 5, 20, 50 simultaneous requests), recording the outcome distribution at each level.</li>
+          <li>Statistical race detection: compares the observed "successful" outcome count against the expected count under a no-race assumption (normally 1, for a single-use resource) at each concurrency level, and reports a race-condition finding only when the deviation is consistent and reproducible across multiple runs — not a one-off fluke — with the actual run-to-run data shown as evidence.</li>
+          <li>A confirmation replay: for every detected race, re-runs the exact same burst configuration at least 3 additional times and reports the reproduction rate, since race-condition findings in a real report need reliability data, not a single lucky hit.</li>
+          <li>One consolidated report: candidate endpoints tested, concurrency levels used, outcome distributions, and confirmed findings with reproduction rates and suggested fix pattern (atomic check-and-use, matching Exercise 00's fix).</li>
+          <li>Demonstrated end to end against your Exercise 00 vulnerable and fixed coupon endpoints, correctly detecting the race in the vulnerable version with a high reproduction rate and correctly reporting zero race findings (single successful redemption every time) against the fixed version across repeated runs.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any existing race-condition testing tool doing the detection for you.</li>
+          <li>Firing bursts at every endpoint indiscriminately with no candidate-prioritization heuristic — wastes an engagement's time budget and this is graded against.</li>
+          <li>Reporting a race-condition finding from a single run with no reproduction-rate evidence.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: candidate-identification, concurrent-dispatch, and statistical-detection each in their own module, sharing one underlying HTTP-burst-firing layer.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Extend candidate identification to also flag Exercise 01-style multi-step workflows (a sequence of related endpoints) as candidates for step-skipping/reordering testing, in addition to single-endpoint race testing.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">race_conditions_business_logic/
+├── ex00/
+├── ex01/
+└── capstone/</pre>
+    <p>Each exercise is defended live, with the concurrent-burst evidence reproduced on demand — a "trust me, it raced once" is not acceptable evidence. The capstone is run live against a target set the evaluator selects, including at least one repeated run during the defense itself to demonstrate the reproduction-rate discipline in real time.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — couponrace0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run the concurrent burst live and show the redemption count exceeding one.</li>
+          <li>Explain the exact non-atomic check-then-use pattern and why a database transaction with the right isolation level (or an atomic conditional update) closes it completely.</li>
+          <li>Why does a <code>time.sleep()</code>-based "fix" not actually solve this, even if it makes the race much harder to win in practice?</li>
+          <li>Show your concurrency-vs-success-rate data and explain what it demonstrates about the race window's actual width.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — workflowbypass0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through all three exploits live against the vulnerable workflow, then show all three failing against the fixed version.</li>
+          <li>Why does trusting client-supplied state at the final step recreate exactly the mistake IDOR/broken-access-control findings make, just applied to workflow state instead of object ownership?</li>
+          <li>What's the general principle for multi-step workflows that this fix embodies — "never trust the client for anything the server can independently derive"?</li>
+          <li>Give a real-world example (outside your own app) where you'd expect this exact bug class to show up.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — Capstone: racefuzz</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run this against your Exercise 00 vulnerable endpoint live, across multiple concurrency levels, and narrate the outcome distribution as it's gathered.</li>
+          <li>Run it against the fixed endpoint and show the reproduction-rate evidence supporting a "not vulnerable" conclusion.</li>
+          <li>Walk through your candidate-identification heuristic — what would it flag, and what would it correctly skip, from a list of ten made-up endpoint names?</li>
+          <li>Why does reproduction-rate matter for a race-condition finding specifically, more than it did for, say, a straightforward IDOR finding?</li>
+          <li>What's the relationship between concurrency level and detection reliability in your own data — does higher concurrency always mean a clearer signal?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>A resource that's meant to be usable exactly N times (not strictly 1), e.g. "redeem up to 3 times": detection logic correctly compares against the expected-N outcome, not a hardcoded expectation of exactly 1.</li>
+          <li>A candidate endpoint that turns out to already be correctly atomic: repeated runs consistently show single-winner outcomes, and the tool correctly does not report a finding despite the endpoint matching the naming heuristic.</li>
+          <li>Network-level request reordering/jitter causing an inconsistent single run: the multi-run reproduction-rate requirement specifically guards against reporting this as a false finding.</li>
+          <li>A race window so narrow it only triggers at very high concurrency levels your default configuration doesn't reach: documented as a known limitation with a configurable concurrency ceiling, rather than a silent false negative presented as a clean result.</li>
+          <li>Two different candidate endpoints that share the same underlying resource (e.g. one to "preview" and one to "apply" a coupon): tool's handling of this relationship (tested independently, or flagged as related) is documented.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Race Conditions and Business Logic Abuse · AppSec Mastery Roadmap · Stage 2, Subject 7 of 7 · 1/1
+</footer>
+
+</body>
+</html>

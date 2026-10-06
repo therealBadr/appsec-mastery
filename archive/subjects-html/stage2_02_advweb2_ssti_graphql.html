@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Web Exploitation II: SSTI and GraphQL Security — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 2</div>
+  <h1>Advanced Web Exploitation II: SSTI and GraphQL Security</h1>
+  <div class="subtitle">Subject 2 of 7 — Hands-On Web Security + Code Review</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    A template engine given attacker-controlled template syntax is a code-execution primitive wearing the costume of a rendering bug. A GraphQL API with introspection on and no query-cost limiting is a full schema map handed to an attacker for free, plus a denial-of-service lever built into the query language itself.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — sstichain0</a></li>
+          <li><a href="#ex01">Ex. 01 — graphqlrecon0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: ssti_graphql_auditor</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"A template engine and a SQL parser solve the same problem — turning a mini-language into output — and inherit the same vulnerability the moment user input is allowed to write the mini-language instead of fill in its blanks."</p>
+    <p>Server-Side Template Injection gets less attention than SQLi or XSS, but it routinely escalates directly to remote code execution because template engines are, by design, small programming languages with filesystem and object access built in. GraphQL, meanwhile, inverts the REST attack surface: instead of many opaque endpoints, one endpoint exposes an entire queryable schema, and the query language itself — nesting, aliasing, batching — is the attack surface.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will fingerprint and exploit SSTI against a real template engine (Jinja2), escalating from a rendering quirk to full remote code execution via Python object-introspection gadgets, then attack a GraphQL API for introspection-based schema disclosure, excessive-nesting denial-of-service, and an authorization bug that only exists because REST-style per-endpoint checks were bolted onto a single GraphQL endpoint incorrectly. The capstone builds one tool covering both.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of exploitability or of a fix working must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation targets DVWA, Juice Shop, WebGoat, PortSwigger Academy labs, HackTheBox/lab machines, or an application you wrote — never a third party without written authorization.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">sstichain0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>advweb2_ssti_graphql/ex00/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>Jinja2 (deliberately misused), Flask</dd>
+        <dt>Forbidden</dt><dd>tplmap or any automated SSTI exploitation tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A deliberately vulnerable Flask app that renders user input directly as a Jinja2 template string (instead of passing it as data into a template), exploited from initial fingerprinting through full remote code execution via Python's object-introspection chain.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A vulnerable endpoint using <code>render_template_string(user_input)</code> or equivalent — user input becomes template source, not template data.</li>
+          <li>Fingerprinting: demonstrate the classic detection payload (e.g. <code>{{7*7}}</code>) confirming template evaluation is happening, and explain what distinguishes this from a false-positive (e.g. the app merely echoing the string back unrendered).</li>
+          <li>Escalation via Python's object model: starting from an accessible template object (e.g. a string literal's <code>__class__</code>), walk the <code>__mro__</code>/<code>__subclasses__</code> chain by hand to reach a class useful for code execution (e.g. one wrapping <code>subprocess.Popen</code> or <code>os.system</code>), and execute an arbitrary command — with every step of the chain shown and explained, not a copy-pasted one-liner payload.</li>
+          <li>A written explanation of exactly why this differs from XSS even though both involve injecting into a rendering process: SSTI payloads execute <em>server-side</em>, in the template engine's own execution context, with access to server-side objects — not client-side JavaScript in a victim's browser.</li>
+          <li>The fix applied and verified: separate template (trusted, developer-authored) from data (untrusted, user-supplied) by passing user input as a template <em>variable</em> rather than concatenating it into the template <em>source</em>, with your exploit chain shown failing (the payload is now rendered as inert text, not evaluated).</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>tplmap or any automated SSTI tool.</li>
+          <li>A "payload" copy-pasted from a cheat sheet without being able to walk the object-chain reasoning behind it during defense.</li>
+          <li>A fix that tries to sanitize/blocklist template-looking syntax instead of architecturally separating template from data.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: fingerprinting and the escalation chain each documented as separate, reproducible steps.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate the equivalent vulnerability class in a second template engine (e.g. Jinja2 vs. a Node/EJS-style engine you set up) and note the escalation-path differences.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">graphqlrecon0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>advweb2_ssti_graphql/ex01/</dd>
+        <dt>Files</dt><dd>EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>a GraphQL server you stand up (e.g. Graphene/Ariadne) with introspection enabled, Burp/GraphiQL/manual requests</dd>
+        <dt>Forbidden</dt><dd>InQL or any automated GraphQL security scanner (for the mandatory part — cross-checking afterward is fine)</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A GraphQL API with introspection enabled and no query-complexity limiting, attacked to fully map its schema without documentation, then abused for a resource-exhaustion denial-of-service via deeply nested/circular queries.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Full schema recovery via the standard introspection query (<code>__schema</code>) sent by hand, parsed into a readable map of every type, field, and mutation — including any fields/mutations not exposed in the application's own documented UI, demonstrating that introspection alone defeats "security by not documenting it."</li>
+          <li>Identify at least one sensitive field or mutation discoverable only through introspection (e.g. an internal-sounding field, or a mutation with no corresponding UI control) and demonstrate querying/calling it directly.</li>
+          <li>A deeply nested query attack: construct a query exploiting GraphQL's natural support for nested/recursive field selection (e.g. a self-referential relationship queried many levels deep) to force the server to do exponentially more work than a normal query, measured as a real, demonstrated response-time/resource spike on your own instance — not just asserted as theoretically possible.</li>
+          <li>A batching/aliasing attack: demonstrate using GraphQL query aliasing to submit what is effectively dozens of duplicate queries (e.g. dozens of aliased login-mutation attempts) in a single HTTP request, and explain why an endpoint-level rate limiter (counting HTTP requests) completely misses this.</li>
+          <li>The fixes applied and verified: introspection disabled in production (or gated behind auth), and a query-complexity/depth limiter added and shown correctly rejecting your nested-query and aliasing attacks afterward.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>InQL or any automated GraphQL scanner for the mandatory schema-recovery/exploitation steps.</li>
+          <li>Claiming the DoS attack works without a real measured resource/time impact on your own instance.</li>
+          <li>A fix that merely rate-limits by HTTP request count without addressing query complexity/depth directly — shown to still be bypassable by the aliasing technique otherwise.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: EXPLOIT.md documents the recovered schema, then each attack with its query and measured impact.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>A GraphQL-specific IDOR: find an object-fetching query (e.g. <code>user(id: X)</code>) with no ownership check, reusing your Access Control and IDOR technique directly against this new query shape.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> the object-introspection escalation reasoning from Exercise 00, GraphQL schema-graph reasoning and complexity estimation from Exercise 01, and OOB confirmation (reused from the Server-Side Injection and Client-Side Injection capstones) as the common confirmation technique across both — an SSTI finding and a GraphQL-exposed dangerous mutation are both confirmed the same way: get the target to do something observable outside the response itself. Someone who only learned SSTI has no model for why a GraphQL schema graph needs its own complexity-scoring algorithm; someone who only learned GraphQL has no path from "found a template-looking field" to actual code execution.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">ssti_graphql_auditor</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>advweb2_ssti_graphql/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> One tool combining SSTI fingerprinting/OOB-confirmed exploitation with a GraphQL security auditor that performs introspection recovery, flags overly permissive/sensitive fields, and estimates query-complexity DoS risk — producing a report spanning both attack surfaces for a target that exposes either or both.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>SSTI module: given a target endpoint, sends a small set of engine-fingerprinting payloads (Jinja2-style and at least one alternate-engine-style, e.g. a different delimiter convention), detects which (if any) evaluates, and — only on confirmed evaluation — attempts an OOB-confirmed code-execution payload (reusing the shared OOB-listener pattern from the Server-Side Injection capstone) rather than assuming success from a reflected calculation result alone.</li>
+          <li>GraphQL introspection module: sends the standard introspection query, parses the full schema, and produces a readable map of types/fields/mutations, flagging any field/mutation whose name suggests elevated sensitivity (an admin/internal/debug-sounding name) for manual follow-up.</li>
+          <li>GraphQL complexity-estimation module: given the recovered schema, statically estimates which fields participate in circular/self-referential relationships that could be exploited for nested-query DoS (reusing Exercise 01's attack shape), and generates a candidate deeply-nested query for each, without necessarily firing it destructively by default (a safe "would be exploitable" static estimate, with an opt-in live-fire confirmation mode against your own lab only).</li>
+          <li>GraphQL auth-boundary module: for each discovered query/mutation, attempts it both unauthenticated and under a low-privilege session (reusing your Access Control and IDOR test-harness pattern), flagging any that unexpectedly succeed.</li>
+          <li>One consolidated report spanning both SSTI and GraphQL findings for a target, each with evidence (OOB confirmation for SSTI, schema/query evidence for GraphQL) and severity.</li>
+          <li>Demonstrated end to end against your Exercise 00 (SSTI) and Exercise 01 (GraphQL) targets, correctly confirming each finding, plus fixed versions of both showing zero false positives.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>tplmap or InQL doing either module's core work for you.</li>
+          <li>Live-firing a destructive/high-resource-consumption complexity attack by default against any target — this must be an explicit, separately-invoked, own-lab-only mode.</li>
+          <li>A false positive against either fixed target.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: SSTI-fingerprint, GraphQL-introspection, GraphQL-complexity-estimation, and GraphQL-auth-boundary each in their own module sharing the OOB-listener and HTTP layers.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Extend the SSTI module to attempt engine-specific escalation chains for at least one engine beyond Jinja2, selecting the chain automatically based on the fingerprinting result.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">advweb2_ssti_graphql/
+├── ex00/
+├── ex01/
+└── capstone/</pre>
+    <p>Each exercise is defended live against your own targets. The capstone is defended live against a target the evaluator selects, with SSTI and GraphQL findings both required to show OOB or direct-evidence confirmation, never response-content inference alone.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — sstichain0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk the object-introspection chain live, from <code>{{7*7}}</code> to code execution, narrating what each step of the chain actually is.</li>
+          <li>Why does this specific payload structure work — what is Python's object model exposing that a template author never intended to expose?</li>
+          <li>What's the precise architectural difference between your vulnerable and fixed versions — show me the one-line diff and explain why it closes the entire class, not just this one payload.</li>
+          <li>Why is SSTI generally rated more severe than a comparable-looking XSS finding — what does the attacker gain?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — graphqlrecon0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through your introspection query and the schema map it produced, live.</li>
+          <li>Show your nested-query DoS live, with the measured impact — what specifically about GraphQL's execution model makes this possible in a way a REST endpoint typically isn't?</li>
+          <li>Explain the aliasing/batching attack and why an HTTP-request-count rate limiter is the wrong layer to stop it.</li>
+          <li>What does your query-complexity limiter actually measure, and how did you pick its threshold?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — Capstone: ssti_graphql_auditor</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run the SSTI module against your Exercise 00 target live and narrate the fingerprint-then-confirm flow.</li>
+          <li>Run the GraphQL modules against Exercise 01 live — walk through the recovered schema and one flagged sensitive field.</li>
+          <li>Show your complexity-estimation logic on the schema — why does it estimate risk statically instead of always live-firing, and what's the tradeoff?</li>
+          <li>Why does OOB confirmation matter as much for SSTI here as it did for command injection and XXE earlier in the roadmap — what would a response-content-only confirmation get wrong?</li>
+          <li>Run everything against your fixed targets — confirm zero false positives, live.</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>A target where the SSTI fingerprint payload is reflected but not evaluated (a false-positive trap, e.g. the app echoes <code>{{7*7}}</code> as literal text): correctly not flagged as vulnerable without OOB confirmation.</li>
+          <li>A GraphQL schema with introspection disabled but a leaked schema file/documentation elsewhere: tool correctly reports introspection as blocked rather than silently failing with no explanation.</li>
+          <li>A self-referential GraphQL relationship that is actually depth-limited server-side already: complexity module correctly detects the limit is enforced (via a live, bounded test) rather than flagging every circular relationship as exploitable.</li>
+          <li>An SSTI target using a sandboxed template engine that blocks the object-introspection chain specifically: escalation correctly fails and is reported as "evaluation confirmed, escalation blocked" — a distinct, accurate finding rather than a false full-RCE claim.</li>
+          <li>A GraphQL mutation that succeeds unauthenticated by design (e.g. a public signup mutation): auth-boundary module correctly excludes intentionally-public operations from findings, using a config/allowlist you define.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Advanced Web Exploitation II: SSTI and GraphQL Security · AppSec Mastery Roadmap · Stage 2, Subject 2 of 7 · 1/1
+</footer>
+
+</body>
+</html>

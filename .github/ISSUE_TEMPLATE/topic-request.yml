@@ -1,0 +1,20 @@
+name: Topic request
+description: Suggest something that should be covered
+labels: [topic]
+body:
+  - type: input
+    id: subject
+    attributes:
+      label: Which subject or chapter?
+    validations:
+      required: true
+  - type: textarea
+    id: topic
+    attributes:
+      label: What is missing?
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Primary source

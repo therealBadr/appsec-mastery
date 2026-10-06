@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client-Side Injection: XSS and CSRF — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 1</div>
+  <h1>Client-Side Injection: XSS and CSRF</h1>
+  <div class="subtitle">Subject 6 of 7 — Security Fundamentals</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    The two vulnerability classes that exploit the trust a server places in a browser and the trust a browser places in a server — stored, reflected, and DOM-based XSS through to a full cookie-theft payload, and CSRF from a crafted page to a defeated synchronizer token.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — xsstriad0</a></li>
+          <li><a href="#ex01">Ex. 01 — csrfstrike0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: xsscsrf_confirm</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"XSS is not "the site is ugly with a popup." It is arbitrary JavaScript running with the full authority of the logged-in victim, inside the one place your session cookie was supposed to be safe."</p>
+    <p>These two classes get treated as beginner material because <code>alert(1)</code> is the canonical proof-of-concept — and that framing does real damage, because it trains people to stop at proof of existence instead of proof of impact. This subject insists on the second half every time: not "I can inject a script tag" but "I can steal a session and CSRF is what an attacker does the moment they can't."</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will exploit stored, reflected, and DOM-based XSS against separate deliberately vulnerable pages, each ending in an actual session-cookie exfiltration to a listener you control (not an alert box), demonstrate CSRF against a state-changing action with a crafted auto-submitting page, and fix both correctly — output encoding and CSP for XSS, synchronizer tokens and SameSite for CSRF. The capstone is a payload-generation and confirmation tool that adapts to a target's specific context and CSP.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this is exploitable" or "this fix works" must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation in this subject targets DVWA, Juice Shop, WebGoat, or an application you wrote — running locally or on a VPS you own. Never a third party without written authorization.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">xsstriad0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>clientside_injection/ex00/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>a small Flask/Node app you build, your own listener for exfiltration</dd>
+        <dt>Forbidden</dt><dd>XSStrike or any automated XSS scanner</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> Three separate deliberately vulnerable pages — one stored, one reflected, one DOM-based — each exploited to full impact: a working payload that exfiltrates the victim's session cookie to a listener you control, not merely a JavaScript alert.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Stored XSS: a comment/profile-bio feature that persists unsanitized HTML, exploited with a payload that runs on every subsequent visitor's page load and sends <code>document.cookie</code> to a listener endpoint you control, captured with the exfiltrated (test) cookie value arriving at your listener.</li>
+          <li>Reflected XSS: a search or error-message feature that reflects unsanitized input directly into the response, exploited via a crafted URL that a victim would have to click — with the full attack narrated including how such a link would realistically be delivered (a phishing email, a shortened URL).</li>
+          <li>DOM-based XSS: a page where the vulnerability is entirely client-side — JavaScript reads a value from <code>location.hash</code> or similar and writes it into the DOM via <code>innerHTML</code> with no server round-trip involved — exploited with a payload that never appears in any server log, and your writeup explains precisely why that makes DOM-based XSS invisible to server-side-only defenses (WAFs included).</li>
+          <li>For each of the three, demonstrate the payload surviving at least one naive filter (e.g. a blocklist stripping the literal string <code>&lt;script&gt;</code>) via an alternative injection vector (an event handler attribute like <code>onerror</code>, or a different tag), proving blocklist-based XSS filtering fails the same way blocklist-based injection filtering failed in Server-Side Injection.</li>
+          <li>A written classification table: for each of your three findings, source (where attacker input enters), sink (where it's unsafely written to the page), and whether the taint flow crosses the server at all — the actual mental model for finding new XSS, not payload memorization.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>XSStrike or any automated XSS scanner/fuzzer.</li>
+          <li>Stopping at an <code>alert(1)</code> proof-of-concept for any of the three — full impact (cookie exfiltration to your own listener) is mandatory for each.</li>
+          <li>Testing any payload against a target other than your own app.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the three vulnerable pages are separate, isolated routes, not variations of one shared vulnerable function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>A CSP-bypass variant: add a real but weak CSP (e.g. allowing a JSONP endpoint or a wildcard script-src host) to one of the three pages and demonstrate exfiltration still succeeding through the CSP gap.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">csrfstrike0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>clientside_injection/ex01/</dd>
+        <dt>Files</dt><dd>attack_page.html, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>a state-changing endpoint you build with no CSRF protection, a crafted attacker HTML page</dd>
+        <dt>Forbidden</dt><dd>any automated CSRF PoC generator (Burp's CSRF PoC generator may be used only to cross-check your own hand-written page afterward)</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A working CSRF exploit against a real state-changing action (e.g. "change account email" or "transfer funds") via a self-submitting malicious HTML page a victim only has to load, and a demonstration of exactly what SameSite cookie attributes do and don't prevent against it.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A target endpoint that changes account state (e.g. email address) based solely on a valid session cookie, with no CSRF token and no other request-origin verification.</li>
+          <li>A standalone <code>attack_page.html</code> — the kind that would be hosted on an attacker's own site — containing a form that auto-submits via JavaScript on page load, targeting the vulnerable endpoint, demonstrated working when a victim (your own second browser session/profile, authenticated to the target) simply opens the page.</li>
+          <li>A GET-based CSRF variant, if the vulnerable action can be triggered via GET (e.g. via an <code>&lt;img src=&gt;</code> tag) — demonstrating that CSRF isn't only a form-submission problem, and explaining why allowing state changes via GET is a separate, compounding mistake.</li>
+          <li>A demonstration of the exploit failing once the cookie is set with <code>SameSite=Lax</code>, succeeding again for the GET/image-tag variant specifically if the browser's Lax handling of top-level navigation allows it (document precisely which sub-case Lax does and does not stop), and failing entirely once set to <code>SameSite=Strict</code> — three real before/after captures, not an assertion.</li>
+          <li>The complete, correct fix implemented: a synchronizer token (a random, per-session or per-request token embedded in the legitimate form and validated server-side on submission) added to the vulnerable endpoint, with your original exploit re-run and shown failing even without relying on <code>SameSite</code> at all.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Relying on <code>SameSite</code> alone as "the fix" in your writeup — modern browser defaults have reduced CSRF's reach, but a synchronizer token is the actual robust, defense-in-depth fix and must be implemented.</li>
+          <li>A CSRF PoC generated entirely by an external tool with no hand-built page of your own.</li>
+          <li>Testing this against anything other than your own local target.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: token generation and token validation each in their own function; attack_page.html kept as a standalone artifact demonstrating it needs nothing from the target site itself.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate a CSRF exploit against a JSON API endpoint that naively accepts <code>Content-Type: text/plain</code> as a way around a simple-requests-only CORS assumption, showing CSRF isn't strictly a form-encoded-only problem.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> the source/sink/context reasoning from Exercise 00 (a payload that works inside an HTML attribute is shaped completely differently from one that works inside a <code>&lt;script&gt;</code> block or a URL context — a one-size-fits-all payload fails constantly in real applications), CSP-directive awareness from Applied HTTP/CSP work earlier in the roadmap, and the CSRF token/SameSite reasoning from Exercise 01. A tool that fires the same <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> payload everywhere — the beginner's mental model this subject explicitly rejected — misses the majority of real XSS, which lives in attribute contexts, JS-string contexts, and CSP-restricted pages where only a context-specific payload has any chance.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">xsscsrf_confirm</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>clientside_injection/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A context-aware payload tool: given a target injection point, it detects the surrounding HTML/JS/attribute context and the active CSP (if any), generates an appropriately-shaped XSS payload for that specific context, and — for any state-changing endpoint it also finds — automatically generates and tests a CSRF proof-of-concept, confirming both via real out-of-band callbacks exactly as the capstone before this one did for server-side injection.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Context detection: given a marker string reflected into a response, determines whether it landed in an HTML text node, an HTML attribute value, a <code>&lt;script&gt;</code> block, or a URL/href context, by inspecting exactly where the marker appears relative to surrounding tag/quote structure.</li>
+          <li>CSP detection: parses any <code>Content-Security-Policy</code> header present (reusing your HTTP Internals header-parsing logic) and determines whether inline scripts, specific external hosts, or JSONP-style callback endpoints on allowed hosts could serve as a bypass.</li>
+          <li>Context-appropriate payload generation: produces a different payload shape for each detected context (e.g. breaking out of an attribute with a quote-and-event-handler payload vs. breaking out of a script string vs. a plain tag injection), and, when a CSP would block a naive inline payload, attempts a CSP-aware alternative (an allowed host, or reports "no bypass found" honestly).</li>
+          <li>OOB confirmation: every candidate payload, when it fires, calls back to a listener you control (reusing the OOB-listener pattern from the previous capstone) with a unique token, so success is confirmed by actual execution, not by guessing from the reflected response alone.</li>
+          <li>CSRF auto-detection and PoC generation: for any discovered state-changing endpoint reachable with only cookie-based auth and no token/origin check, automatically generates a working <code>attack_page.html</code>-style PoC (per Exercise 01) and reports it as a paired finding alongside any XSS on the same application, since the two are commonly exploited together (XSS to steal a token, or CSRF to abuse the lack of one).</li>
+          <li>Demonstrated end to end against your own Exercise 00 (three XSS contexts) and Exercise 01 (CSRF) targets, correctly generating a firing, OOB-confirmed payload for each XSS context and a working CSRF PoC, plus a clean/fixed target set with zero false positives.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>XSStrike or any existing context-aware XSS tool doing the detection/generation for you.</li>
+          <li>A single fixed payload tried everywhere regardless of detected context.</li>
+          <li>Reporting an XSS finding based on the payload merely appearing unescaped in the response, without OOB execution confirmation.</li>
+          <li>A false positive against the clean/fixed targets.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: context-detection, CSP-parsing, payload-generation (as a table of context → template, extensible), and CSRF-detection each in their own module.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Auto-mutation: when the first context-appropriate payload is blocked (e.g. by output encoding the tool didn't anticipate), automatically try a small set of alternative encodings/techniques for that same context before giving up.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">clientside_injection/
+├── ex00/
+├── ex01/
+└── capstone/</pre>
+    <p>Each exercise is defended live against a fresh instance of your target. The capstone is run live against a target set — including at least one context or CSP configuration the evaluator modifies immediately beforehand — and is expected to adapt its generated payloads accordingly rather than relying on cached/hardcoded results from earlier testing.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — xsstriad0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run all three exploits live, end to end, and show the exfiltrated cookie value arriving at your listener each time.</li>
+          <li>For the DOM-based case specifically, explain exactly why a server-side WAF, no matter how well configured, cannot see this payload at all.</li>
+          <li>Show your blocklist bypass for one of the three — what did the filter author's mental model get wrong?</li>
+          <li>Fill in the source/sink table live for a payload I describe to you that you haven't seen before.</li>
+          <li>What is the actual difference in real-world severity between stored and reflected XSS, and why?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — csrfstrike0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Open your attack page live in an authenticated browser session and show the state change happen.</li>
+          <li>Walk through exactly what <code>SameSite=Lax</code> does and does not stop for this specific endpoint and this specific attack shape.</li>
+          <li>Why is a synchronizer token a stronger fix than relying on <code>SameSite</code> alone — what threat model gap does <code>SameSite</code> not cover (think: subdomain-hosted attacker content, or older/misbehaving browsers)?</li>
+          <li>Why does allowing this action via GET make the vulnerability strictly worse, independent of the CSRF-token question?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — Capstone: xsscsrf_confirm</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run this against your three XSS contexts live — narrate how the detected context changes the generated payload each time.</li>
+          <li>Show a case where CSP detection correctly identifies that no bypass is available, and the tool honestly reports failure instead of firing a payload that won't execute.</li>
+          <li>Walk through the OOB confirmation for one finding — what specifically proves execution happened versus the payload merely being present in the HTML?</li>
+          <li>Run the CSRF module against your Exercise 01 target live and show the generated PoC actually working.</li>
+          <li>Why does pairing an XSS finding with a CSRF finding on the same application matter for a real report's severity assessment?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>A marker reflected inside an HTML comment: correctly detected as a distinct (usually low-value) context, not conflated with a text-node context.</li>
+          <li>A marker reflected in a context where the surrounding quotes are inconsistent/malformed HTML (browser error-recovery territory): tool reports lower confidence rather than a confident wrong payload.</li>
+          <li>A CSP with a <code>nonce</code>-based script-src: correctly recognized as effectively unbypassable by this tool's technique set, reported honestly rather than attempting a doomed inline payload.</li>
+          <li>A state-changing endpoint that already has a correctly-implemented synchronizer token: CSRF module correctly reports not-vulnerable, not a false positive from merely finding a form.</li>
+          <li>A reflected marker appearing in multiple contexts simultaneously on one page (e.g. once in an attribute, once in a script block): both contexts detected and payloaded separately.</li>
+          <li>An OOB callback that arrives but with a corrupted/unexpected token: not falsely attributed to a candidate payload it didn't actually come from.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Client-Side Injection: XSS and CSRF · AppSec Mastery Roadmap · Stage 1, Subject 6 of 7 · 1/1
+</footer>
+
+</body>
+</html>

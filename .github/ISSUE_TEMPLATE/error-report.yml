@@ -1,0 +1,27 @@
+name: Error report
+description: Something in a lesson or subject is wrong, outdated or unclear
+labels: [error]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: Link or path of the page
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Evidence or source
+      description: RFC, man page, documentation, or the output you got
+  - type: input
+    id: env
+    attributes:
+      label: Your environment
+      description: OS and tool versions, if relevant

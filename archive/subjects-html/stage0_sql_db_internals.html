@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL and Database Internals — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 0</div>
+  <h1>SQL and Database Internals</h1>
+  <div class="subtitle">Subject 5 of 6 — Foundations Reset</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Go under the ORM and the ? placeholder to where a query actually becomes a parse tree — because SQL injection is not a list of payloads to memorize, it is what happens when user input crosses from data into syntax at parse time.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — manualsqli0</a></li>
+          <li><a href="#ex01">Ex. 01 — unionharvest</a></li>
+          <li><a href="#ex02">Ex. 02 — paramfix</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: blindextract</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"A parameterized query is not "safer SQL." It is a different message to the database entirely — data and syntax sent on separate channels instead of concatenated into one string and hoped over."</p>
+    <p>Every SQL injection tutorial teaches payloads. Almost none teach why a payload works: that a database driver tokenizes and parses a query string before it ever looks at a value, and that string concatenation lets attacker input rewrite the parse tree itself. Once you've seen that mechanism directly, injection stops being a list of tricks and becomes one idea applied everywhere data crosses into syntax — not just SQL.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will stand up a real vulnerable login query and break it by hand — no SQLMap — then extract an entire schema through UNION injection, rewrite every vulnerable query as a parameterized one and prove the fix holds against your own exploit, and end by building a tool that demonstrates blind boolean and time-based extraction, the techniques that work even when the application shows you nothing.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input, an unreachable host, or unexpected data. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline), applies to every exercise.</strong> Functions do one thing and are named for what they do. No magic numbers — ports, offsets, thresholds, and protocol constants are named constants, never bare literals. No block of code you cannot explain, unprompted, line by line, during defense. Every non-obvious line carries a comment explaining why, not what.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this detects X" or "this parses Y correctly" must be backed by a reproducible capture, transcript, or log — captured in your turn-in. Assertions without evidence are treated as unmet requirements during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct. A single mandatory-part flaw — even a minor one — zeroes the bonus evaluation for that exercise, no exceptions.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> Every target in this subject is a database and application you stood up yourself (MySQL/PostgreSQL/SQLite behind a small app you write or a deliberately vulnerable app like DVWA). None of this is authorized against a third party's database, ever, under any framing.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>Global forbidden list.</strong> SQLMap, or any automated injection tool, is forbidden for every exercise's mandatory part. You are building the understanding SQLMap automates; reading its source for technique ideas is allowed.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">manualsqli0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>sql_db_internals/ex00/</dd>
+        <dt>Files</dt><dd>login_vuln.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>Python, sqlite3 or MySQL/Postgres driver, Burp for capturing requests</dd>
+        <dt>Forbidden</dt><dd>SQLMap, any automated SQL injection tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A minimal login endpoint built with raw string-concatenated SQL, exploited entirely by hand to bypass authentication, with the exact parse-tree-level explanation of why each payload works.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A login query built via string concatenation (e.g. <code>f"SELECT * FROM users WHERE username='{u}' AND password='{p}'"</code>) against a real (local) database with at least three seeded users.</li>
+          <li>A working authentication-bypass payload (e.g. <code>' OR '1'='1' --</code> or the DB-specific equivalent) that logs in as an arbitrary user without knowing their password, captured with the raw request and the resulting query string logged server-side for evidence.</li>
+          <li>A written, precise explanation of what the database's parser actually does differently with and without the payload — draw or describe the resulting token stream / parse tree for both the intended query and the injected one, not just "it becomes true."</li>
+          <li>A second payload logging in specifically as a target user by name (e.g. <code>admin'--</code>) without needing the universal-true trick, demonstrating targeted exploitation, not just a lucky bypass.</li>
+          <li>A note on why comment-based termination (<code>--</code>, <code>#</code>) is necessary in some contexts and not others, based on what trails the injection point in the original query string.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>SQLMap or any tool that generates the payload for you.</li>
+          <li>A payload that happens to work without you being able to explain, unprompted, why.</li>
+          <li>Testing against a database you don't control.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the vulnerable query isolated in its own function, request logging separated from query execution.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate the same bypass against both MySQL and PostgreSQL syntax and document the two or three syntax differences that mattered.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">unionharvest</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>sql_db_internals/ex01/</dd>
+        <dt>Files</dt><dd>EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>browser/Burp, manual requests</dd>
+        <dt>Forbidden</dt><dd>SQLMap</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A UNION-based injection against a vulnerable search/listing endpoint, manually extracting the database version, full schema (table and column names via <code>information_schema</code>), and table contents — entirely by hand.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Determine the number of columns in the original query using <code>ORDER BY</code> incrementing or a UNION SELECT with NULLs, showing the exact error/behavior change that reveals the count.</li>
+          <li>Identify which columns are reflected in the output (visible in the response) by injecting recognizable markers into a UNION SELECT, one column at a time.</li>
+          <li>Extract the database version and current database name via the appropriate built-in (e.g. <code>@@version</code>/<code>version()</code>, <code>database()</code>/<code>current_database()</code>).</li>
+          <li>Enumerate all tables in the current database via <code>information_schema.tables</code> (or the DB-specific equivalent), then all columns of a target table via <code>information_schema.columns</code>, then extract full row contents from that table using <code>GROUP_CONCAT</code>/<code>string_agg</code> or repeated UNION rows.</li>
+          <li>A written walkthrough of the full chain in order, each step's payload and the specific response change that told you it worked.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>SQLMap.</li>
+          <li>Skipping straight to a known table name instead of demonstrating the enumeration via <code>information_schema</code>.</li>
+          <li>Extracting data from a database that is not your own seeded instance.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: EXPLOIT.md structured as one numbered step per payload, each with request, response excerpt, and interpretation.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Repeat the same extraction as error-based injection (forcing the DB to leak data via a crafted error message) on a database/config where UNION is blocked but verbose errors are on.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">paramfix</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>sql_db_internals/ex02/</dd>
+        <dt>Files</dt><dd>login_fixed.py, PROOF.md</dd>
+        <dt>Allowed</dt><dd>parameterized queries via your DB driver's native placeholder support</dd>
+        <dt>Forbidden</dt><dd>manual escaping/sanitization as a substitute for parameterization; an ORM used as a black box you cannot explain</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> Every vulnerable query from Exercise 00 and 01 rewritten as a parameterized query, with your own Exercise 00/01 exploits re-run against the fixed version and proven to fail — plus a from-first-principles explanation of why parameterization actually closes the hole.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Every string-concatenated query rewritten using your driver's native parameter placeholders (e.g. <code>?</code> or <code>%s</code> with a separate values tuple) — never manual escaping or blocklisting as the fix.</li>
+          <li>Your exact Exercise 00 authentication-bypass payload and Exercise 01 UNION payloads re-run against the fixed endpoints, captured failing (the payload is now treated as literal data, e.g. a failed login for a nonexistent username containing quote characters).</li>
+          <li>A written, parser-level explanation of why this specifically works: the query structure is parsed and compiled by the database <em>before</em> the parameter values are ever substituted, so there is no point at which attacker-controlled bytes can be interpreted as SQL syntax.</li>
+          <li>A written note on why a blocklist-based "fix" (stripping quotes, blocking the word "SELECT") is not equivalent and can be bypassed — with at least one concrete bypass example against a blocklist you deliberately write and then defeat.</li>
+          <li>A note on ORM safety: one example of an ORM call that is still safe (uses parameterization under the hood) and one example of an ORM escape hatch (raw SQL / string-built filter) that reintroduces the exact same vulnerability.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Calling <code>str.replace()</code>-based quote-escaping a fix.</li>
+          <li>A blocklist-based mitigation presented as equivalent to parameterization.</li>
+          <li>An ORM example you cannot explain the generated SQL for.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: PROOF.md is exploit-attempt → observed failure → root-cause explanation, per query fixed.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Show a second-order injection: data safely parameterized on insert, but later concatenated unsafely into a different query when read back and reused — and fix that too.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> query-parser-level understanding (to construct payloads that are syntactically valid in context, not copy-pasted), <code>information_schema</code> enumeration (to know what to extract before extracting it), parameterized-query awareness (to correctly test whether a target is actually vulnerable versus falsely triggering on an unrelated response difference), and patient statistical reasoning about timing and response differences. A tool that only knows UNION injection is useless here — there is nothing to UNION into a response the attacker never sees. It has to infer one bit of information at a time from a true/false signal or a measured delay, thousands of times, without ever seeing the data directly.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">blindextract</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>sql_db_internals/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A tool that extracts data from a SQL injection point that returns no visible output and no verbose errors — using boolean-based blind and time-based blind techniques, both implemented as a generic binary-search character extractor against any injectable parameter you point it at.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Boolean-blind module: given a URL/request template with an injection point and a way to detect true vs. false (e.g. response length, a specific string present/absent, or an HTTP status difference — configurable, not hardcoded to one target), performs binary search over each character of a target value (starting with database version, then table names, then column contents) using conditions like <code>AND SUBSTRING((SELECT ...),N,1) > 'X'</code>.</li>
+          <li>Time-based-blind module: same character-by-character extraction, but using a conditional time delay (e.g. <code>IF(condition, SLEEP(N), 0)</code> or the DB-specific equivalent) and a statistically sound threshold (not a fixed magic number — justified against baseline request timing variance you measured).</li>
+          <li>Both modules extract, at minimum: database version, current database name, and the full contents of one column in one table you specify — end to end, unattended.</li>
+          <li>A calibration step run before extraction that measures baseline response time/length variance against the target, so the true/false or fast/slow threshold is derived from the target, not assumed.</li>
+          <li>Extraction progress and results logged in real time (not only at the end), so a long-running extraction can be interrupted and inspected mid-run.</li>
+          <li>Demonstrated against your own Exercise 00/01 application modified to suppress all error output and visible query results (simulating a truly blind endpoint), with a full character string successfully extracted and verified correct against the known seeded value.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>SQLMap, or wrapping SQLMap and relabeling it.</li>
+          <li>Hardcoding the true/false detection string or the timing threshold for one specific target instead of deriving both from calibration/configuration.</li>
+          <li>A char-extraction loop with no upper bound that can hang forever against a target that stops responding as expected.</li>
+          <li>Claiming successful extraction without the verification step against a known value.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: calibration, boolean-oracle, time-oracle, and binary-search-extraction each in their own function; the extraction algorithm shared between both oracle types (only the oracle function itself differs).</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Out-of-band extraction technique (e.g. DNS exfiltration via a function the target DB supports) as a third oracle module, demonstrated in a lab where you control the receiving DNS server.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">sql_db_internals/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live against a fresh copy of the target database (reseeded by the evaluator). For the capstone, the evaluator points your tool at a modified schema/value it has not seen before and expects a correct, verified extraction — a plausible-looking wrong answer is a failure.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — manualsqli0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Write out, right now, the literal final query string your payload produces, character by character.</li>
+          <li>Why does <code>' OR '1'='1</code> without a trailing comment sometimes still work depending on what follows in the original query — walk through a case where it would and one where it would break.</li>
+          <li>What is the actual parser-level difference between a value and a keyword in SQL, and how does your payload exploit the boundary between them?</li>
+          <li>Why would a WAF that blocks the literal string <code>OR 1=1</code> still be bypassable, in principle, by this same class of bug?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — unionharvest</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through determining the column count live, from scratch, against a fresh copy of the target.</li>
+          <li>Why does column type matter when choosing where to place your extracted string in the UNION — what happens if you put a string where the original column was an integer?</li>
+          <li>Show me your <code>information_schema</code> queries — why does this system view exist in the database at all, from the vendor's perspective?</li>
+          <li>What's the difference in evidence between a UNION-based extraction and an error-based one, and when would you have to fall back to the latter?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — paramfix</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Re-run your original Exercise 00 payload against this fixed endpoint live — walk me through exactly what the database does with it now.</li>
+          <li>Why doesn't parameterization protect a dynamically-built <code>ORDER BY</code> column name the same way it protects a value — what's structurally different about that case?</li>
+          <li>Show me your blocklist bypass — what did the blocklist author fail to anticipate?</li>
+          <li>Point to the ORM raw-SQL escape hatch you demonstrated — why does an ORM even expose that, and when is it legitimately necessary?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: blindextract</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through one full character extraction, live, narrating each binary-search step and what response signal told you which half to keep.</li>
+          <li>Why is time-based blind extraction dramatically slower and noisier than boolean-based, and what does your calibration step do about the noise?</li>
+          <li>Show me your calibration output — what did baseline timing variance on this target actually look like, and how did you pick your threshold from it?</li>
+          <li>What happens if the target's response time is affected by something unrelated to your payload (e.g. server load) mid-extraction — does your tool have any resilience to that, or is it a documented limitation?</li>
+          <li>Why can't you just reuse your Exercise 01 UNION approach here — what specifically is different about this target?</li>
+          <li>Extract one new value live that you have not pre-tested, from the same schema, and verify it against the database directly.</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>A target value containing a single-quote or SQL-meaningful character itself: extracted correctly without breaking the injection payload.</li>
+          <li>An empty string as the true value (extraction should terminate immediately, not loop looking for a first character that never comes).</li>
+          <li>A target column value longer than expected: extraction doesn't truncate silently, length is determined first via <code>LENGTH()</code>/<code>len()</code> before character extraction begins.</li>
+          <li>Network hiccup mid-extraction (one request times out): retried or logged as a gap, not silently treated as a false result that corrupts the extracted string.</li>
+          <li>Boolean oracle where the "true" condition also changes response length by an amount close to normal variance: calibration catches this and the tool reports low confidence rather than false-positive matches.</li>
+          <li>Time-based oracle against a target with highly variable baseline latency: threshold adapts or the tool explicitly reports that time-based extraction is unreliable here.</li>
+          <li>Case sensitivity in extracted values: correctly preserved, not normalized away by a case-insensitive comparison in the binary search.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  SQL and Database Internals · AppSec Mastery Roadmap · Stage 0, Subject 5 of 6 · 1/1
+</footer>
+
+</body>
+</html>

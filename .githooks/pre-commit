@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks commits that contain secrets. Enable once per clone:  git config core.hooksPath .githooks
+# Deliberate bypass (your call, never a habit):  git commit --no-verify
+exec python3 "$(git rev-parse --show-toplevel)/tools/scan_secrets.py" --staged

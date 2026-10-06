@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Admin Depth — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.65;
+    font-size:16px;
+  }
+
+  /* ===== Header ===== */
+  header.cover{
+    background:var(--navy);
+    color:#f5f4ef;
+    padding:64px 24px 48px;
+    text-align:center;
+    border-bottom:6px solid var(--accent);
+  }
+  header.cover .eyebrow{
+    font-family:var(--mono);
+    letter-spacing:.35em;
+    font-size:12px;
+    text-transform:uppercase;
+    color:#8fd9d1;
+    margin-bottom:18px;
+  }
+  header.cover h1{
+    font-family:var(--mono);
+    font-size:clamp(28px,5vw,52px);
+    letter-spacing:.06em;
+    margin:0 0 14px;
+    font-weight:800;
+  }
+  header.cover .subtitle{
+    font-family:var(--mono);
+    font-size:14px;
+    color:#c8c6bd;
+    margin-bottom:6px;
+  }
+  header.cover .version{
+    font-family:var(--mono);
+    font-size:12px;
+    color:#8b8a82;
+  }
+  header.cover .summary{
+    max-width:640px;
+    margin:32px auto 0;
+    font-family:var(--sans);
+    font-style:italic;
+    color:#dedcd3;
+    font-size:15px;
+    line-height:1.7;
+    border-top:1px solid #333844;
+    padding-top:24px;
+  }
+
+  /* ===== Shell / TOC ===== */
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+
+  nav.toc{
+    background:var(--paper-alt);
+    border:1px solid var(--line);
+    border-radius:6px;
+    margin:-28px auto 56px;
+    padding:28px 32px;
+    max-width:832px;
+    position:relative;
+    z-index:2;
+  }
+  nav.toc h2{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+  }
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+
+  /* ===== Chapters ===== */
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  section.chapter h2{
+    font-family:var(--mono);
+    font-size:26px;
+    margin:0 0 20px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--ink);
+  }
+  section.chapter h3.sub{
+    font-family:var(--mono);
+    font-size:18px;
+    margin:34px 0 12px;
+    color:var(--navy-soft);
+  }
+  section.chapter p{color:var(--ink-soft);}
+
+  .foreword{
+    font-style:italic;
+    font-size:19px;
+    text-align:center;
+    padding:36px 20px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+
+  .rule{
+    display:flex;
+    gap:14px;
+    padding:14px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{
+    font-family:var(--mono);
+    font-size:12px;
+    font-weight:700;
+    color:var(--accent);
+    min-width:44px;
+  }
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+
+  /* ===== Exercise cards ===== */
+  .exercise{
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    margin:28px 0 48px;
+    background:#fff;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);
+  }
+  .exercise-head{
+    background:var(--navy);
+    color:#f5f4ef;
+    padding:16px 22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:var(--mono);
+  }
+  .exercise-head .ex-num{
+    font-size:11px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:#8fd9d1;
+  }
+  .exercise-head .ex-name{
+    font-size:19px;
+    font-weight:700;
+  }
+  .exercise-meta{
+    display:grid;
+    grid-template-columns:140px 1fr;
+    row-gap:8px;
+    column-gap:14px;
+    padding:16px 22px;
+    background:var(--paper-alt);
+    border-bottom:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:12.5px;
+  }
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    font-weight:700;
+    margin-bottom:10px;
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:3px;
+  }
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{
+    font-family:var(--mono);
+    background:#efece2;
+    padding:1px 5px;
+    border-radius:3px;
+    font-size:.9em;
+  }
+
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+
+  .capstone-note{
+    background:var(--accent-soft);
+    border:1px dashed var(--accent);
+    border-radius:6px;
+    padding:18px 22px;
+    font-size:14.5px;
+    color:#0b3d38;
+    margin-bottom:20px;
+  }
+  .capstone-note strong{color:var(--accent);}
+
+  pre.filetree{
+    font-family:var(--mono);
+    font-size:13px;
+    background:var(--navy);
+    color:#e4e2d8;
+    padding:20px 24px;
+    border-radius:6px;
+    overflow-x:auto;
+    line-height:1.6;
+  }
+
+  /* ===== Appendix ===== */
+  .appendix-intro{
+    font-size:14px;
+    font-style:italic;
+    color:var(--ink-soft);
+    border-left:3px solid var(--line);
+    padding-left:16px;
+    margin-bottom:30px;
+  }
+  .appendix-block{
+    border:1px solid var(--line);
+    border-radius:8px;
+    margin-bottom:26px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .appendix-block h4{
+    font-family:var(--mono);
+    margin:0;
+    padding:14px 20px;
+    background:var(--paper-alt);
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+    letter-spacing:.04em;
+  }
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{
+    content:"☐";
+    position:absolute;
+    left:0;
+    color:var(--edge);
+    font-size:14px;
+  }
+
+  footer.endcap{
+    background:var(--navy);
+    color:#9a9890;
+    text-align:center;
+    padding:26px;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.1em;
+    margin-top:60px;
+  }
+
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 0</div>
+  <h1>Linux Admin Depth</h1>
+  <div class="subtitle">Subject 1 of Stage 0 — Foundations Reset</div>
+  <div class="version">Version 1.0 — August 2026</div>
+  <p class="summary">
+    Harden, instrument, and defend a real Linux host from first principles —
+    filesystem, permissions, processes, systemd, packet filtering,
+    capabilities, and logs — with nothing you cannot personally explain,
+    line by line, while someone is watching.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — bastion0</a></li>
+          <li><a href="#ex01">Ex. 01 — logsentry</a></li>
+          <li><a href="#ex02">Ex. 02 — procwatch</a></li>
+          <li><a href="#ex03">Ex. 03 — suidwatch</a></li>
+          <li><a href="#ex04">Ex. 04 — linux_for_security_engineers</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: sentineld</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"Root is not a permission. It is the absence of a decision."</p>
+    <p>A system is not hardened because you ran a script that says so. It is
+    hardened because you can put it in front of a live attacker, watch, and
+    explain afterward exactly why it held — or exactly why it didn't.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>This subject closes the gap between "I used the terminal" and "I
+    understand what the terminal is talking to." You will provision a real
+    host, harden it, instrument it, and finally build a daemon that defends
+    it autonomously. Every exercise below stands alone and is turned in
+    separately, but they share one box: your own VPS. By the end of Chapter
+    IV that box will be running code you wrote to detect and respond to a
+    live attack, unsupervised.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Evaluation environment.</strong> Every exercise is evaluated on a real, disposable Linux VPS you provision yourself (Debian or Ubuntu, minimal image), administered entirely over SSH. No GUI, no desktop environment, no cloud-console point-and-click substitutes for a command you were supposed to run yourself.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input, missing permissions, or unexpected system state. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Norm (code-quality baseline), applies to every exercise.</strong> Functions do one thing and are named for what they do. No magic numbers — thresholds, ports, paths, and time windows are named constants or config values. No block of code you cannot explain, unprompted, line by line, during defense. Scripts are modular: one function per pipeline stage, not one monolith. Every non-obvious line carries a comment explaining why, not what.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Global forbidden list.</strong> Unless an exercise explicitly says otherwise: no <code>nmap</code>, <code>scapy</code>, <code>lsof</code>, <code>netstat</code>, <code>ss</code>, <code>fail2ban</code>, <code>OSSEC</code>, <code>Wazuh</code>, <code>auditd</code>, <code>ufw</code>, <code>SQLMap</code>, <code>dnspython</code>, or any library/tool that performs the exercise's core mechanism for you. Reading their source for ideas is allowed. Depending on them at runtime is not.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this control works" must be backed by a reproducible demonstration — a command, a log line, a failed attack attempt — captured in your turn-in. Assertions without evidence are treated as unmet requirements during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct. A single mandatory-part flaw — even a minor one — zeroes the bonus evaluation for that exercise, no exceptions.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <!-- EX 00 -->
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">bastion0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>linux_admin_depth/ex00/</dd>
+        <dt>Files</dt><dd>harden.sh, README.md, evidence/</dd>
+        <dt>Allowed</dt><dd>ssh, nftables, fail2ban, systemd, unattended-upgrades</dd>
+        <dt>Forbidden</dt><dd>ufw (as final artifact), ansible/puppet/chef, any hardening script you did not write</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> Provision a fresh VPS and convert it into a defensible bastion host via a single idempotent script, with every control verified by a live attack you run against your own box — not asserted from memory.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Fresh minimal Debian/Ubuntu image — no cloud-provider "hardened" template.</li>
+          <li>SSH: key-only auth, root login disabled, non-default port, capped <code>MaxAuthTries</code>, idle timeout, <code>AllowUsers</code>/<code>AllowGroups</code> restricted to your account.</li>
+          <li>Firewall: default-deny inbound, final ruleset in raw <strong>nftables</strong> — explicit allow rules per service actually running.</li>
+          <li>Brute-force mitigation with a jail definition you wrote/tuned yourself — failure count, window, and ban duration each justified in writing.</li>
+          <li>Every enabled service audited from <code>systemctl list-unit-files</code>; every one you keep is justified in writing.</li>
+          <li>Unattended security updates configured, with a written note on what this does and does not protect against.</li>
+          <li>All of the above encoded in one idempotent script: running it twice produces identical system state, no duplicate rules, no errors.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>A hardening script copy-pasted without being able to delete any single line and correctly predict the consequence.</li>
+          <li>A control claimed without evidence.</li>
+          <li>A control left partially applied (e.g. firewall "enabled" with a catch-all allow rule that defeats it).</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.3, plus: single entry-point script, idempotency checks before every mutation, config values isolated at the top of the file.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>TOTP 2FA on SSH; webhook alert on brute-force-jail trigger; full idempotent-tool (Ansible) rewrite of the hardening script.</p>
+      </div>
+    </article>
+
+    <!-- EX 01 -->
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">logsentry</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>linux_admin_depth/ex01/</dd>
+        <dt>Files</dt><dd>logsentry.sh, README.md, sample_logs/</dd>
+        <dt>Allowed</dt><dd>grep, awk, sed, sort, uniq, cut, date, comm, join, zcat/zgrep, bash builtins</dd>
+        <dt>Forbidden</dt><dd>python, perl, ruby, any interpreter invoked anywhere in the pipeline</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> A pure-Bash CLI that ingests a real auth.log/journalctl stream — including rotated, gzip-compressed history — and surfaces brute-force patterns, ranked offenders, and attack timing.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Parses real <code>auth.log</code> or <code>journalctl -u ssh</code> output, plus a rotated <code>.gz</code> log, extracting source IP, timestamp, attempted username, success/failure per line.</li>
+          <li>Computes: top-N offending IPs by failed-attempt count, per-hour attempt buckets, first-seen/last-seen per IP.</li>
+          <li>Implements a configurable sliding-window brute-force detector (N attempts in M seconds) using only bash/awk/<code>date</code> arithmetic.</li>
+          <li>Output as both a human-readable table and machine-parseable TSV/CSV via a flag.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Shelling out to an interpreter for date-math or windowing logic.</li>
+          <li>Hardcoded log-format/year assumptions that break silently on a different distro's syslog layout, with no detection or error.</li>
+          <li>Silently discarding malformed lines — they must be counted and reported.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.3, plus: separate functions for extract / aggregate / detect / format; <code>set -euo pipefail</code>; trap-based temp-file cleanup; no magic numbers for window sizes.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>ASCII bar chart of attempts per hour in pure bash; offline ASN/network-range grouping with no GeoIP service call.</p>
+      </div>
+    </article>
+
+    <!-- EX 02 -->
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">procwatch</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>linux_admin_depth/ex02/</dd>
+        <dt>Files</dt><dd>procwatch.sh, README.md</dd>
+        <dt>Allowed</dt><dd>/proc filesystem only</dd>
+        <dt>Forbidden</dt><dd>lsof, netstat, ss, any /proc-wrapping library</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> A Bash tool that enumerates every process and every listening/established socket purely by reading <code>/proc</code>, manually correlating socket inode numbers to owning PIDs via file descriptors.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Enumerate all <code>/proc/[pid]</code> entries: cmdline, <code>exe</code> symlink target, owning uid/gid, and <strong>PPID</strong> — all read from <code>/proc/[pid]/status</code>.</li>
+          <li>Parse <code>/proc/net/tcp</code>, <code>tcp6</code>, <code>udp</code>, <code>udp6</code>: decode local address:port from hex, decode connection state.</li>
+          <li>Correlate each socket's inode (from the <code>/proc/net/tcp</code> inode column) to its owning PID by scanning <code>/proc/[pid]/fd/*</code> for <code>socket:[inode]</code> targets.</li>
+          <li>Output per flagged process: PID, PPID, name, owning user, port(s), state, executable path.</li>
+          <li>Flag processes listening on <code>0.0.0.0</code>/<code>::</code> as higher-risk than loopback-only.</li>
+          <li>Using the PPID chain, flag any listening process whose parent is not an expected ancestor (<code>systemd</code>/PID 1, or another explicitly allow-listed service manager) — a process spawned by <code>cron</code>, <code>at</code>, or a shell and now holding a listening socket is exactly this pattern.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>ss/lsof/netstat inside the shipped tool logic (external comparison during your own testing is fine).</li>
+          <li>Hardcoding known ports instead of generically decoding the hex address field.</li>
+          <li>Crashing or silently omitting a process when <code>/proc/[pid]/fd</code> is unreadable — must be reported as permission-denied.</li>
+          <li>Flagging parentage by process <em>name</em> instead of walking the actual PPID chain — a renamed process must not evade the ancestry check.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.3, plus: separate functions for proc enumeration, socket-table parsing, inode-to-PID correlation, output formatting; named constants for the <code>/proc/net/tcp</code> column layout.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Continuous watch mode diffing against the previous scan; cross-reference against a baseline allow-list file.</p>
+      </div>
+    </article>
+
+    <!-- EX 03 -->
+    <article class="exercise" id="ex03">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 03</span>
+        <span class="ex-name">suidwatch</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>linux_admin_depth/ex03/</dd>
+        <dt>Files</dt><dd>suidwatch.sh, baseline.conf, README.md</dd>
+        <dt>Allowed</dt><dd>find, stat, coreutils</dd>
+        <dt>Forbidden</dt><dd>any prewritten SUID-auditing tool</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> A Bash tool that walks the filesystem, finds every setUID/setGID binary and every world-writable file/directory, classifies each against a real baseline, and produces a risk-annotated report you can defend line by line.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Full <code>find</code>-based traversal for setUID (04000), setGID (02000), and world-writable (<code>o+w</code>) files/directories; world-writable directories missing the sticky bit flagged as higher risk.</li>
+          <li>Exclusions (e.g. <code>/proc</code>, <code>/sys</code>) minimal and explicitly justified — not a blanket skip of large parts of the tree.</li>
+          <li>Every found setUID/setGID binary cross-referenced against a maintained baseline of expected binaries for your distro; anything not on the baseline is flagged as unexpected.</li>
+          <li>Report per flagged item: path, permission bits (symbolic + octal), owner, group, mtime, and a one-line note on what the binary actually does — looked up, not guessed.</li>
+          <li>Runs without root where possible; unscanned paths due to permissions are explicitly reported, never silently skipped.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>A static allowlist copied from a blog without verifying it against your actual system.</li>
+          <li>Treating "found" as automatically "dangerous" with no investigation of what the binary does.</li>
+          <li>Excluding large filesystem regions "to save time" without written justification.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.3, plus: modular functions for traversal, classification, baseline diff, reporting; baseline lives in a config file, never hardcoded inline.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Diff mode against a saved prior report; expose this as a callable module for the Chapter IV capstone's permission-drift check.</p>
+      </div>
+    </article>
+
+    <!-- EX 04 -->
+    <article class="exercise" id="ex04">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 04</span>
+        <span class="ex-name">linux_for_security_engineers</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>linux_admin_depth/ex04/</dd>
+        <dt>Files</dt><dd>README.md (published externally, link required)</dd>
+        <dt>Allowed</dt><dd>your own terminal output only</dd>
+        <dt>Forbidden</dt><dd>copied screenshots, copied explanations</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> A published reference document on the Linux permission model, <code>/proc</code> internals, local auth internals, and log semantics — rigorous enough that another engineer could learn the material from it alone.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <p>Every section below must include command output you personally generated, plus a "why this matters for security" paragraph:</p>
+        <ul>
+          <li>Filesystem hierarchy — <strong><code>/proc</code>, <code>/sys</code>, <code>/dev</code>, <code>/etc</code>, and <code>/var/log</code> each explicitly covered</strong>, not summarized as one generic "filesystem" section — and what each exposes to an attacker.</li>
+          <li>Full permission model with worked numeric examples of setUID/setGID/sticky bit.</li>
+          <li><code>/etc/passwd</code> and <code>/etc/shadow</code> field-by-field including hash-algorithm identification.</li>
+          <li>Process/signal model with a real fork/exec trace (e.g. via strace).</li>
+          <li>systemd unit anatomy using a real unit file you wrote.</li>
+          <li>iptables/nftables chain/table concepts against a real ruleset you built.</li>
+          <li>Linux capabilities — <strong><code>CAP_NET_BIND_SERVICE</code> and <code>CAP_SYS_PTRACE</code> specifically explained</strong> (what each grants, what it would let an attacker do if present on a compromised process), plus drop one real capability from a real process and show the resulting behavior change.</li>
+          <li><code>/proc/[pid]/maps</code> and <code>/proc/[pid]/fd</code> walked against a real running process.</li>
+          <li><strong>Cron and scheduled-task persistence</strong> — <code>/etc/crontab</code>, <code>/etc/cron.d/</code>, per-user crontabs (<code>crontab -l</code>), and systemd timers, with a real (planted-then-removed) example of a cron-based persistence mechanism on your own VPS and the exact artifact it leaves behind.</li>
+          <li>auth.log/syslog field breakdown using real (redacted) log lines.</li>
+          <li>Published externally.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Unattributed lifting of explanations from tutorials/blogs.</li>
+          <li>Screenshots or output you didn't personally generate.</li>
+          <li>Purely definitional sections with no security-implication paragraph.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.3, plus: consistent structure per section (concept → command → output → implication); no jargon introduced without a first-use definition.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>French-language version; companion cheat-sheet PDF generated from the writeup.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> filesystem hierarchy knowledge, the full permissions model, users/groups/authentication internals, processes and signals, systemd, iptables/nftables, Linux capabilities, cron/persistence mechanisms, and log analysis — all in one running system. No exercise above requires more than two or three of these at once; this one requires all of them, simultaneously, under one running process. Someone who only learned log parsing can build the detector, but the daemon will not start without correct capability/systemd configuration. Someone who only learned nftables can block IPs, but has no detection signal to act on. Someone who only learned <code>/proc</code> can enumerate sockets, but cannot turn that into a defensible, auditable, self-limiting response. Someone who only read about cron abuse in the abstract has never had to actually diff a live crontab against a baseline under a running daemon. Partial knowledge fails visibly at integration, not at the end.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">sentineld</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>linux_admin_depth/capstone/</dd>
+        <dt>Files</dt><dd>src/, sentineld.service, config/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.6</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> Build and operate <code>sentineld</code>: a systemd-managed daemon, running as a dedicated unprivileged system user with the minimum Linux capabilities required, that continuously detects SSH brute-force patterns, unexpected listening sockets, and setUID/permission drift, and automatically contains detected threats via nftables rules with automatic expiry — with a full structured audit trail.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Runs as a systemd service under a dedicated non-root system account created by you (<code>User=</code>, <code>Group=</code> in the unit), never root.</li>
+          <li>Drops to the minimal capability set required (e.g. <code>CAP_NET_ADMIN</code> only, via <code>AmbientCapabilities</code>/<code>CapabilityBoundingSet</code> or <code>setcap</code>) — you must be able to justify why full root is unnecessary.</li>
+          <li>Implements, as one integrated system:
+            <ul>
+              <li>An auth log / <code>journalctl</code> parser detecting sliding-window SSH brute force (configurable N attempts in M seconds).</li>
+              <li>A <code>/proc</code>-only process &amp; socket scanner cross-referencing listening sockets against a baseline allow-list, flagging new unexpected listeners, and flagging PPID-chain ancestry anomalies exactly as in Exercise 02.</li>
+              <li>A permission-drift auditor that snapshots setuid/setgid/world-writable state at startup and alerts on any change from that baseline.</li>
+              <li>A cron/systemd-timer persistence auditor that snapshots the system crontab, every file under <code>/etc/cron.d/</code>, every per-user crontab, and all enabled systemd timer units at startup, and alerts on any entry added, removed, or modified since that baseline — the same drift-detection pattern applied to scheduled-task persistence instead of file permissions.</li>
+              <li>Automatic nftables containment: flagged IPs get dropped in a dedicated chain your daemon creates and manages, with configurable automatic expiry.</li>
+              <li>A structured JSON audit log of every detection and every action taken.</li>
+            </ul>
+          </li>
+          <li>Proper systemd integration: <code>Restart=on-failure</code>, logs via journald (not a bypassing custom file logger), and a <code>SIGHUP</code> handler that reloads configuration without a full restart — handled explicitly in your code.</li>
+          <li>Baseline (allowed ports, allowed setuid binaries) driven entirely by a config file — no hardcoded values.</li>
+          <li>A dry-run mode that logs proposed nftables actions without applying them, and a live mode that applies them.</li>
+          <li>Demonstrated end-to-end on a real VPS (the same one from Exercise 00) against a real simulated brute-force attack (e.g. hydra/medusa from a second host) — captured as a full terminal transcript or recording showing detection through automatic block through automatic expiry.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>fail2ban, OSSEC, Wazuh, auditd rules, or any existing HIDS doing the detection logic for you.</li>
+          <li>Any high-level log-management library that does the pattern matching for you — the sliding-window algorithm must be hand-implemented.</li>
+          <li>lsof/netstat/ss for socket enumeration anywhere in the daemon.</li>
+          <li>Any prewritten cron/persistence-auditing tool doing the crontab/timer diffing for you.</li>
+          <li>Running the daemon as root, ever, in the delivered artifact.</li>
+          <li>Wrapping someone else's iptables script and calling it "your nftables integration."</li>
+          <li>Swallowing exceptions/errors silently — every failure path is logged with cause.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.3, plus: modular by concern (log parser, proc scanner, permission auditor, firewall controller, audit logger) as separably testable units; functions under ~40 lines; no magic numbers for thresholds/windows/expiry.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.6)</span>
+        <p>Webhook/Slack/email alerting; a read-only minimal dashboard as a separate unprivileged process; SQLite-backed audit trail with a query CLI; an allowlist-learning mode that proposes baseline updates for human review instead of trusting blindly.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">linux_admin_depth/
+├── ex00/
+├── ex01/
+├── ex02/
+├── ex03/
+├── ex04/
+└── capstone/</pre>
+    <p>Each exercise is defended live, on your running VPS, from a clean
+    terminal — not from slides, not from a pre-recorded demo unless the
+    exercise explicitly allows a recording as evidence (capstone only). The
+    evaluator may modify inputs, kill processes, corrupt state, or attack
+    the system live and expects your program to behave exactly as specified
+    in the Mandatory section, no better, no worse. An evaluator who cannot
+    get your project to fail through a specified edge case should mark the
+    exercise as passed; one who finds an unhandled case not explicitly
+    listed in this subject applies §II.2 and asks you to defend it live.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense, the same way you'd rehearse against a barème before a real 42 defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — bastion0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through what happens to a SYN packet on your SSH port from an IP with no matching rule yet — trace it through your actual ruleset.</li>
+          <li>Why this SSH port specifically, and what does changing it protect against — and what does it not protect against?</li>
+          <li>What's your exact fail2ban failure-count/window/ban-duration, and why those numbers instead of the defaults?</li>
+          <li>If I get valid key access to a low-privilege account on this box, what's my realistic path to root, and what have you done to make that harder?</li>
+          <li>A security update needs a service restart mid-incident — is that a risk with your current config? How would you know it happened?</li>
+          <li>Prove your script is idempotent — run it twice now and diff <code>nft list ruleset</code> before and after.</li>
+          <li>What's still exposed on this box right now, and why is that an acceptable risk?</li>
+          <li>What does raw nftables give you here that UFW would not have?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>Root SSH login attempt: rejected at auth, logged.</li>
+          <li>6 rapid failed SSH attempts from one IP inside the fail2ban window: IP banned, verified by a subsequent connection actually failing.</li>
+          <li>Script run twice back-to-back: identical <code>nft list ruleset</code> output, no errors.</li>
+          <li>Full port scan from an external host: only explicitly allowed ports respond.</li>
+          <li>Simulated disk-full during log write: fail2ban/sshd protection doesn't silently stop.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — logsentry</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me, in actual bash, how you compute elapsed seconds between two syslog timestamps without invoking an interpreter.</li>
+          <li>Syslog's traditional timestamp has no year — how does your tool behave across a Dec 31 → Jan 1 boundary, and did you actually test that?</li>
+          <li>Feed it a line with a corrupted timestamp right now — show me what happens.</li>
+          <li>Why awk over raw bash string-splitting (or vice versa) — what did you actually measure?</li>
+          <li>Does this scale to a 2GB log file? Did you test at that size, or just on a small sample?</li>
+          <li>How does your IPv4/IPv6 detection regex differ, and does the sliding-window logic still hold for both?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>10,000+ line log, mixed IPv4/IPv6.</li>
+          <li>Gzip-rotated log where a single attack spans the rotation boundary — merges correctly by time.</li>
+          <li>Malformed line mid-file — script continues, reports malformed count.</li>
+          <li>Two IPs tied on failed-attempt count — tie-break behavior defined and documented.</li>
+          <li>Zero failed attempts in the log — clean exit, no error.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — procwatch</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through the exact byte layout of the <code>local_address</code> column in <code>/proc/net/tcp</code> — what encoding, what byte order?</li>
+          <li>Show me your inode-to-PID correlation running live, line by line.</li>
+          <li>What happens when you lack permission to read another user's <code>/proc/[pid]/fd</code>? Prove it, don't describe it.</li>
+          <li>A process listening on <code>::</code> also serves v4 traffic in dual-stack mode — does your tool represent that correctly?</li>
+          <li>A process opens and closes a socket between two of your polling passes — could you miss it? Is that acceptable for this tool's stated purpose?</li>
+          <li>What do hex codes <code>0A</code> and <code>01</code> mean in the TCP state column?</li>
+          <li>How does correlation perform against a process holding 500 file descriptors — did you actually test that?</li>
+          <li>Walk the PPID chain of a flagged process live, right now, up to PID 1 — show me you're actually reading <code>/proc/[pid]/status</code> at each hop, not trusting <code>ps</code>'s tree view.</li>
+          <li>I spawn a listener from a cron job so its parent is a short-lived cron child that has already exited by the time you scan — does your ancestry check still work, or does it depend on the parent still being alive?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>Process listening on loopback only vs. <code>0.0.0.0</code> — correctly distinguished.</li>
+          <li>Process you don't own with a listening socket — permission handling verified, no crash.</li>
+          <li>Multiple processes sharing one socket via <code>SO_REUSEPORT</code> — handled correctly or the limitation is explicitly documented.</li>
+          <li>Short-lived process opening/closing a port within one polling interval.</li>
+          <li>Zero listening sockets system-wide — clean empty output.</li>
+          <li>Process with a deleted-but-running binary (<code>exe (deleted)</code>) — handled without crashing.</li>
+          <li>A process listening on a port whose parent is <code>systemd</code> (expected): not flagged. The same process re-parented to PID 1 after its original parent dies (a classic daemonizing pattern): correctly not confused with a malicious reparent.</li>
+          <li>A process spawned by <code>cron</code> that opens a listening socket: flagged by the ancestry check specifically because its parent is <code>cron</code>, not an allow-listed service manager.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — suidwatch</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through what the kernel does differently at <code>execve()</code> when the setUID bit is set.</li>
+          <li>Pick a binary your tool flagged as unexpected — what does it do, and how did you verify that rather than guess from the name?</li>
+          <li>World-writable file vs. world-writable directory without the sticky bit — give me a concrete exploitation scenario for each.</li>
+          <li>How does your tool treat a symlink with the setUID bit on the target versus on the link itself?</li>
+          <li>I create a new setUID binary in <code>/tmp</code> right now — does a re-run catch it, and how fast relative to your traversal strategy?</li>
+          <li>Why exclude <code>/proc</code> and <code>/sys</code> specifically — what breaks if you don't?</li>
+          <li>What happens when your tool hits a directory it can't read into owned by root — does it report that clearly?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>New setUID binary in a non-standard path — flagged.</li>
+          <li>Standard expected setUID binary (<code>/usr/bin/passwd</code>) — classified as expected, not flagged.</li>
+          <li>World-writable directory with sticky bit (<code>/tmp</code>) vs. without — distinguished correctly.</li>
+          <li>setGID-only binary — identified and labeled separately from setUID.</li>
+          <li>Directory the running user can't traverse — reported as unscanned, not silently omitted.</li>
+          <li>Symlink with different permissions than its target — both states captured.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a4">
+      <h4>A.4 — linux_for_security_engineers</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Pick any command output at random — explain every field without your notes.</li>
+          <li>Where did you actually run this (container/VM/bare metal), and does that change any internals you described?</li>
+          <li>Show the <code>/etc/shadow</code> line you documented — how do you identify its hash algorithm from the prefix?</li>
+          <li>Walk through the syscall sequence of the fork/exec you captured — what differs between parent and child return values?</li>
+          <li>Show your <code>setcap</code>/<code>getcap</code> output — what changes if that capability is removed?</li>
+          <li><code>CAP_NET_BIND_SERVICE</code> and <code>CAP_SYS_PTRACE</code> — what does each grant specifically, and what could an attacker do with a process that holds one of them but is not root?</li>
+          <li>You planted a cron-based persistence example and then removed it — show me the exact file/line you added, and where its trace would still be visible in logs even after the crontab entry itself is deleted.</li>
+          <li>What's the difference in attacker value between <code>/etc/crontab</code>, <code>/etc/cron.d/</code>, and a per-user crontab — why would an attacker prefer one over another depending on their access level?</li>
+          <li>Pick one of <code>/dev</code> or <code>/sys</code> — show a real file under it and explain what reading or writing to it actually does at the kernel level.</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>Every command must be independently reproducible on a stock Debian/Ubuntu VPS.</li>
+          <li>Every log-field claim verifiable against the shown line.</li>
+          <li>At least one worked example per section uses a non-trivial configuration, not just a default <code>systemctl status</code>.</li>
+          <li>The cron-persistence example must show both the planting command and the specific log/artifact evidence it leaves, and confirm its removal leaves the system in its original state.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a5">
+      <h4>A.5 — Capstone: sentineld</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Why this specific capability set instead of root, and what's still possible if this daemon itself is compromised?</li>
+          <li>Walk me through, at the syscall level, what happens when your daemon opens <code>/proc/net/tcp</code>.</li>
+          <li>Four failed attempts at t=0, a fifth at t=61s, window is 60s — detection or not? Justify from your actual window semantics.</li>
+          <li>journald is configured volatile (no disk persistence) and the box reboots mid-attack — what state do you lose, and does the daemon handle recovery?</li>
+          <li>How does the daemon distinguish a legitimate service restart opening a new port from an actual backdoor listener? What's your false-positive reasoning?</li>
+          <li>Show me the nftables chain your daemon creates — why a dedicated chain instead of modifying <code>INPUT</code> directly?</li>
+          <li>Two brute-force sources hit simultaneously — could there be a race condition in rule insertion? Show me you've thought about it.</li>
+          <li>If someone gets a shell as the unprivileged user this daemon runs as, what's the blast radius — what can they not do that root could?</li>
+          <li>Your permission-drift baseline snapshot happens at startup — if a setuid binary is added five seconds into initialization, before the baseline finishes, do you catch it? How do you know?</li>
+          <li>Walk through <code>SIGHUP</code> end to end: from <code>kill -HUP &lt;pid&gt;</code> to reloaded config in your code — why not just restart the service instead?</li>
+          <li>Why nftables over iptables here, concretely — name the specific feature you're actually relying on, not "it's newer."</li>
+          <li>Theory names <code>CAP_NET_BIND_SERVICE</code> and <code>CAP_SYS_PTRACE</code> as the classic examples of "root isn't monolithic" — why does <code>sentineld</code> need neither of those, and <code>CAP_NET_ADMIN</code> instead? What would you need to add if a future version had to bind a low port itself?</li>
+          <li>Your cron/timer auditor snapshots at startup — walk me through exactly where you read state from for: root's crontab, a regular user's crontab, <code>/etc/cron.d/</code>, and systemd timers. What about an <code>at</code> job — would your current design catch that, and if not, is that an acceptable documented gap or a real hole?</li>
+          <li>I add a new file under <code>/etc/cron.d/</code> while the daemon is running — show me the detection happen live, and explain why you're diffing against a startup baseline instead of re-reading the baseline file every cycle.</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>4 failed attempts spaced 20s apart, then a 5th at second 61 from the first: correctly NOT flagged per your defined window.</li>
+          <li>5 failed attempts within 45 seconds, same IP: flagged and blocked.</li>
+          <li>A successful login interleaved among failures from the same IP: your reset-or-not behavior is explicit and justified.</li>
+          <li>IPv6 source addresses throughout the log: parsed correctly, never dropped silently.</li>
+          <li>Log rotation or journald restart mid-run: window state isn't corrupted, daemon doesn't crash.</li>
+          <li>New process binds an unallowlisted port while running: detected within your defined polling interval.</li>
+          <li>A listening process whose parent is <code>cron</code> rather than an allow-listed service manager: flagged via the PPID-ancestry check inherited from Exercise 02.</li>
+          <li>setuid bit added to a normally clean binary during runtime: caught on next scan cycle.</li>
+          <li>A new entry added to a regular (non-root) user's crontab mid-run: detected on the next scan cycle.</li>
+          <li>A new file dropped into <code>/etc/cron.d/</code> mid-run: detected on the next scan cycle.</li>
+          <li>A systemd timer unit enabled mid-run: detected on the next scan cycle.</li>
+          <li>A cron entry removed and immediately re-added with identical content: your drift detector's behavior on this (silent, since state matches baseline again, or logged as a transient event) is explicit and justified.</li>
+          <li>nftables rule expiry: blocked IP is provably reachable again once TTL elapses.</li>
+          <li><code>SIGHUP</code> arrives mid-write to the audit log: no corruption, no lost in-flight event.</li>
+          <li>Malformed/truncated log line: parser doesn't crash.</li>
+          <li>Daemon started with an impossible capability request: fails loudly with a clear error, no silent degradation.</li>
+          <li>Two instances started at once: no duplicate nftables rules, no corrupted shared state.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Linux Admin Depth · AppSec Mastery Roadmap · Stage 0, Subject 1 · 1/1
+</footer>
+
+</body>
+</html>

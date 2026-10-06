@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Security Fundamentals (AWS) — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 3</div>
+  <h1>Cloud Security Fundamentals (AWS)</h1>
+  <div class="subtitle">Subject 8 of 9 — Secure Development / AppSec Engineering</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    The File Handling and Cloud SSRF subject reached the metadata endpoint via SSRF; this subject builds the rest of the cloud-specific attack surface around it — IAM as the actual perimeter in a cloud environment, S3 misconfiguration as the single most common real-world cloud breach cause, and Lambda's own distinct security model.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Foreword</a></li>
+      <li><a href="#ch1">Introduction</a></li>
+      <li><a href="#ch2">Theory</a>
+        <ol class="toc-sub">
+          <li><a href="#t0">IAM as the real perimeter</a></li>
+          <li><a href="#t1">S3 misconfiguration</a></li>
+          <li><a href="#t2">IMDS and instance-role compromise</a></li>
+          <li><a href="#t3">Lambda and serverless security</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch3">Practical Outputs</a></li>
+      <li><a href="#ch4">Common Delusions</a></li>
+      <li><a href="#ch5">Exit Gate</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Foreword</div>
+    <p class="foreword">"In a data center, the perimeter was the network. In the cloud, the perimeter is an IAM policy document — and it's written in JSON, which means it's one misplaced wildcard away from meaning something nobody intended."</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Introduction</div>
+    <h2>Why This Subject</h2>
+    <p>A huge fraction of real-world cloud breaches trace back to three specific, well-understood misconfiguration classes: an S3 bucket left public, an IAM role granted far more than it needs, and a serverless function with an overprivileged execution role — none of which require any novel exploitation technique once you know exactly where to look and how AWS's own permission model actually resolves.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Theory</div>
+    <h2>What You Must Understand</h2>
+    <div class="topic-block" id="t0">
+      <h4>IAM as the real perimeter</h4>
+      <div class="tbody">
+        <p>AWS Identity and Access Management: policies (what's allowed), roles (identities services/users assume), and the actual evaluation logic (explicit deny always wins, otherwise any matching allow grants access) that determines what a compromised credential or role can actually do.</p>
+<ul>
+          <li>The Principle of Least Privilege applied concretely: an IAM policy with <code>"Action": "*", "Resource": "*"</code> is the cloud-native version of running a container as root</li>
+          <li>Policy evaluation logic specifically: an explicit Deny anywhere in the applicable policies always wins, which is a common source of "why isn't this working" confusion and also a real defense-in-depth tool</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t1">
+      <h4>S3 misconfiguration</h4>
+      <div class="tbody">
+        <p>The single most common real-world cloud-breach root cause: a bucket or bucket policy that grants public or overly broad read/write access, often through a misunderstood ACL, a permissive bucket policy, or Block Public Access settings left disabled.</p>
+<ul>
+          <li>Bucket policy vs. ACL vs. account-level Block Public Access settings — three separate controls that all have to align for a bucket to actually be private</li>
+          <li>A public-write (not just public-read) bucket is a far more severe finding — data tampering or hosting malicious content, not just disclosure</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t2">
+      <h4>IMDS and instance-role compromise</h4>
+      <div class="tbody">
+        <p>The direct continuation of File Handling and Cloud SSRF's metadata-endpoint work: what an attacker actually does with the temporary credentials obtained there — enumerate the attached IAM role's actual permissions and pivot outward from there.</p>
+<ul>
+          <li>The stolen credentials are exactly as powerful as the EC2 instance's attached IAM role — an overprivileged instance role turns a single SSRF into a much larger compromise</li>
+          <li>IMDSv2 plus a minimal, tightly-scoped instance role are complementary mitigations, not substitutes for each other</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t3">
+      <h4>Lambda and serverless security</h4>
+      <div class="tbody">
+        <p>A distinct execution model with its own security considerations: the function's execution role (its own IAM identity, separately scoped from anything else), event-source injection (an attacker-controlled event payload as a new kind of untrusted-input surface), and dependency/cold-start-specific risks.</p>
+<ul>
+          <li>A Lambda's execution role, like an EC2 instance role, should be scoped to exactly what that one function needs — a shared, broad execution role across many functions violates least privilege the same way a shared broad service account does</li>
+          <li>Event-source data (e.g. from an S3 trigger, an API Gateway request, a queue message) is still untrusted input and subject to every injection class from Stage 1, just arriving through a different entry point than an HTTP request</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Practical Outputs</h2>
+    <div class="outputs-block">
+      <span class="block-label lbl-mandatory">Practical Outputs</span>
+      <ul>
+          <li>An AWS Free Tier lab: a deliberately exposed S3 bucket (public read, or public write) exploited to demonstrate real data disclosure/tampering, then fixed and re-verified as private using all three relevant controls (ACL, bucket policy, Block Public Access).</li>
+          <li>An over-permissioned IAM role exploited in your lab (e.g. a role attached to an EC2 instance with far more access than the instance's function requires), with the specific excessive permission identified and scoped down to least privilege.</li>
+          <li>A vulnerable Lambda function (e.g. one that evaluates untrusted event data unsafely, reusing an injection technique from Stage 1) exploited and fixed, with its execution role scoped to least privilege.</li>
+          <li>A written IAM policy review checklist you'd apply to an unfamiliar AWS account, prioritized by what to check first.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Common Delusions</h2>
+    <div class="delusions-block">
+      <span class="block-label lbl-delusions">Common Delusions at This Stage</span>
+      <ul>
+          <li>"Our data is safe because it's in the cloud." The cloud provider secures the infrastructure; the customer is responsible for configuring IAM, S3, and everything above it correctly — this is AWS's own shared-responsibility model, not an assumption to skip.</li>
+          <li>"IAM is too complex to fully understand, so we'll just grant broad access and move on." This is exactly the instinct that produces the majority of real-world cloud breaches — the complexity is a reason to learn the evaluation logic, not to avoid it.</li>
+          <li>"We rotated the instance's stolen credentials, we're done." If the role itself was overprivileged, the next SSRF or compromise gets the same excessive access again — the role's scope is the actual fix, not just the one incident's cleanup.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Exit Gate</h2>
+    <div class="exitgate-block">
+      <span class="block-label lbl-exitgate">Exit Gate — must do all of this without notes</span>
+      <ul>
+          <li>Given an IAM policy document, determine exactly what it allows and identify any overly broad grants without notes.</li>
+          <li>Explain the three separate S3 controls that must all align for a bucket to be genuinely private.</li>
+          <li>Walk through the full chain from SSRF/metadata-endpoint compromise to IAM-role-scoped blast radius, live.</li>
+          <li>Review an unfamiliar Lambda function's execution role and identify whether it follows least privilege.</li>
+        </ul>
+    </div>
+  </section>
+
+
+</div>
+
+<footer class="endcap">
+  Cloud Security Fundamentals (AWS) · AppSec Mastery Roadmap · Stage 3, Subject 8 of 9 · 1/1
+</footer>
+
+</body>
+</html>

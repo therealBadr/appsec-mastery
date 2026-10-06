@@ -1,0 +1,305 @@
+site_name: AppSec Mastery
+site_description: An open, hands-on application security curriculum — 42 project-style subjects, written in public by a learner.
+site_url: https://YOUR_GITHUB_USERNAME.github.io/appsec-mastery/
+repo_url: https://github.com/YOUR_GITHUB_USERNAME/appsec-mastery
+repo_name: YOUR_GITHUB_USERNAME/appsec-mastery
+edit_uri: edit/main/docs/
+copyright: Content CC BY-SA 4.0 · Code MIT
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.action.edit
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - assets/extra.css
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.keys
+
+# Files and folders starting with "_" are drafts: they stay in the repo but are not published.
+exclude_docs: |
+  _*
+  .*
+
+# Navigation is generated from what is published: python tools/curriculum.py refresh
+# <nav:start>
+nav:
+  - Home: index.md
+  - Start here:
+      - "How to use this site": how-to-use.md
+      - "Weekly study routine": weekly-routine.md
+      - "Using AI as a tutor": ai-tutor.md
+      - "Responsible use": ethics.md
+      - "About": about.md
+  - Roadmap: roadmap.md
+  - "Stage 0: Foundations Reset":
+      - stage-0-foundations-reset/index.md
+      - "Linux Administration Depth":
+          - stage-0-foundations-reset/01-linux-admin-depth/index.md
+          - Lessons:
+              - stage-0-foundations-reset/01-linux-admin-depth/lessons/index.md
+          - The Subject: stage-0-foundations-reset/01-linux-admin-depth/subject.md
+      - "Networking Depth":
+          - stage-0-foundations-reset/02-networking-depth/index.md
+          - Lessons:
+              - stage-0-foundations-reset/02-networking-depth/lessons/index.md
+          - The Subject: stage-0-foundations-reset/02-networking-depth/subject.md
+      - "HTTP Internals":
+          - stage-0-foundations-reset/03-http-internals/index.md
+          - Lessons:
+              - stage-0-foundations-reset/03-http-internals/lessons/index.md
+          - The Subject: stage-0-foundations-reset/03-http-internals/subject.md
+      - "OS Internals":
+          - stage-0-foundations-reset/04-os-internals/index.md
+          - Lessons:
+              - stage-0-foundations-reset/04-os-internals/lessons/index.md
+          - The Subject: stage-0-foundations-reset/04-os-internals/subject.md
+      - "SQL and Database Internals":
+          - stage-0-foundations-reset/05-sql-db-internals/index.md
+          - Lessons:
+              - stage-0-foundations-reset/05-sql-db-internals/lessons/index.md
+          - The Subject: stage-0-foundations-reset/05-sql-db-internals/subject.md
+      - "Bash and Python for Security":
+          - stage-0-foundations-reset/06-bash-python-security/index.md
+          - Lessons:
+              - stage-0-foundations-reset/06-bash-python-security/lessons/index.md
+          - The Subject: stage-0-foundations-reset/06-bash-python-security/subject.md
+  - "Stage 1: Security Fundamentals":
+      - stage-1-security-fundamentals/index.md
+      - "Authentication and Session Security":
+          - stage-1-security-fundamentals/01-auth-session-security/index.md
+          - Lessons:
+              - stage-1-security-fundamentals/01-auth-session-security/lessons/index.md
+          - The Subject: stage-1-security-fundamentals/01-auth-session-security/subject.md
+      - "Cryptography Fundamentals for AppSec":
+          - stage-1-security-fundamentals/02-crypto-fundamentals/index.md
+          - Lessons:
+              - stage-1-security-fundamentals/02-crypto-fundamentals/lessons/index.md
+          - The Subject: stage-1-security-fundamentals/02-crypto-fundamentals/subject.md
+      - "Applied Cryptographic Attacks":
+          - stage-1-security-fundamentals/03-applied-crypto-attacks/index.md
+          - Lessons:
+              - stage-1-security-fundamentals/03-applied-crypto-attacks/lessons/index.md
+          - The Subject: stage-1-security-fundamentals/03-applied-crypto-attacks/subject.md
+      - "Access Control Models and IDOR":
+          - stage-1-security-fundamentals/04-access-control-idor/index.md
+          - Lessons:
+              - stage-1-security-fundamentals/04-access-control-idor/lessons/index.md
+          - The Subject: stage-1-security-fundamentals/04-access-control-idor/subject.md
+      - "Server-Side Injection: Command Injection, XXE and SSRF":
+          - stage-1-security-fundamentals/05-serverside-injection/index.md
+          - Lessons:
+              - stage-1-security-fundamentals/05-serverside-injection/lessons/index.md
+          - The Subject: stage-1-security-fundamentals/05-serverside-injection/subject.md
+      - "Client-Side Injection: XSS and CSRF":
+          - stage-1-security-fundamentals/06-clientside-injection/index.md
+          - Lessons:
+              - stage-1-security-fundamentals/06-clientside-injection/lessons/index.md
+          - The Subject: stage-1-security-fundamentals/06-clientside-injection/subject.md
+      - "Secure Coding Principles and TLS Configuration":
+          - stage-1-security-fundamentals/07-securecoding-tls/index.md
+          - Lessons:
+              - stage-1-security-fundamentals/07-securecoding-tls/lessons/index.md
+          - The Subject: stage-1-security-fundamentals/07-securecoding-tls/subject.md
+  - "Stage 2: Hands-On Web Security and Code Review":
+      - stage-2-hands-on-web-security/index.md
+      - "Advanced Web Exploitation I: Request Smuggling and Deserialization":
+          - stage-2-hands-on-web-security/01-advweb1-smuggling-deserialization/index.md
+          - Lessons:
+              - stage-2-hands-on-web-security/01-advweb1-smuggling-deserialization/lessons/index.md
+          - The Subject: stage-2-hands-on-web-security/01-advweb1-smuggling-deserialization/subject.md
+      - "Advanced Web Exploitation II: SSTI and GraphQL Security":
+          - stage-2-hands-on-web-security/02-advweb2-ssti-graphql/index.md
+          - Lessons:
+              - stage-2-hands-on-web-security/02-advweb2-ssti-graphql/lessons/index.md
+          - The Subject: stage-2-hands-on-web-security/02-advweb2-ssti-graphql/subject.md
+      - "Modern API Authorization: BOLA, BFLA, and Rate-Limit Abuse":
+          - stage-2-hands-on-web-security/03-api-authorization/index.md
+          - Lessons:
+              - stage-2-hands-on-web-security/03-api-authorization/lessons/index.md
+          - The Subject: stage-2-hands-on-web-security/03-api-authorization/subject.md
+      - "File Handling Vulnerabilities and Cloud SSRF":
+          - stage-2-hands-on-web-security/04-file-handling-cloud-ssrf/index.md
+          - Lessons:
+              - stage-2-hands-on-web-security/04-file-handling-cloud-ssrf/lessons/index.md
+          - The Subject: stage-2-hands-on-web-security/04-file-handling-cloud-ssrf/subject.md
+      - "Secure Code Review Methodology":
+          - stage-2-hands-on-web-security/05-secure-code-review/index.md
+          - Lessons:
+              - stage-2-hands-on-web-security/05-secure-code-review/lessons/index.md
+          - The Subject: stage-2-hands-on-web-security/05-secure-code-review/subject.md
+      - "Burp Suite Mastery and the PortSwigger Gauntlet":
+          - stage-2-hands-on-web-security/06-burp-mastery-portswigger/index.md
+          - Lessons:
+              - stage-2-hands-on-web-security/06-burp-mastery-portswigger/lessons/index.md
+          - The Subject: stage-2-hands-on-web-security/06-burp-mastery-portswigger/subject.md
+      - "Race Conditions and Business Logic Abuse":
+          - stage-2-hands-on-web-security/07-race-conditions-business-logic/index.md
+          - Lessons:
+              - stage-2-hands-on-web-security/07-race-conditions-business-logic/lessons/index.md
+          - The Subject: stage-2-hands-on-web-security/07-race-conditions-business-logic/subject.md
+  - "Stage 3: Secure Development and AppSec Engineering":
+      - stage-3-appsec-engineering/index.md
+      - "Threat Modeling":
+          - stage-3-appsec-engineering/01-threat-modeling/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/01-threat-modeling/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/01-threat-modeling/subject.md
+      - "SAST Engineering":
+          - stage-3-appsec-engineering/02-sast-engineering/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/02-sast-engineering/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/02-sast-engineering/subject.md
+      - "DAST and Dynamic Pipeline Integration":
+          - stage-3-appsec-engineering/03-dast-pipeline/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/03-dast-pipeline/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/03-dast-pipeline/subject.md
+      - "Software Composition Analysis and Supply Chain Security":
+          - stage-3-appsec-engineering/04-sca-supply-chain/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/04-sca-supply-chain/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/04-sca-supply-chain/subject.md
+      - "DevSecOps Pipeline Engineering":
+          - stage-3-appsec-engineering/05-devsecops-pipeline/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/05-devsecops-pipeline/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/05-devsecops-pipeline/subject.md
+      - "Container and Kubernetes Security":
+          - stage-3-appsec-engineering/06-container-kubernetes-security/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/06-container-kubernetes-security/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/06-container-kubernetes-security/subject.md
+      - "Secrets Detection and Management":
+          - stage-3-appsec-engineering/07-secrets-detection-management/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/07-secrets-detection-management/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/07-secrets-detection-management/subject.md
+      - "Cloud Security Fundamentals (AWS)":
+          - stage-3-appsec-engineering/08-cloud-security-aws/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/08-cloud-security-aws/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/08-cloud-security-aws/subject.md
+      - "Incident Triage for Compromised Web Applications":
+          - stage-3-appsec-engineering/09-incident-triage/index.md
+          - Lessons:
+              - stage-3-appsec-engineering/09-incident-triage/lessons/index.md
+          - The Subject: stage-3-appsec-engineering/09-incident-triage/subject.md
+  - "Stage 4: Real-World Readiness and Portfolio":
+      - stage-4-real-world-readiness/index.md
+      - "Bug Bounty Methodology":
+          - stage-4-real-world-readiness/01-bug-bounty-methodology/index.md
+          - Lessons:
+              - stage-4-real-world-readiness/01-bug-bounty-methodology/lessons/index.md
+          - The Subject: stage-4-real-world-readiness/01-bug-bounty-methodology/subject.md
+      - "Advanced Reconnaissance and OSINT":
+          - stage-4-real-world-readiness/02-advanced-recon-osint/index.md
+          - Lessons:
+              - stage-4-real-world-readiness/02-advanced-recon-osint/lessons/index.md
+          - The Subject: stage-4-real-world-readiness/02-advanced-recon-osint/subject.md
+      - "Full Penetration Test Methodology and Reporting":
+          - stage-4-real-world-readiness/03-pentest-methodology-reporting/index.md
+          - Lessons:
+              - stage-4-real-world-readiness/03-pentest-methodology-reporting/lessons/index.md
+          - The Subject: stage-4-real-world-readiness/03-pentest-methodology-reporting/subject.md
+      - "CVE Reproduction and N-Day Research":
+          - stage-4-real-world-readiness/04-cve-reproduction-nday/index.md
+          - Lessons:
+              - stage-4-real-world-readiness/04-cve-reproduction-nday/lessons/index.md
+          - The Subject: stage-4-real-world-readiness/04-cve-reproduction-nday/subject.md
+      - "Building and Publishing Original Security Tools":
+          - stage-4-real-world-readiness/05-tool-building-publishing/index.md
+          - Lessons:
+              - stage-4-real-world-readiness/05-tool-building-publishing/lessons/index.md
+          - The Subject: stage-4-real-world-readiness/05-tool-building-publishing/subject.md
+      - "Professional Security Writing and Blogging":
+          - stage-4-real-world-readiness/06-security-writing-blogging/index.md
+          - Lessons:
+              - stage-4-real-world-readiness/06-security-writing-blogging/lessons/index.md
+          - The Subject: stage-4-real-world-readiness/06-security-writing-blogging/subject.md
+  - "Stage 5: Advanced Specialization":
+      - stage-5-advanced-specialization/index.md
+      - "Mobile AppSec: Android":
+          - stage-5-advanced-specialization/01-mobile-appsec-android/index.md
+          - Lessons:
+              - stage-5-advanced-specialization/01-mobile-appsec-android/lessons/index.md
+          - The Subject: stage-5-advanced-specialization/01-mobile-appsec-android/subject.md
+      - "Mobile AppSec: iOS":
+          - stage-5-advanced-specialization/02-mobile-appsec-ios/index.md
+          - Lessons:
+              - stage-5-advanced-specialization/02-mobile-appsec-ios/lessons/index.md
+          - The Subject: stage-5-advanced-specialization/02-mobile-appsec-ios/subject.md
+      - "Cloud-Native AppSec":
+          - stage-5-advanced-specialization/03-cloud-native-appsec/index.md
+          - Lessons:
+              - stage-5-advanced-specialization/03-cloud-native-appsec/lessons/index.md
+          - The Subject: stage-5-advanced-specialization/03-cloud-native-appsec/subject.md
+      - "API Security Research":
+          - stage-5-advanced-specialization/04-api-security-research/index.md
+          - Lessons:
+              - stage-5-advanced-specialization/04-api-security-research/lessons/index.md
+          - The Subject: stage-5-advanced-specialization/04-api-security-research/subject.md
+      - "Security Architecture and Engineering":
+          - stage-5-advanced-specialization/05-security-architecture-engineering/index.md
+          - Lessons:
+              - stage-5-advanced-specialization/05-security-architecture-engineering/lessons/index.md
+          - The Subject: stage-5-advanced-specialization/05-security-architecture-engineering/subject.md
+      - "Supply Chain Security Research":
+          - stage-5-advanced-specialization/06-supply-chain-security-research/index.md
+          - Lessons:
+              - stage-5-advanced-specialization/06-supply-chain-security-research/lessons/index.md
+          - The Subject: stage-5-advanced-specialization/06-supply-chain-security-research/subject.md
+      - "Security Research, Publication, and Mentorship":
+          - stage-5-advanced-specialization/07-research-publication-mentorship/index.md
+          - Lessons:
+              - stage-5-advanced-specialization/07-research-publication-mentorship/lessons/index.md
+          - The Subject: stage-5-advanced-specialization/07-research-publication-mentorship/subject.md
+# <nav:end>
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/YOUR_GITHUB_USERNAME

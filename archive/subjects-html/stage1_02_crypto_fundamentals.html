@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cryptography Fundamentals for AppSec — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 1</div>
+  <h1>Cryptography Fundamentals for AppSec</h1>
+  <div class="subtitle">Subject 2 of 7 — Security Fundamentals</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Not implementing your own crypto — using real primitives correctly, and knowing exactly where a system's security actually lives: not in the algorithm name, but in key management, mode of operation, and the trust chain that tells you whose key you're even looking at.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — aeadmatters</a></li>
+          <li><a href="#ex01">Ex. 01 — hashpurpose0</a></li>
+          <li><a href="#ex02">Ex. 02 — chaininspect</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: cryptoreview</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">""AES-256" tells you almost nothing about whether a system is secure. The mode, the key management, and the seventeen ways a correct algorithm gets used incorrectly are where the real system lives."</p>
+    <p>AppSec engineers are not cryptographers, and this subject does not pretend otherwise — you will use vetted libraries throughout, never hand-roll a cipher. What you need is the ability to read a system's use of crypto and know immediately whether it's sound: is this mode authenticated, is this hash used for the right purpose, does this PKI chain actually terminate somewhere trustworthy. That reading ability is the actual skill.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will implement correct symmetric encryption (authenticated, with correct nonce handling) and observe what happens when each safeguard is removed one at a time, build a password-hashing comparison demonstrating why fast hashes are wrong for passwords, and walk a full X.509 certificate chain by hand extending your TLS work from Networking Depth into signature verification specifically. The capstone is a static crypto-usage auditor that scans source code for exactly the misuse patterns you'll have spent the whole subject learning to recognize.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this is exploitable" or "this fix works" must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation in this subject targets DVWA, Juice Shop, WebGoat, or an application you wrote — running locally or on a VPS you own. Never a third party without written authorization.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>No hand-rolled primitives.</strong> Every cipher, hash, and signature operation in this subject uses a vetted library (<code>cryptography</code>, <code>PyNaCl</code>, or your language's standard crypto module). You are studying correct <em>usage</em>, never implementing AES or SHA yourself.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">aeadmatters</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>crypto_fundamentals/ex00/</dd>
+        <dt>Files</dt><dd>aeadmatters.py, REPORT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>python cryptography library</dd>
+        <dt>Forbidden</dt><dd>any hand-rolled cipher implementation</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A file-encryption tool built correctly first (AES-GCM, random nonce per message, authenticated), then deliberately broken one safeguard at a time — nonce reuse, no authentication tag check, ECB mode — with each break demonstrated as a real, working attack, not just described.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Correct baseline: AES-256-GCM with a freshly random 96-bit nonce per encryption, the auth tag verified on decrypt, key derived from a passphrase via a proper KDF (e.g. Scrypt/Argon2, not a bare hash).</li>
+          <li>Nonce-reuse attack: encrypt two different plaintexts under the same key and the same (reused) nonce, and demonstrate recovering the XOR of the two plaintexts from the two ciphertexts — the textbook stream-cipher-keystream-reuse break, executed for real against your own output, not described in the abstract.</li>
+          <li>Missing-authentication attack: given a mode without a tag check (or GCM with tag verification deliberately skipped), demonstrate a bit-flipping attack — modify specific ciphertext bytes and show a predictable, attacker-chosen change appears in the decrypted plaintext with no error raised.</li>
+          <li>ECB-mode demonstration: encrypt an image or another block-structured input under ECB and ordinary CBC/GCM side by side, and show the ECB output still visibly reveals structure ("the ECB penguin") while CBC/GCM does not.</li>
+          <li>A written summary table: attack → what safeguard's absence enabled it → what the correct implementation does differently.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Implementing AES, GCM, or any primitive yourself — use the library's tested implementation throughout.</li>
+          <li>A "correct baseline" that reuses a nonce across runs due to a seeding bug — verified by explicitly checking nonce uniqueness across N encryptions.</li>
+          <li>Deriving the key directly from a passphrase via a bare hash instead of a proper password-based KDF.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: key derivation, encryption, decryption/verification, and each attack demonstration in their own function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate a padding-oracle-style attack against a CBC-mode implementation with verbose padding-error responses (a preview of Applied Cryptographic Attacks).</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">hashpurpose0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>crypto_fundamentals/ex01/</dd>
+        <dt>Files</dt><dd>hashpurpose0.py, REPORT.md</dd>
+        <dt>Allowed</dt><dd>hashlib, bcrypt/argon2 library</dd>
+        <dt>Forbidden</dt><dd>none beyond the global list</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A password-storage comparison tool that hashes the same wordlist under a fast general-purpose hash (SHA-256) versus a purpose-built password hash (bcrypt/Argon2), measures and demonstrates the real-world cracking-speed gap, and produces a written explanation of exactly why "hashing" is not one undifferentiated concept.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Hash a shared wordlist of at least 5,000 candidate passwords under raw SHA-256 (with a per-user salt) and separately under bcrypt/Argon2 (correctly configured cost parameters, justified in writing).</li>
+          <li>Measure and report actual hashing throughput (hashes/second on your hardware) for both, and extrapolate to realistic offline cracking time for a leaked database of, say, 10,000 SHA-256 hashes versus 10,000 bcrypt/Argon2 hashes at that measured rate.</li>
+          <li>Demonstrate cracking a deliberately weak password from each hash set using a dictionary attack you implement (not a prebuilt cracker), and show the wall-clock time difference directly, not just the extrapolated math.</li>
+          <li>A written explanation distinguishing three purposes commonly (and wrongly) conflated under "hashing": general-purpose integrity hashing (fast is fine, e.g. checking a file wasn't corrupted), cryptographic hashing for signatures/HMAC (fast, but must be collision- and preimage-resistant), and password hashing (must be deliberately slow and memory-hard) — with a concrete real-world consequence of using the wrong one for each purpose.</li>
+          <li>A demonstration of salting's specific benefit: precompute a rainbow-table-style lookup for a small unsalted hash set, then show the same lookup fails against a salted set — real precomputed tables, not just an assertion.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>A prebuilt password cracker (John/Hashcat) as your cracking engine — build your own dictionary-attack loop; comparing your result against Hashcat afterward is fine.</li>
+          <li>Configuring bcrypt/Argon2 with cost parameters so low they defeat the point of the comparison, without justifying the choice.</li>
+          <li>Conflating "hashing" as one undifferentiated concept anywhere in your written explanation.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: hashing, throughput measurement, dictionary-attack, and rainbow-table-demo each isolated.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate a real-world consequence of hash-length-extension on a naive <code>SHA256(secret || message)</code> MAC construction, previewing why HMAC exists (full exploitation is Applied Cryptographic Attacks' subject).</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">chaininspect</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>crypto_fundamentals/ex02/</dd>
+        <dt>Files</dt><dd>chaininspect.py, README.md</dd>
+        <dt>Allowed</dt><dd>cryptography library (x509 module), ssl for connection setup</dd>
+        <dt>Forbidden</dt><dd>reusing tlsinspect.py verbatim from Networking Depth — this exercise goes deeper into signature verification specifically</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> Extends the TLS chain work from Networking Depth into full manual signature verification: for a real certificate chain, verify each certificate's signature against its issuer's public key using raw cryptographic operations, and demonstrate what breaks when a chain doesn't actually terminate in a trusted root.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Retrieve a real certificate chain (leaf, intermediate(s), root) for a target you choose, and for each non-root certificate, extract the issuer's public key and verify the certificate's signature over its own TBSCertificate bytes using the correct algorithm (RSA-PSS/PKCS1v15 or ECDSA depending on the cert) — a genuine signature-verification call, not a bundled "is this valid" boolean from a higher-level API.</li>
+          <li>Demonstrate the chain terminating in a certificate present in a real trust store (e.g. the system CA bundle), and explain in writing what "trusted root" actually means operationally — a root CA's certificate is self-signed, so its own "signature verification" only proves internal consistency, and trust is actually a policy decision (is this root in the store you've chosen to trust) not a cryptographic one.</li>
+          <li>Construct and verify a chain that does <em>not</em> terminate in a trusted root (e.g. a self-signed leaf, or a real intermediate with a fabricated/self-signed replacement for the root), and show your verification logic correctly rejecting it — with the exact point of failure identified (signature mismatch vs. untrusted anchor).</li>
+          <li>A written explanation of the asymmetric-crypto mechanics underneath this: why the issuer signing with their private key and everyone verifying with the public key is what makes forging a certificate infeasible without the issuer's private key, tied back to RSA/ECDSA fundamentals.</li>
+          <li>A demonstration of certificate pinning's specific benefit: show a scenario (simulated, e.g. a MITM proxy you run against your own test client) where a normally-valid-but-substituted certificate is accepted by standard chain validation but rejected once pinning to the expected public key/certificate is added.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Calling a single library "verify chain" function and treating its boolean result as your own verification logic.</li>
+          <li>Skipping intermediate certificates and only verifying the leaf against the root directly.</li>
+          <li>Asserting the broken-chain case is rejected without showing the specific verification step that fails.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: chain retrieval, per-certificate signature verification, trust-anchor checking, and the pinning demo each in their own function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Certificate Transparency: fetch and display the CT log inclusion for a real certificate, and explain what CT specifically defends against (mis-issuance detection) that chain validation alone does not.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> every failure mode from all three exercises simultaneously, recognized from source code rather than from a live attack you already know is there — ECB/nonce-reuse patterns from Exercise 00, password-hashing misuse from Exercise 01, and disabled/incomplete certificate validation from Exercise 02, plus enough real understanding of each primitive's correct use to avoid flooding a report with false positives on code that is actually fine. A pattern-matcher with no underlying model of *why* each pattern is dangerous cannot tell "AES.MODE_ECB used for a non-repeating single block" (low risk) from "AES.MODE_ECB used to encrypt a multi-block image" (textbook broken) — this capstone has to make that distinction.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">cryptoreview</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>crypto_fundamentals/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A static analysis tool that scans a codebase for the crypto-misuse patterns this subject covers — ECB mode, hardcoded keys/IVs, fast hashes used for passwords, missing authentication, weak/no salt, disabled certificate verification — and produces a reviewer-grade report with the exact line, the specific risk, and the correct fix.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Static rule for symmetric-cipher misuse: flags ECB mode usage, flags any hardcoded IV/nonce literal in source, and flags any cipher-mode usage without a paired authentication mechanism (bare CBC/CTR with no HMAC and no AEAD mode) — using an AST-based or robust regex-based scanner across at least Python and one other language (e.g. JavaScript or Java) of your choice.</li>
+          <li>Static rule for password-hashing misuse: flags direct use of MD5/SHA-1/SHA-256/SHA-512 where the surrounding context (variable/field names like <code>password</code>, <code>passwd</code>, function names like <code>hash_password</code>) indicates password storage, and confirms — rather than flags as clean — correct use of bcrypt/Argon2/scrypt/PBKDF2.</li>
+          <li>Static rule for hardcoded secrets: flags hardcoded API keys, encryption keys, and JWT signing secrets assigned as string literals in source (building on and reusable from a simple entropy/pattern heuristic, not just a fixed keyword list).</li>
+          <li>Static rule for TLS/certificate-validation bypass: flags <code>verify=False</code>/<code>CERT_NONE</code>/equivalent disabled-verification patterns across your target languages' common HTTP/TLS libraries.</li>
+          <li>Every finding reported with file, line, the exact risky code, a plain-language explanation of the specific failure mode (not a generic "insecure crypto" message), and a concrete suggested fix.</li>
+          <li>Demonstrated against a test corpus of at least 15 deliberately-planted findings across the four rule categories plus at least 10 deliberately-clean examples of correct usage (e.g. properly-configured AES-GCM, properly-used bcrypt, a legitimate non-password SHA-256 integrity check) — and achieves zero false positives on the clean set, with every planted finding caught.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Semgrep, Bandit, or any existing SAST tool doing the detection for you — you are building the rule logic yourself (a preview of what Stage 3's SAST Engineering subject formalizes).</li>
+          <li>A keyword-only scanner that flags every occurrence of "MD5" regardless of context, producing false positives on legitimate non-password integrity uses.</li>
+          <li>Any false positive on the clean-code test set — an AppSec tool that cries wolf gets disabled by the engineering team it's meant to help, and this capstone is graded on that standard.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: one rule module per finding category with a shared file-walking/AST-parsing layer; each rule independently testable against its own fixture files.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>A fifth rule detecting insufficiently random key/token generation (e.g. Python's <code>random</code> module used for a security-sensitive token instead of <code>secrets</code>).</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">crypto_fundamentals/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live with your own captures reproduced on demand. For the capstone, the evaluator supplies a modified corpus (new planted findings, new clean examples) immediately before the defense and expects the same zero-false-positive, full-catch standard.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — aeadmatters</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show your nonce-reuse attack live — derive the XOR-of-plaintexts result and explain exactly why stream-cipher-style constructions make this possible.</li>
+          <li>Why does GCM's authentication tag specifically prevent the bit-flipping attack that a bare CTR/CBC-without-HMAC construction would not?</li>
+          <li>What in the ECB output makes structure visible, at the byte level — why does one identical plaintext block always produce the same ciphertext block?</li>
+          <li>Why is Argon2/Scrypt correct for password-based key derivation where a single SHA-256 call is wrong — tie this forward to Cryptography's "password hashing" distinction from general-purpose hashing.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — hashpurpose0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show your measured hashes/second for both algorithms live and walk through the extrapolated cracking-time math for a real breach scenario.</li>
+          <li>Why is "slow" a security property for password hashing but a liability everywhere else you use hashing?</li>
+          <li>What does Argon2's memory-hardness specifically defend against that a purely CPU-slow hash does not?</li>
+          <li>Show your salted-vs-unsalted rainbow-table demo — why does a unique salt per user defeat a precomputed table even if the table is enormous?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — chaininspect</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through verifying one intermediate certificate's signature, live, byte-level, against its issuer's public key.</li>
+          <li>Why is a self-signed root's "valid signature" not actually proof of trustworthiness — what makes a root trustworthy, if not cryptography?</li>
+          <li>Show your rejected-chain case — exactly which check failed, and how does your code distinguish "signature invalid" from "signer not trusted"?</li>
+          <li>Explain your pinning demo's MITM scenario — what would a real attacker need to pull this off against a non-pinned client, and why does pinning close it?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: cryptoreview</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run this against a codebase I hand you live — walk through the findings as they come out.</li>
+          <li>Show me one of your clean-code fixtures and explain exactly what makes your scanner correctly recognize it as safe rather than flagging the mere presence of "SHA256" or "AES".</li>
+          <li>Why does distinguishing password-hashing context from general-purpose hashing context require more than a keyword match — what did you actually check?</li>
+          <li>What would a real false positive on a large real-world codebase look like for your ECB-detection rule, and how would you tune it down without missing real cases?</li>
+          <li>Why is this capstone specifically about *recognizing* the failure modes from source rather than exploiting them live — what's the practical AppSec-engineering value of that shift?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>ECB mode used deliberately and safely for a single, non-repeating 16-byte block (rare but real): not flagged, or flagged at clearly lower severity with the reasoning shown.</li>
+          <li>A hardcoded IV that is actually a public, non-secret constant used correctly in a context where IV secrecy isn't the security property (documented exception): reviewer can see why it was or wasn't flagged.</li>
+          <li>bcrypt/Argon2 used with a dangerously low cost factor: flagged as a separate, lower-severity finding — "correct primitive, weak configuration" — not treated identically to using no password hash at all.</li>
+          <li>A hardcoded value that looks like a secret but is a public constant (e.g. a well-known test key from a library's own documentation): either correctly excluded or flagged with appropriately hedged confidence.</li>
+          <li>Disabled certificate verification only in code clearly marked as a test/mock file: still flagged, since test-only code has a way of reaching production — but the report may note the file's apparent purpose.</li>
+          <li>A file the scanner cannot parse (syntax error, unsupported language dialect): reported as unscanned, never silently skipped from the final report.</li>
+          <li>The same finding appearing in a vendored/third-party directory versus first-party code: both reported, optionally distinguished, never silently excluded without the user opting into that.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Cryptography Fundamentals for AppSec · AppSec Mastery Roadmap · Stage 1, Subject 2 of 7 · 1/1
+</footer>
+
+</body>
+</html>

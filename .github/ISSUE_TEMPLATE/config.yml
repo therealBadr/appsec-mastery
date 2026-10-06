@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and discussion
+    url: https://github.com/YOUR_GITHUB_USERNAME/appsec-mastery/discussions
+    about: Ask questions or share your own solutions here.

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile AppSec: iOS — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 5</div>
+  <h1>Mobile AppSec: iOS</h1>
+  <div class="subtitle">Subject 2 of 7 — Advanced Specialization</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    The second half of the mobile lane, deliberately separated from Android because the platform model is genuinely different: a more locked-down OS, Objective-C/Swift binaries instead of DEX bytecode, and a jailbreak-dependent (rather than root-dependent) analysis workflow.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Foreword</a></li>
+      <li><a href="#ch1">Introduction</a></li>
+      <li><a href="#ch2">Theory</a>
+        <ol class="toc-sub">
+          <li><a href="#t0">IPA structure and binary analysis</a></li>
+          <li><a href="#t1">Insecure local data storage on iOS</a></li>
+          <li><a href="#t2">App sandboxing and inter-app communication</a></li>
+          <li><a href="#t3">Jailbreak-dependent dynamic analysis</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch3">Practical Outputs</a></li>
+      <li><a href="#ch4">Common Delusions</a></li>
+      <li><a href="#ch5">Exit Gate</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Foreword</div>
+    <p class="foreword">"iOS's sandbox is stronger than Android's by default, which doesn't mean iOS apps are more secure — it means the same developer mistakes are simply harder for a researcher to reach, not less common."</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Introduction</div>
+    <h2>Why This Subject</h2>
+    <p>This subject deliberately parallels Mobile AppSec: Android's structure so the platform differences are the thing that stands out — the vulnerability classes (insecure storage, weak IPC-equivalent, defeatable pinning) are conceptually identical; the tooling, binary format, and platform security model are not, and conflating the two platforms is a common, career-limiting mistake for a mobile-focused specialist.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Theory</div>
+    <h2>What You Must Understand</h2>
+    <div class="topic-block" id="t0">
+      <h4>IPA structure and binary analysis</h4>
+      <div class="tbody">
+        <p>An IPA is a structured archive containing a Mach-O binary (Objective-C/Swift) and resources, analyzed with a different toolchain than Android's — class-dump/Hopper/Ghidra for static analysis, and the binary's far more limited "decompile to readable source" story compared to DEX.</p>
+<ul>
+          <li>Objective-C's runtime message-passing model means method names are frequently still visible in the binary even without full decompilation, which is its own useful static-analysis signal</li>
+          <li>Swift binaries are meaningfully harder to reverse than Objective-C ones — a real, current tooling-maturity gap worth knowing about going in</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t1">
+      <h4>Insecure local data storage on iOS</h4>
+      <div class="tbody">
+        <p>The same underlying mistake as Android's (data that should be in a secure, platform-provided store ending up in a plaintext file or a database instead), expressed through iOS-specific mechanisms — NSUserDefaults, an unencrypted local database, or a Keychain item stored with an overly permissive accessibility level.</p>
+<ul>
+          <li>The iOS Keychain is the correct place for sensitive data — an app using NSUserDefaults for a session token instead is the direct iOS analogue of Android's SharedPreferences mistake</li>
+          <li>Even correct Keychain usage can be undermined by a permissive accessibility attribute (e.g. accessible even when the device is locked) — a configuration nuance worth checking specifically, not assumed safe from Keychain usage alone</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t2">
+      <h4>App sandboxing and inter-app communication</h4>
+      <div class="tbody">
+        <p>iOS's sandbox is stronger by default than Android's, but Custom URL Schemes and Universal Links are the platform's IPC-equivalent attack surface — an app registering a URL scheme with no validation of the calling app or the URL's parameters is exploitable by any other installed app or a malicious webpage.</p>
+<ul>
+          <li>A Custom URL Scheme handler that acts on parameters with no validation is directly the mobile-platform version of an injection sink — the same source/sink reasoning from Client-Side Injection applies</li>
+          <li>Universal Links (HTTPS-based, domain-verified) are the more secure modern alternative — an app still using unvalidated Custom URL Schemes for sensitive actions is a real, checkable finding</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t3">
+      <h4>Jailbreak-dependent dynamic analysis</h4>
+      <div class="tbody">
+        <p>Where iOS most diverges from the Android workflow: full runtime instrumentation (Frida, Objection) and filesystem access for dynamic testing generally requires a jailbroken device or a jailbroken-equivalent research environment — a meaningfully higher setup cost than Android's emulator-based workflow.</p>
+<ul>
+          <li>A jailbroken test device (or a corellium-style virtual research device, where accessible) unlocks the same class of certificate-pinning bypass and runtime hooking used in the Android subject</li>
+          <li>iOS's more locked-down default posture means static analysis carries proportionally more weight in an iOS assessment than it typically does for Android, where dynamic analysis is cheaper to set up</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Practical Outputs</h2>
+    <div class="outputs-block">
+      <span class="block-label lbl-mandatory">Practical Outputs</span>
+      <ul>
+          <li>A static analysis of a real (or deliberately vulnerable, e.g. an OWASP iGoat-style) IPA: binary and resource review for hardcoded secrets and insecure storage, mirroring the Android subject's methodology on iOS's toolchain.</li>
+          <li>A working exploitation of an insecure Custom URL Scheme handler (a crafted URL/webpage triggering unintended app behavior) demonstrated end to end.</li>
+          <li>A certificate-pinning bypass on a jailbroken (or jailbreak-equivalent) test device using Frida/Objection, with the resulting API traffic tested with a Stage 1-2 technique exactly as in the Android subject.</li>
+          <li>A written comparison document: for every finding class covered in both mobile subjects, the specific tooling and platform-model difference between Android and iOS, aimed at a reader deciding which platform to specialize in first.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Common Delusions</h2>
+    <div class="delusions-block">
+      <span class="block-label lbl-delusions">Common Delusions at This Stage</span>
+      <ul>
+          <li>"iOS's sandbox means iOS apps don't have these bugs." The sandbox limits reachability from a researcher's or attacker's external vantage point; it does not stop a developer from making the identical storage or validation mistake inside their own app's sandbox.</li>
+          <li>"The Android and iOS mobile-security skillsets transfer completely." The vulnerability classes transfer; the tooling, binary format, and analysis workflow are different enough that real fluency in one doesn't automatically confer fluency in the other.</li>
+          <li>"You need a jailbroken device for everything." Static analysis (this subject's first topic) goes a long way without one — jailbreak-dependent dynamic analysis is a real cost worth reserving for when static analysis alone is insufficient.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Exit Gate</h2>
+    <div class="exitgate-block">
+      <span class="block-label lbl-exitgate">Exit Gate — must do all of this without notes</span>
+      <ul>
+          <li>Statically analyze an unfamiliar IPA and identify at least one real finding without notes.</li>
+          <li>Explain the specific accessibility-attribute nuance that can undermine otherwise-correct Keychain usage.</li>
+          <li>Exploit an insecure Custom URL Scheme handler, live, from a crafted trigger.</li>
+          <li>Articulate, specifically, what differs in tooling and workflow between an Android and an iOS assessment for the same underlying finding class.</li>
+        </ul>
+    </div>
+  </section>
+
+
+</div>
+
+<footer class="endcap">
+  Mobile AppSec: iOS · AppSec Mastery Roadmap · Stage 5, Subject 2 of 7 · 1/1
+</footer>
+
+</body>
+</html>

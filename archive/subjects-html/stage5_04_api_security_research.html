@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Security Research — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 5</div>
+  <h1>API Security Research</h1>
+  <div class="subtitle">Subject 4 of 7 — Advanced Specialization</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Modern API Authorization built the practitioner's skill: find BOLA/BFLA/mass-assignment in a given API. This specialization lane goes further into research territory — the protocol-level and specification-level issues that produce entire classes of findings across many APIs at once, the kind of work that produces a genuinely novel technique rather than another instance of a known one.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Foreword</a></li>
+      <li><a href="#ch1">Introduction</a></li>
+      <li><a href="#ch2">Theory</a>
+        <ol class="toc-sub">
+          <li><a href="#t0">gRPC and Protocol Buffers security</a></li>
+          <li><a href="#t1">WebSocket and real-time API security</a></li>
+          <li><a href="#t2">API specification-format weaknesses</a></li>
+          <li><a href="#t3">API gateway and aggregation-layer risk</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch3">Practical Outputs</a></li>
+      <li><a href="#ch4">Common Delusions</a></li>
+      <li><a href="#ch5">Exit Gate</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Foreword</div>
+    <p class="foreword">"A practitioner finds the BOLA in this API. A researcher asks why the OpenAPI specification format itself makes BOLA this easy to introduce and this hard to catch by tooling, across every API that uses it."</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Introduction</div>
+    <h2>Why This Subject</h2>
+    <p>This lane assumes Modern API Authorization's practitioner skill as a prerequisite and reorients it toward research questions: instead of testing one API for known bug classes, study a protocol or specification format itself for structural weaknesses that would predict where new bug classes are likely to keep appearing.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Theory</div>
+    <h2>What You Must Understand</h2>
+    <div class="topic-block" id="t0">
+      <h4>gRPC and Protocol Buffers security</h4>
+      <div class="tbody">
+        <p>A binary, schema-defined RPC protocol increasingly used for service-to-service (and sometimes client-facing) communication — different attack surface than REST/GraphQL's text-based, self-describing formats, with its own specific research questions around reflection, schema exposure, and message-size/resource-exhaustion behavior.</p>
+<ul>
+          <li>gRPC server reflection (if left enabled) discloses the full service/method schema, the direct protocol analogue of GraphQL introspection from Advanced Web Exploitation II</li>
+          <li>Protobuf's binary format means many web-focused tools (built for text-based HTTP) don't natively understand it — a genuine tooling gap a researcher can productively work in</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t1">
+      <h4>WebSocket and real-time API security</h4>
+      <div class="tbody">
+        <p>A persistent, bidirectional connection breaks several assumptions the request/response-oriented techniques from Stage 1-2 depend on — CSRF-equivalent origin-validation questions apply differently, and message-level authorization has to be re-checked per message, not just at connection time.</p>
+<ul>
+          <li>A WebSocket connection authenticated only at handshake time, with no per-message authorization check, is the real-time-API version of Access Control and IDOR's "checked once, trusted forever" failure mode</li>
+          <li>Cross-Site WebSocket Hijacking: the CSRF-equivalent attack against a WebSocket endpoint with insufficient origin validation at connection time</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t2">
+      <h4>API specification-format weaknesses</h4>
+      <div class="tbody">
+        <p>Research at the level of the OpenAPI/GraphQL/gRPC specification formats themselves: what does each format make easy to express correctly (and what does it make easy to get wrong by default) — the kind of question whose answer predicts findings across every API built on that format, not just one.</p>
+<ul>
+          <li>A specification field with an insecure-by-default value (if one exists in a format/framework combination you study) produces the same finding repeatedly across every API generated from it — a single research insight with wide practical reach</li>
+          <li>This is precisely the research mode Real-World Readiness's CVE Reproduction and N-Day Research subject built the patch-diff/advisory-reading skill for, now aimed forward at original findings instead of backward at disclosed ones</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t3">
+      <h4>API gateway and aggregation-layer risk</h4>
+      <div class="tbody">
+        <p>A gateway sitting in front of many backend services introduces its own security surface distinct from any individual backend's — inconsistent auth enforcement across routes, request/response transformation bugs, and the gateway itself becoming a high-value single point of compromise for everything behind it.</p>
+<ul>
+          <li>A gateway that terminates TLS and re-establishes an internal connection without equivalent authentication is a variant of the SSRF "borrows the server's network position" idea, now structural to the architecture rather than a bug in one endpoint</li>
+          <li>Route-specific authentication/authorization configuration drift (one route's gateway config subtly differs from a sibling route's) is a realistic, checkable research target across real-world gateway configurations</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Practical Outputs</h2>
+    <div class="outputs-block">
+      <span class="block-label lbl-mandatory">Practical Outputs</span>
+      <ul>
+          <li>A gRPC security assessment of a service you build (or a deliberately vulnerable gRPC target), including a reflection-based schema-enumeration finding and at least one authorization gap reusing your BOLA/BFLA methodology adapted to gRPC's call shape.</li>
+          <li>A WebSocket application (you build) with a deliberately weak per-message authorization model, exploited to demonstrate a message-level authorization bypass distinct from the connection-time auth check succeeding correctly.</li>
+          <li>A written research note on one API specification format's structural weakness — a genuine analysis of what the format makes easy to get wrong, with at least one concrete example finding produced from that structural insight, not just one API's individual bug.</li>
+          <li>An API gateway configuration review (yours, or a documented reference architecture) identifying at least one route-specific authentication/authorization inconsistency.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Common Delusions</h2>
+    <div class="delusions-block">
+      <span class="block-label lbl-delusions">Common Delusions at This Stage</span>
+      <ul>
+          <li>"Every API is basically REST with different syntax." gRPC and WebSocket-based APIs violate assumptions (request/response symmetry, connection-time-only authentication) that REST-focused tooling and technique take for granted — treating them identically produces false negatives.</li>
+          <li>"Research means finding something nobody's ever found before." Most valuable research work is systematic analysis that predicts and explains a class of findings, not necessarily a single unprecedented discovery — the CVE Reproduction subject's "independent reproduction is real research too" lesson applies here as well.</li>
+          <li>"The gateway is just plumbing, not part of the attack surface." A misconfigured gateway is frequently the highest-value single target in an entire architecture, precisely because it sits in front of everything else.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Exit Gate</h2>
+    <div class="exitgate-block">
+      <span class="block-label lbl-exitgate">Exit Gate — must do all of this without notes</span>
+      <ul>
+          <li>Assess an unfamiliar gRPC service for reflection exposure and at least one authorization gap.</li>
+          <li>Explain precisely why WebSocket authorization requires different reasoning than REST/GraphQL request-response authorization.</li>
+          <li>Present your specification-format research note and defend why the structural weakness you identified predicts findings beyond the one example you produced.</li>
+          <li>Review an unfamiliar API gateway configuration and identify a route-level inconsistency.</li>
+        </ul>
+    </div>
+  </section>
+
+
+</div>
+
+<footer class="endcap">
+  API Security Research · AppSec Mastery Roadmap · Stage 5, Subject 4 of 7 · 1/1
+</footer>
+
+</body>
+</html>

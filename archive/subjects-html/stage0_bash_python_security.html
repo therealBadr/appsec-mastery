@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bash and Python for Security — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 0</div>
+  <h1>Bash and Python for Security</h1>
+  <div class="subtitle">Subject 6 of 6 — Foundations Reset</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    The tooling layer underneath everything else in this roadmap — concurrent sockets, binary packing, subprocess handling that doesn't open a second vulnerability while closing the first, and the Burp-adjacent HTTP fuzzing primitives you will otherwise depend on a GUI for forever.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — subenum0</a></li>
+          <li><a href="#ex01">Ex. 01 — bannergrab0</a></li>
+          <li><a href="#ex02">Ex. 02 — httpfuzz0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: reconpipe</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"Every security tool you will ever use started as someone's script that got popular. Write the script first and you will never mistake the tool for magic again."</p>
+    <p>This is the last Stage 0 subject on purpose: it assumes the networking, HTTP, OS, and SQL depth from the rest of the stage and turns it into reusable tooling instinct. The four builds here are not toy exercises — a subdomain enumerator, a banner grabber, and a hand-built HTTP fuzzer are the actual internals of tools like <code>amass</code>, <code>masscan</code>, and Burp Intruder, at a scale you can still read top to bottom.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will build a concurrent subdomain enumerator, a CIDR-range banner grabber, and a stripped-down HTTP fuzzer that flags anomalous responses the way Burp Intruder's response-diffing does — then combine all three into a single recon pipeline that takes a domain and produces a structured attack-surface report with zero manual steps in between.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input, an unreachable host, or unexpected data. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline), applies to every exercise.</strong> Functions do one thing and are named for what they do. No magic numbers — ports, offsets, thresholds, and protocol constants are named constants, never bare literals. No block of code you cannot explain, unprompted, line by line, during defense. Every non-obvious line carries a comment explaining why, not what.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this detects X" or "this parses Y correctly" must be backed by a reproducible capture, transcript, or log — captured in your turn-in. Assertions without evidence are treated as unmet requirements during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct. A single mandatory-part flaw — even a minor one — zeroes the bonus evaluation for that exercise, no exceptions.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> Exercises target domains/hosts you own or a lab environment (e.g. your own VPS, a deliberately vulnerable app you run locally). Subdomain enumeration and fuzzing against third-party infrastructure without written authorization is out of scope for this subject, full stop.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>Global forbidden list.</strong> No <code>subfinder</code>/<code>amass</code>/<code>ffuf</code>/<code>gobuster</code>/<code>masscan</code> — you are building minimal versions of exactly these tools. <code>shell=True</code> in <code>subprocess</code> calls is forbidden anywhere in this subject unless the exercise explicitly requires demonstrating why it's dangerous.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">subenum0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>bash_python_security/ex00/</dd>
+        <dt>Files</dt><dd>subenum0.py, README.md</dd>
+        <dt>Allowed</dt><dd>socket, concurrent.futures/asyncio/threading, standard library only</dd>
+        <dt>Forbidden</dt><dd>subfinder, amass, dnspython for the core resolution logic</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A concurrent subdomain enumerator: given a domain and a wordlist, resolves each candidate subdomain and reports which exist, with real concurrency and real rate control — not a naive serial loop with a library doing the DNS work for you.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Constructs and sends DNS A-record queries for each candidate subdomain using raw <code>socket</code> (UDP to a configurable resolver) — reusing/extending your <code>dnsresolve0</code> logic from Networking Depth is expected, not discouraged.</li>
+          <li>Runs lookups concurrently (thread pool, process pool, or asyncio — your choice, justified) with a configurable concurrency limit, and measurably faster than a serial baseline you also implement and benchmark against.</li>
+          <li>Implements basic rate limiting/backoff so the tool does not flood the resolver into dropping responses — demonstrated by comparing result completeness at an unthrottled vs. throttled concurrency level against your own test resolver.</li>
+          <li>Correctly handles wildcard DNS (a domain that resolves *every* subdomain to the same IP, which would otherwise produce 100% false positives) by detecting the wildcard pattern first and filtering it out.</li>
+          <li>Outputs discovered subdomains with their resolved IP(s), and a summary of query count, success rate, and elapsed time.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>dnspython or any DNS library doing the packet construction/parsing for you.</li>
+          <li>A tool with no concurrency limit that can be trivially turned into a denial-of-service against the target's DNS infrastructure.</li>
+          <li>Silently returning wrong results on a wildcard domain instead of detecting and handling it.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: resolution, concurrency orchestration, wildcard detection, and reporting each in their own function; concurrency limit and timeout as named config values.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Passive enumeration via Certificate Transparency logs (crt.sh) as an additional, clearly-labeled data source alongside your active brute-force results.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">bannergrab0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>bash_python_security/ex01/</dd>
+        <dt>Files</dt><dd>bannergrab0.py, README.md</dd>
+        <dt>Allowed</dt><dd>socket, ssl, concurrent.futures/asyncio, ipaddress standard module</dd>
+        <dt>Forbidden</dt><dd>masscan, nmap, python-nmap</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A tool that scans a CIDR range for a set of common ports, grabs service banners (including a TLS-wrapped banner where relevant), and identifies services from the banner text into a structured report — the connect-and-read pattern underneath every recon tool's "service detection" feature.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Given a CIDR (using the <code>ipaddress</code> module to enumerate hosts) and a port list, connects to each host:port concurrently with a sane timeout, and reads the first response bytes (or, for ports needing a prompt like HTTP, sends a minimal valid request first).</li>
+          <li>Correctly handles at least one TLS-wrapped service (e.g. HTTPS on 443) by wrapping the socket with <code>ssl</code> before reading the banner, and reports the negotiated TLS version alongside the banner.</li>
+          <li>Identifies service/product from the banner text against a small signature table you build (e.g. recognizing <code>SSH-2.0-OpenSSH_X.Y</code>, an <code>HTTP/1.1</code> status line with a <code>Server:</code> header, etc.), reporting "unidentified" honestly when no signature matches rather than guessing.</li>
+          <li>Structured output per host: open ports, raw banner, identified service/version where possible, and a timestamp.</li>
+          <li>A written note on why banner-based version identification is inherently unreliable (banners can be spoofed, stripped, or genuinely ambiguous) and what that means for trusting this tool's output at face value.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>nmap/masscan/python-nmap doing the scanning or the service identification for you.</li>
+          <li>A synchronous, unbounded-timeout scanner that takes hours on a /24 with no way to configure concurrency.</li>
+          <li>Claiming a confident service identification from an ambiguous or generic banner.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: CIDR expansion, connection/banner-grab, TLS handling, and signature matching each in their own function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Add UDP banner grabbing for at least one UDP service (e.g. DNS version query) with the inherent unreliability of UDP handled (retries, explicit "no response" vs "closed" distinction from Networking Depth carried over here).</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">httpfuzz0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>bash_python_security/ex02/</dd>
+        <dt>Files</dt><dd>httpfuzz0.py, README.md</dd>
+        <dt>Allowed</dt><dd>requests or raw sockets, concurrent.futures/asyncio</dd>
+        <dt>Forbidden</dt><dd>Burp Intruder, ffuf, wfuzz, any existing fuzzing tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A stripped-down HTTP fuzzer: takes a request template with a marked injection point and a payload wordlist, sends every payload, and flags responses that differ meaningfully from a measured baseline — by status, length, and timing — the exact mechanism behind Burp Intruder's "Grep/Extract" and response-diffing.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Accepts a request template (method, URL, headers, body) with a placeholder marker (e.g. <code>FUZZ</code>) and a wordlist file, and substitutes each payload into the marked position — URL, a query parameter, a header value, or the body, your choice of which positions to support, at least two of the four.</li>
+          <li>Sends a baseline request first (with an inert placeholder value) and records its status code, response length, and response time as the comparison point.</li>
+          <li>For every payload, records status/length/time and flags a response as anomalous if it differs from baseline by more than a configurable threshold in any dimension — not just exact-match filtering.</li>
+          <li>Runs concurrently with a configurable worker count and a rate limit, and includes basic retry/backoff on transient connection errors rather than treating a dropped connection as a legitimate response.</li>
+          <li>Outputs a sorted, scannable report: payload, status, length, time-delta-from-baseline, and an anomaly flag — the same shape as Burp Intruder's results grid.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Burp Intruder, ffuf, wfuzz, or any existing fuzzer wrapped and relabeled.</li>
+          <li>Flagging every non-200 response as anomalous with no actual baseline comparison.</li>
+          <li>A concurrency model with no rate limit that can trivially become a denial-of-service against the target.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: template-substitution, baseline measurement, request execution, and anomaly-detection each in their own function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Add a second, independent anomaly signal: response-body similarity (e.g. a simple diff ratio) instead of just length, to catch same-length-but-different-content responses.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> concurrent DNS resolution, raw socket/TLS service interaction, and HTTP request construction/anomaly-detection, chained so each stage's output correctly becomes the next stage's input — discovered subdomains feed the port scanner, discovered open HTTP(S) ports feed the fuzzer — with concurrency and rate-limiting reasoned about at the pipeline level, not just per-stage, since three separately-well-behaved tools run back to back can still add up to an unintentional denial-of-service against the target. No single exercise above has to reason about that compounding effect; the capstone does, by construction.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">reconpipe</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>bash_python_security/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A single pipeline that takes one domain and, unattended, runs subdomain enumeration, then banner-grabs every discovered live host, then fuzzes any discovered HTTP endpoints with a small default payload set for anomalies — producing one structured, prioritized attack-surface report with zero manual steps between stages.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Stage 1: runs your <code>subenum0</code> logic against the target domain and a wordlist, producing a list of live subdomains with resolved IPs.</li>
+          <li>Stage 2: runs your <code>bannergrab0</code> logic against every discovered IP on a default port list (at minimum 22, 80, 443, 8080), producing service/banner data per host, and specifically identifying which hosts are serving HTTP/HTTPS.</li>
+          <li>Stage 3: for every discovered HTTP(S) endpoint, runs your <code>httpfuzz0</code> logic with a small default wordlist (e.g. common path segments) against the URL path, flagging anomalous responses (candidate hidden endpoints) per host.</li>
+          <li>Pipeline-level concurrency/rate governance: a single global rate-limit/concurrency budget that stages 1–3 share or respect in sequence, with written reasoning for why per-stage limits alone are not sufficient to bound total request volume against one target.</li>
+          <li>One final consolidated report combining all three stages: for each live host, its open ports/services and any flagged anomalous paths, ranked by a simple priority heuristic you define and justify (e.g. non-standard open ports and flagged anomalies rank above a clean, fully-expected HTTP/HTTPS-only host).</li>
+          <li>Demonstrated end to end against your own VPS/lab domain with at least one intentionally-hidden path seeded for the fuzz stage to find, proving the full chain works without manual intervention between stages.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any of the forbidden tools from Exercises 00–02, anywhere in the pipeline.</li>
+          <li>Running any stage against a target outside your own lab/domain.</li>
+          <li>A pipeline with no global rate governance, where each stage independently maxes out concurrency regardless of what the other stages already sent.</li>
+          <li>Silently dropping a stage's failure (e.g. DNS resolver unreachable) instead of reporting it and degrading gracefully.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: each stage remains an independently callable/testable module (reusing Exercises 00–02's code, not reimplementing), with a single orchestrator that sequences them and owns the shared rate/concurrency budget.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>A resumable run — if the pipeline is interrupted after Stage 1, a re-run picks up from Stage 2 using cached Stage 1 output instead of re-enumerating from scratch.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">bash_python_security/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live against your own lab environment, which the evaluator may reseed with different hosts/wordlist entries beforehand. For the capstone, the evaluator may add a new hidden path or a new listening service to your lab domain immediately before the defense and expects the pipeline to surface it without any code changes.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — subenum0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me your wildcard-detection logic running live against a domain configured with a wildcard record — walk through exactly how it avoids the false-positive flood.</li>
+          <li>Why does an unthrottled concurrent resolver risk becoming a denial-of-service tool against the target's own DNS infrastructure, and what specifically did you do about it?</li>
+          <li>What is your concurrency model (threads/processes/asyncio) and why did you pick it for this specific workload (I/O-bound DNS lookups)?</li>
+          <li>Show your serial-vs-concurrent benchmark — what was the actual speedup, and where does the benefit taper off as you increase concurrency further?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — bannergrab0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me your CIDR expansion on a real range — how many hosts, and how does your concurrency limit keep this from being effectively a denial-of-service scan?</li>
+          <li>Walk through your TLS-wrapped banner grab live — where exactly does the TLS handshake happen relative to reading the banner?</li>
+          <li>Give me an example banner your signature table correctly identifies, and one it correctly refuses to guess on — why the difference?</li>
+          <li>What stops this tool from being indistinguishable, from the target's perspective, from the reconnaissance phase of a real attack — and why does that mean scope authorization matters here specifically?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — httpfuzz0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run this live against your own Exercise 02 login endpoint from SQL and Database Internals with a small SQLi payload wordlist — walk me through which result gets flagged and why.</li>
+          <li>Why is length-only anomaly detection insufficient on its own — give a concrete case where it would miss something a length-plus-timing check would catch.</li>
+          <li>Show your baseline measurement — why does it matter that you measure baseline timing more than once, if you do?</li>
+          <li>What specifically makes this dangerous to run against a target without authorization, distinct from just "sending some HTTP requests"?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: reconpipe</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run the full pipeline live against your lab domain — narrate what's happening as each stage hands off to the next.</li>
+          <li>Why can three individually-rate-limited stages still overwhelm a target if you don't reason about the pipeline as a whole — give me the concrete math for your own configured limits.</li>
+          <li>Show me the intentionally-hidden path you seeded — walk through exactly how the fuzz stage's anomaly detection caught it.</li>
+          <li>What happens if Stage 1 finds zero subdomains — does the pipeline degrade gracefully or does it crash trying to feed an empty list into Stage 2?</li>
+          <li>Justify your priority-ranking heuristic in the final report with a concrete example from your own run.</li>
+          <li>If I ask you to point this at a domain you don't own right now, what do you say, and why?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>Zero subdomains discovered: pipeline reports this clearly and exits cleanly rather than crashing on empty input to Stage 2.</li>
+          <li>A discovered host with no open ports from the default list: reported as scanned-but-closed, not omitted from the report entirely.</li>
+          <li>A discovered HTTP(S) endpoint that returns identical responses for every fuzzed payload (a catch-all 200 page): correctly reported as zero anomalies, not a false positive flood.</li>
+          <li>DNS resolver becomes unreachable mid-Stage-1: pipeline reports a partial result and a clear error, does not hang indefinitely.</li>
+          <li>A host that responds to banner-grab but drops the connection during the HTTP fuzz stage: reported as a connectivity anomaly for that host, not silently skipped.</li>
+          <li>The same host appearing under two different discovered subdomains (duplicate IP): fuzzed once, not redundantly, or explicitly documented if you chose to fuzz per-hostname instead of per-IP.</li>
+          <li>Pipeline interrupted (Ctrl-C) mid-run: partial results already gathered are not lost/discarded silently.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Bash and Python for Security · AppSec Mastery Roadmap · Stage 0, Subject 6 of 6 · 1/1
+</footer>
+
+</body>
+</html>

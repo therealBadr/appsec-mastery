@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-label="AppSec Mastery">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1f2a"/><stop offset="1" stop-color="#0f4c5c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#g)"/>
+  <g font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" fill="#5eead4" opacity=".18" font-size="22">
+    <text x="60" y="90">$ ssh -o PasswordAuthentication=no bastion</text>
+    <text x="60" y="560">$ nft list ruleset | grep -c drop</text>
+    <text x="700" y="120">GET /admin HTTP/1.1</text>
+    <text x="760" y="590">Set-Cookie: sid=...; HttpOnly; Secure</text>
+  </g>
+  <text x="640" y="300" text-anchor="middle" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="110" font-weight="700" fill="#ffffff">AppSec Mastery</text>
+  <text x="640" y="380" text-anchor="middle" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="38" fill="#99f6e4">An open curriculum, written in public while learning it</text>
+  <text x="640" y="470" text-anchor="middle" font-family="DejaVu Sans Mono, Menlo, Consolas, monospace" font-size="30" fill="#e2e8f0">6 stages · 42 subjects · labs · write-ups</text>
+</svg>

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Networking Depth — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.65;
+    font-size:16px;
+  }
+
+  /* ===== Header ===== */
+  header.cover{
+    background:var(--navy);
+    color:#f5f4ef;
+    padding:64px 24px 48px;
+    text-align:center;
+    border-bottom:6px solid var(--accent);
+  }
+  header.cover .eyebrow{
+    font-family:var(--mono);
+    letter-spacing:.35em;
+    font-size:12px;
+    text-transform:uppercase;
+    color:#8fd9d1;
+    margin-bottom:18px;
+  }
+  header.cover h1{
+    font-family:var(--mono);
+    font-size:clamp(28px,5vw,52px);
+    letter-spacing:.06em;
+    margin:0 0 14px;
+    font-weight:800;
+  }
+  header.cover .subtitle{
+    font-family:var(--mono);
+    font-size:14px;
+    color:#c8c6bd;
+    margin-bottom:6px;
+  }
+  header.cover .version{
+    font-family:var(--mono);
+    font-size:12px;
+    color:#8b8a82;
+  }
+  header.cover .summary{
+    max-width:640px;
+    margin:32px auto 0;
+    font-family:var(--sans);
+    font-style:italic;
+    color:#dedcd3;
+    font-size:15px;
+    line-height:1.7;
+    border-top:1px solid #333844;
+    padding-top:24px;
+  }
+
+  /* ===== Shell / TOC ===== */
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+
+  nav.toc{
+    background:var(--paper-alt);
+    border:1px solid var(--line);
+    border-radius:6px;
+    margin:-28px auto 56px;
+    padding:28px 32px;
+    max-width:832px;
+    position:relative;
+    z-index:2;
+  }
+  nav.toc h2{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+  }
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+
+  /* ===== Chapters ===== */
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  section.chapter h2{
+    font-family:var(--mono);
+    font-size:26px;
+    margin:0 0 20px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--ink);
+  }
+  section.chapter h3.sub{
+    font-family:var(--mono);
+    font-size:18px;
+    margin:34px 0 12px;
+    color:var(--navy-soft);
+  }
+  section.chapter p{color:var(--ink-soft);}
+
+  .foreword{
+    font-style:italic;
+    font-size:19px;
+    text-align:center;
+    padding:36px 20px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+
+  .rule{
+    display:flex;
+    gap:14px;
+    padding:14px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{
+    font-family:var(--mono);
+    font-size:12px;
+    font-weight:700;
+    color:var(--accent);
+    min-width:44px;
+  }
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+
+  /* ===== Exercise cards ===== */
+  .exercise{
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    margin:28px 0 48px;
+    background:#fff;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);
+  }
+  .exercise-head{
+    background:var(--navy);
+    color:#f5f4ef;
+    padding:16px 22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:var(--mono);
+  }
+  .exercise-head .ex-num{
+    font-size:11px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:#8fd9d1;
+  }
+  .exercise-head .ex-name{
+    font-size:19px;
+    font-weight:700;
+  }
+  .exercise-meta{
+    display:grid;
+    grid-template-columns:140px 1fr;
+    row-gap:8px;
+    column-gap:14px;
+    padding:16px 22px;
+    background:var(--paper-alt);
+    border-bottom:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:12.5px;
+  }
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    font-weight:700;
+    margin-bottom:10px;
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:3px;
+  }
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{
+    font-family:var(--mono);
+    background:#efece2;
+    padding:1px 5px;
+    border-radius:3px;
+    font-size:.9em;
+  }
+
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+
+  .capstone-note{
+    background:var(--accent-soft);
+    border:1px dashed var(--accent);
+    border-radius:6px;
+    padding:18px 22px;
+    font-size:14.5px;
+    color:#0b3d38;
+    margin-bottom:20px;
+  }
+  .capstone-note strong{color:var(--accent);}
+
+  pre.filetree{
+    font-family:var(--mono);
+    font-size:13px;
+    background:var(--navy);
+    color:#e4e2d8;
+    padding:20px 24px;
+    border-radius:6px;
+    overflow-x:auto;
+    line-height:1.6;
+  }
+
+  /* ===== Appendix ===== */
+  .appendix-intro{
+    font-size:14px;
+    font-style:italic;
+    color:var(--ink-soft);
+    border-left:3px solid var(--line);
+    padding-left:16px;
+    margin-bottom:30px;
+  }
+  .appendix-block{
+    border:1px solid var(--line);
+    border-radius:8px;
+    margin-bottom:26px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .appendix-block h4{
+    font-family:var(--mono);
+    margin:0;
+    padding:14px 20px;
+    background:var(--paper-alt);
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+    letter-spacing:.04em;
+  }
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{
+    content:"☐";
+    position:absolute;
+    left:0;
+    color:var(--edge);
+    font-size:14px;
+  }
+
+  .lab-warning{
+    background:var(--forbidden-bg);
+    border:1px solid var(--forbidden);
+    border-radius:6px;
+    padding:16px 20px;
+    font-size:14px;
+    color:#5c1414;
+    margin-bottom:24px;
+  }
+  .lab-warning strong{color:var(--forbidden);}
+
+  footer.endcap{
+    background:var(--navy);
+    color:#9a9890;
+    text-align:center;
+    padding:26px;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.1em;
+    margin-top:60px;
+  }
+
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 0</div>
+  <h1>Networking Depth</h1>
+  <div class="subtitle">Subject 2 of Stage 0 — Foundations Reset</div>
+  <div class="version">Version 1.0 — August 2026</div>
+  <p class="summary">
+    Read, construct, and interrogate every protocol between a URL and a
+    socket — Ethernet through TLS — until nothing on the wire is a black
+    box, and prove it by detecting real attacks against a network you
+    built.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — wireshark_deepdive</a></li>
+          <li><a href="#ex01">Ex. 01 — portscan0</a></li>
+          <li><a href="#ex02">Ex. 02 — dnsresolve0</a></li>
+          <li><a href="#ex03">Ex. 03 — tlsinspect</a></li>
+          <li><a href="#ex04">Ex. 04 — how_dns_actually_works</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: netwatch</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"The wire doesn't lie about where a packet has been. It only lies about where it's going."</p>
+    <p>Every protocol below was designed by someone solving a real problem
+    under real constraints. You will not understand why TLS looks the way
+    it does, or why DNS trusts almost nothing, until you have built a
+    smaller, worse version of each yourself and watched it break.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>This subject moves from "I can read a Wireshark capture" to "I can
+    write the thing that produced the capture, and separately, the thing
+    that would have caught the attack hiding inside it." You will build
+    protocol implementations from raw sockets — no <code>scapy</code>, no
+    <code>nmap</code>, no <code>dnspython</code> — and end by building a
+    passive sentinel that has to understand every layer at once, live, on
+    a network you constructed yourself.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Evaluation environment.</strong> Exercises 00–04 may be evaluated against hosts you own or explicitly-authorized public infrastructure (e.g. your own domain's authoritative nameservers, your own bastion VPS). The Chapter IV capstone requires an <strong>isolated lab network</strong> you control end to end — a local hypervisor (VirtualBox/KVM/libvirt) with 2–3 VMs on a host-only or internal-only virtual network, or an equivalent private cloud VPC segment. Active Layer 2/3 attacks (ARP poisoning, rogue DHCP) must never touch a network you do not own or administer.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Scope and legality.</strong> Every active technique in this subject (scanning, spoofing, poisoning, rogue services) is authorized only against infrastructure you personally own or a lab you built for this purpose. None of it is authorized against a third party, an employer's network, a coffee-shop Wi-Fi, or "just to see what happens." This is a hard boundary, not a suggestion.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input, an unreachable host, or unexpected protocol responses. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Norm (code-quality baseline), applies to every exercise.</strong> Functions do one thing and are named for what they do. No magic numbers — ports, timeouts, protocol constants (flag bits, record types, opcode values) are named constants, never bare literals. No block of code you cannot explain, unprompted, line by line, during defense. Every non-obvious line carries a comment explaining why, not what.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Global forbidden list.</strong> Unless an exercise explicitly says otherwise: no <code>scapy</code>, <code>dpkt</code>, <code>pyshark</code>, <code>nmap</code>, <code>hping3</code>, <code>masscan</code>, <code>dnspython</code>, or any library that performs the exercise's core protocol parsing or construction for you. Reading their source for ideas is allowed. Depending on them at runtime for the graded logic is not. The standard library's <code>socket</code>, <code>struct</code>, and <code>ssl</code> modules are always allowed unless an exercise restricts them further.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this detects X" or "this parses Y correctly" must be backed by a reproducible capture, transcript, or log — captured in your turn-in. Assertions without evidence are treated as unmet requirements during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.7</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct. A single mandatory-part flaw — even a minor one — zeroes the bonus evaluation for that exercise, no exceptions.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <!-- EX 00 -->
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">wireshark_deepdive</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>networking_depth/ex00/</dd>
+        <dt>Files</dt><dd>captures/*.pcapng, ANALYSIS.md</dd>
+        <dt>Allowed</dt><dd>Wireshark/tshark, your own traffic only</dd>
+        <dt>Forbidden</dt><dd>third-party capture files, unannotated screenshots</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> Capture and fully annotate five real scenarios of your own traffic, at the packet level, published as a single reviewable writeup with the raw captures attached.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Five captures, each isolated to the scenario: (1) a DNS lookup, (2) a plaintext HTTP request, (3) a full HTTPS/TLS handshake, (4) an SSH connection setup, (5) a <strong>deliberately caused failed TCP connection</strong> (e.g. connecting to a closed port you control) — the failure must be one you engineered, not one you stumbled into.</li>
+          <li>Every packet in every capture annotated with: OSI layer(s) involved, relevant header fields and their actual values (not paraphrased), and what would be visible to an on-path observer versus what is encrypted.</li>
+          <li>The TCP handshake and failed-connection captures must have every flag (SYN/ACK/RST/FIN) and every sequence/acknowledgment number annotated, with an explanation of why the ack number is always "their seq + 1" and what would happen if an attacker could predict or inject a sequence number at that point in the handshake.</li>
+          <li>The TLS handshake capture must identify, from the raw bytes, the ClientHello's SNI extension and the ServerHello's negotiated cipher suite and TLS version — read from the packet, not asserted from memory.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Screenshots without the underlying <code>.pcapng</code> file attached for independent verification.</li>
+          <li>Captures of third-party traffic that is not yours to publish.</li>
+          <li>Annotations copied from a tutorial's example capture instead of your own.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.4, plus: one markdown section per scenario, consistent structure (capture → annotated field table → narrative explanation).</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>A sixth capture of a NAT'd connection (client behind NAT to a public server) with an explanation of exactly what the server sees versus what the client's LAN sees.</p>
+      </div>
+    </article>
+
+    <!-- EX 01 -->
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">portscan0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>networking_depth/ex01/</dd>
+        <dt>Files</dt><dd>portscan0.py, README.md</dd>
+        <dt>Allowed</dt><dd>raw sockets, socket, struct, standard library only</dd>
+        <dt>Forbidden</dt><dd>scapy, nmap, masscan, hping3, python-nmap</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> A port scanner built entirely on raw sockets that performs TCP SYN scanning, TCP connect scanning, and UDP scanning, with banner grabbing and TTL-based OS fingerprinting, distinguishing open/closed/filtered with the same precision a real scanner needs.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>TCP SYN scan: hand-construct the IP and TCP headers (including checksum computation), send a raw SYN, and classify the target port by the exact response — SYN/ACK means open, RST means closed, no response after a defined timeout means filtered. No connection is ever completed (no ACK sent back on open ports) — a true half-open scan.</li>
+          <li>TCP connect scan: full three-way handshake via the standard <code>connect()</code> syscall, as a slower/louder comparison mode.</li>
+          <li>UDP scan: send an empty or protocol-appropriate probe, classify as open (response received), closed (ICMP port-unreachable received — you must parse the ICMP message to determine this), or open|filtered (no response after timeout — and your writeup must explain why UDP scanning can never fully disambiguate this case without a protocol-aware probe).</li>
+          <li>Banner grabbing on discovered open TCP ports (read the first response bytes after connecting).</li>
+          <li>TTL-based OS fingerprinting: read the IP TTL of response packets, compare against a signature table you built (e.g. default TTLs for Linux/Windows/network gear) accounting for hop-count decrement, and report a best-guess OS family with your confidence reasoning.</li>
+          <li>A written section explaining the source-IP-spoofing concept: why a SYN scan cannot practically be run with a spoofed source address if you need to see the response, and what that implies about blind spoofing attacks against TCP's handshake in general.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>scapy, nmap, masscan, hping3, or any wrapper around them.</li>
+          <li>Hardcoding checksum values instead of computing them from the actual header bytes.</li>
+          <li>Treating "no response" identically for TCP filtered and UDP open|filtered without acknowledging, in code and in writing, that they are different levels of uncertainty.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.4, plus: header construction, checksum computation, response classification, and fingerprinting each in their own function; no protocol constant as a bare literal.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Parallel scanning with correct raw-socket response demultiplexing (matching responses back to the probe that caused them under concurrent sends); IPv6 support.</p>
+      </div>
+    </article>
+
+    <!-- EX 02 -->
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">dnsresolve0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>networking_depth/ex02/</dd>
+        <dt>Files</dt><dd>dnsresolve0.py, README.md</dd>
+        <dt>Allowed</dt><dd>socket (UDP/TCP), struct, standard library only</dd>
+        <dt>Forbidden</dt><dd>dnspython, any DNS parsing/query library</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> A DNS resolver that performs true iterative resolution starting from a root nameserver — no upstream recursive resolver involved at any point — constructing and parsing every packet by hand.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Starts from a hardcoded root nameserver IP, sends a manually-constructed binary DNS query (correct header, question section, ID, flags), and performs <strong>iterative resolution</strong>: follow each referral (root → TLD → authoritative) yourself by parsing the Authority/Additional sections, never asking a resolver to do the walk for you.</li>
+          <li>Supports at minimum record types A, AAAA, MX, TXT, NS, and CNAME — correctly following a CNAME chain to its final answer.</li>
+          <li>Handles the TC (truncated) flag by re-issuing the same query over TCP with the correct length-prefix framing.</li>
+          <li>Handles NXDOMAIN and SERVFAIL responses distinctly and reports them clearly rather than crashing or returning an empty result indistinguishable from "no such record type."</li>
+          <li>A written explanation, in your own words, of the difference between recursive and iterative resolution and which role your tool is playing at each step (it iterates on the caller's behalf, which is what makes it "a recursive resolver" from the outside while performing iteration internally — you must be able to explain why both terms are correct from different vantage points).</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Sending the query to <code>8.8.8.8</code>, your OS resolver, or any recursive resolver at any point — that defeats the entire exercise.</li>
+          <li>dnspython or any library that parses/constructs DNS packets for you.</li>
+          <li>Silently returning an empty result on NXDOMAIN instead of reporting it as NXDOMAIN specifically.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.4, plus: packet construction, packet parsing, referral-following, and TCP-fallback each isolated in their own function; DNS header flag bits accessed via named bitmasks, never magic hex.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>EDNS0 support (OPT record) with a larger UDP payload size advertised; basic negative-caching of NXDOMAIN responses per TTL.</p>
+      </div>
+    </article>
+
+    <!-- EX 03 -->
+    <article class="exercise" id="ex03">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 03</span>
+        <span class="ex-name">tlsinspect</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>networking_depth/ex03/</dd>
+        <dt>Files</dt><dd>tlsinspect.py, README.md</dd>
+        <dt>Allowed</dt><dd>ssl, socket standard library modules</dd>
+        <dt>Forbidden</dt><dd>sslyze, testssl.sh, or any wrapper around them</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> Connects to any HTTPS host and produces a full trust and configuration report — chain, validity, SANs, cipher suite, TLS version, SNI/ALPN — with the chain of trust verified by your own logic, not solely by asking the library "is this valid?"</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Connects using the SNI extension explicitly set to the target hostname, and reports the negotiated ALPN protocol.</li>
+          <li>Retrieves and displays the full certificate chain: subject, issuer, validity window, SANs, signature algorithm, key type/size, for every certificate in the chain, not just the leaf.</li>
+          <li>Verifies the chain <strong>yourself</strong>: each certificate's signature checked against its issuer's public key, terminating at a certificate present in your local trust store — not solely by calling a single "verify" method and trusting its boolean output without being able to explain each link.</li>
+          <li>Performs SAN/CN hostname matching yourself, including correct wildcard matching rules (<code>*.example.com</code> matches <code>foo.example.com</code>, not <code>foo.bar.example.com</code>).</li>
+          <li>Flags, explicitly, each of: self-signed leaf, expired certificate, SHA-1 (or weaker) signature algorithm anywhere in the chain, and TLS version below 1.2 offered or negotiated.</li>
+          <li>Reports the negotiated cipher suite and TLS protocol version as read from the actual handshake, with a plain-language note on what "negotiated" means (client offers a list, server picks one — not the other way around).</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Reporting <code>ssl.get_server_certificate()</code>'s success as your only chain validation without independently walking and verifying the chain.</li>
+          <li>sslyze, testssl.sh, or any existing TLS-audit tool wrapped and relabeled.</li>
+          <li>Ignoring intermediate certificates and only reporting on the leaf.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.4, plus: connection setup, chain retrieval, chain verification, hostname matching, and misconfiguration flagging each in their own function.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>OCSP stapling detection and interpretation; a batch mode scanning a list of hosts and producing a comparison table.</p>
+      </div>
+    </article>
+
+    <!-- EX 04 -->
+    <article class="exercise" id="ex04">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 04</span>
+        <span class="ex-name">how_dns_actually_works</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>networking_depth/ex04/</dd>
+        <dt>Files</dt><dd>README.md (published externally), captures/</dd>
+        <dt>Allowed</dt><dd>your own domain/zone, your own captures</dd>
+        <dt>Forbidden</dt><dd>AXFR attempts against domains you don't control</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> A published, evidence-backed writeup walking every step from typing a URL to holding an IP address — deep enough to also cover the DNS attack surface (zone transfers, rebinding, and DoH) with real captures, not diagrams copied from elsewhere.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Full walkthrough, with real Wireshark screenshots and referenced <code>.pcapng</code> captures, from URL entry to resolved IP: browser/OS cache check, stub resolver, recursive resolver, root → TLD → authoritative referral chain, final answer, and TTL-driven caching.</li>
+          <li>A zone-transfer (AXFR) attempt against an authoritative nameserver <strong>you control</strong> for a domain/zone you own, showing a properly configured server refusing the transfer, with the exact response captured and explained.</li>
+          <li>A constructed DNS-rebinding walkthrough in your own lab: a record with a short TTL that first resolves to a public IP and then, on re-query after TTL expiry, resolves to a private/loopback address — captured and explained as the mechanism, with a note on what mitigations (DNS pinning, host header validation) defeat it.</li>
+          <li>A captured comparison of the same query performed as plaintext DNS (UDP/53) versus DNS-over-HTTPS, with an explanation of exactly what an on-path observer can and cannot see in each case.</li>
+          <li>Published externally (GitHub or personal site).</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>AXFR attempts against any domain you do not own or administer.</li>
+          <li>Diagrams or explanations lifted from other blogs/tutorials without independent verification via your own captures.</li>
+          <li>Treating DoH as "encryption for the query" without addressing what it does <em>not</em> hide (e.g. SNI in the subsequent TLS connection, unless ECH is also used — which you should mention as the next layer of the problem).</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.4, plus: consistent structure (concept → capture → narrative → implication) per section.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>A comparable capture of DNS-over-TLS (port 853) alongside DoH; a short section on Encrypted Client Hello (ECH) and what it additionally hides.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="lab-warning">
+      <strong>Lab-only.</strong> Every attack scenario demonstrated in this capstone must be run inside the isolated lab described in §II.1/§II.2. Never against a network you don't own or administer.
+    </div>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> the OSI model as a working analysis framework, full TCP mechanics (handshake, sequence/ack tracking, flags, state), IP-layer behavior (fragmentation, TTL, spoofing reasoning), UDP and amplification patterns, ARP and ARP poisoning, the full DHCP DORA lifecycle plus starvation and rogue-server detection, DNS depth (including zone-transfer and rebinding detection live on the wire), ICMP types/codes and tunneling detection, subnetting/CIDR-aware segmentation reasoning, NAT and attribution caveats, TLS handshake-level parsing, and the practical reason HTTPS/HSTS defeats on-path MITM. No exercise above touches more than two or three of these; <code>netwatch</code> requires understanding essentially the entire theory list simultaneously to correctly interpret one live capture. Someone who only knows DNS cannot parse the ARP and DHCP traffic on the same wire. Someone who only knows TCP/IP headers has no way to recognize a DNS-rebinding response or a TLS downgrade. The tool doesn't work — doesn't even start correctly classifying traffic — on partial knowledge.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">netwatch</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>networking_depth/capstone/</dd>
+        <dt>Files</dt><dd>src/, topology.md, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <p><strong>Description.</strong> Build <code>netwatch</code>: a passive network sentinel that sniffs a live interface, hand-parses every layer from Ethernet through DNS/TLS without any packet-crafting library, and detects a defined set of multi-layer network attacks in real time, tagging every finding by OSI layer and by subnet/NAT context. Demonstrate it against real attack traffic you generate in your own isolated lab.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Raw packet capture (<code>AF_PACKET</code>/raw socket on Linux) with all parsing — Ethernet, ARP, IP (including fragment reassembly), TCP, UDP, ICMP, DNS, and TLS ClientHello/ServerHello — implemented by hand from the raw bytes. No <code>scapy</code>/<code>dpkt</code>/<code>pyshark</code> anywhere in the parsing path.</li>
+          <li><strong>TCP flow tracker</strong>: maintains per-flow state (SYN_SENT → SYN_RECEIVED/ESTABLISHED → FIN/RST variants) from observed packets; uses sequence/ack tracking to flag anomalies such as unexpected RST injection or out-of-window sequence numbers.</li>
+          <li><strong>IP layer module</strong>: reassembles fragmented packets (including out-of-order fragment arrival), tracks per-source-IP TTL and flags inconsistent TTL from the same source address as a possible spoofing indicator, and is configured with an expected CIDR baseline — any traffic violating your defined subnet boundaries (e.g. an unexpected source on the internal segment, or an RFC1918 address leaking onto the external-facing interface) is flagged as a segmentation violation.</li>
+          <li><strong>UDP amplification module</strong>: tracks request/response size ratio for known amplification-capable services (DNS, NTP, memcached, etc.) and flags any ratio above a configurable threshold.</li>
+          <li><strong>ARP module</strong>: tracks IP-to-MAC bindings observed on the wire; flags conflicting bindings for the same IP (the ARP-poisoning signature) and unsolicited ARP replies.</li>
+          <li><strong>DHCP module</strong>: parses the full DORA sequence (Discover/Offer/Request/Ack); flags more than one distinct server address issuing OFFERs (rogue DHCP) and abnormal DISCOVER volume from many distinct MACs in a short window (starvation).</li>
+          <li><strong>DNS module</strong>: classifies observed record types; flags AXFR requests/responses; flags rebinding indicators (short-TTL A record whose answer is a private/loopback address).</li>
+          <li><strong>ICMP module</strong>: parses type/code; flags anomalous payload size/pattern relative to standard echo traffic as a tunneling indicator.</li>
+          <li><strong>TLS module</strong>: parses ClientHello/ServerHello without decrypting; extracts SNI, ALPN, offered/negotiated version and cipher suite; flags a version/cipher <strong>downgrade</strong> relative to a known-good baseline capture you provide.</li>
+          <li>Every finding in the output is tagged with the OSI layer(s) involved and an explicit NAT/attribution caveat where the true origin cannot be determined from this vantage point alone.</li>
+          <li>Demonstrated end to end in your own isolated lab (documented topology required) with real evidence for <strong>every</strong> module: an ARP-poisoning attempt, a rogue DHCP server, a DHCP starvation burst, a UDP amplification pattern, a DNS zone-transfer attempt, a DNS-rebinding pattern, an ICMP tunneling pattern, a fragmented-packet evasion attempt, and a TLS downgrade attempt — each with a capture and the corresponding detection log entry.</li>
+          <li>A final live demonstration: from an ARP-poisoned on-path position in your lab, attempt to intercept traffic to (a) a plain HTTP site — succeeds, captured — and (b) an HSTS-preloaded HTTPS site — fails, captured — with a written explanation of exactly why HSTS defeats the downgrade your on-path position would otherwise allow.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li><code>scapy</code>, <code>dpkt</code>, <code>pyshark</code>, or any packet-crafting/parsing library anywhere in the capture or parsing path.</li>
+          <li>Existing IDS/IPS engines (Zeek, Suricata, Snort) doing the detection logic for you — reading their detection-rule documentation for ideas is fine, depending on their engine is not.</li>
+          <li>Running the attacks themselves with your own hand-rolled attacker tooling is <strong>not required</strong> — you may use an existing tool (e.g. <code>arpspoof</code>, a rogue DHCP daemon) purely to generate attacker-side traffic for testing, since building attacker tooling is out of scope for a defensive project. The detection logic must still be entirely yours.</li>
+          <li>Silently dropping a packet type your parser doesn't recognize instead of logging it as unclassified.</li>
+          <li>Claiming a detection "works" without the paired capture + log-entry evidence for that specific module.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.4, plus: one module per protocol/attack class, each independently testable against a static capture file; no protocol magic numbers (flag bits, DHCP message types, DNS opcodes, TLS content types) without named constants; a single top-level dispatcher that routes parsed packets to the relevant modules, not one function doing everything.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Run <code>netwatch</code> itself as an unprivileged process holding only <code>CAP_NET_RAW</code> instead of root, tying back to the Linux Administration Depth capstone's capability-minimization principle; a live terminal dashboard; DNS-over-HTTPS traffic classification (distinguishing it from regular HTTPS by heuristic, since it's not distinguishable by port alone).</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">networking_depth/
+├── ex00/
+├── ex01/
+├── ex02/
+├── ex03/
+├── ex04/
+└── capstone/</pre>
+    <p>Each exercise is defended live. For Exercises 01–03 the evaluator
+    supplies or selects the target (their own test host/domain) live and
+    expects your tool to behave exactly as specified — no pre-baked output.
+    For the capstone, the evaluator may generate additional attack traffic
+    in your lab beyond the scenarios you demonstrated and expects a
+    correctly-tagged finding or an honest "not covered by this module" —
+    silence on a real attack is a failure, a wrong classification is a
+    failure, a crash is an automatic fail regardless of anything else
+    working.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — wireshark_deepdive</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Pick the TCP handshake capture — walk me through the exact seq/ack values across all three packets and explain what "their seq + 1" means at each step.</li>
+          <li>In the failed-connection capture, what flag(s) came back, and what does that specifically tell you versus a timeout with no response at all?</li>
+          <li>Show me the SNI value in the TLS capture, byte-level, in the actual hex dump — not just what your annotation claims.</li>
+          <li>What is visible to an on-path observer in the HTTPS capture versus the HTTP capture — be exact about what's still visible even though it's "encrypted" (e.g. SNI pre-ECH, packet sizes/timing).</li>
+          <li>Why does the DNS lookup capture use UDP, and under what condition would you expect to see it retried over TCP in a live capture?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — portscan0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me the raw IP+TCP header your SYN scan constructs, byte by byte — where's the checksum computed, and prove it's actually computed, not hardcoded.</li>
+          <li>Run a SYN scan against a filtered port live — how do you distinguish "filtered" from "closed" from "the packet got lost on the wire," and what's your actual timeout logic?</li>
+          <li>Your UDP scan gets no response on a port — is it open or filtered? Be honest about what you cannot know, and explain why a protocol-aware probe would resolve it.</li>
+          <li>Why can't you practically run this SYN scan with a spoofed source address and still see results? What does that imply about blind TCP session hijacking?</li>
+          <li>Show your TTL fingerprinting table — where did these baseline values come from, and how many hops does your test target sit behind, and how did you account for that in your guess?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — dnsresolve0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me, live, your query going to the actual root server IP — not <code>8.8.8.8</code>, not your OS resolver.</li>
+          <li>Walk me through a referral response — where in the packet is the next nameserver's address, Authority or Additional section, and why does that distinction matter for your parser?</li>
+          <li>Resolve a name with a CNAME chain — show each hop your resolver follows and where that's happening in your code.</li>
+          <li>Force a truncated response — show the TC flag being read and the TCP retry actually happening.</li>
+          <li>Is your resolver "recursive" or "iterative"? Defend both answers from different vantage points.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — tlsinspect</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through your chain verification — pick the intermediate certificate and show me exactly how you checked its signature against the root's public key.</li>
+          <li>Show a wildcard SAN and prove your matching logic handles it correctly including a case where it should NOT match.</li>
+          <li>Point it at a self-signed host — what specifically triggers your flag, and what would a naive implementation relying only on <code>ssl.verify_mode</code> have missed?</li>
+          <li>What's the actual difference between what the client offers and what gets negotiated — show me both in your output for a real connection.</li>
+          <li>Point it at a TLS 1.0-only host if you can find or stand one up — what happens, and how does your tool represent "the server offered something weak" versus "the connection failed entirely"?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a4">
+      <h4>A.4 — how_dns_actually_works</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show the AXFR refusal capture — what's in the response that indicates refusal specifically, at the protocol level?</li>
+          <li>Walk through your rebinding lab step by step — what TTL did you use and why did that value matter for the timing of your demonstration?</li>
+          <li>In your DoH-vs-plaintext comparison, what exactly can an on-path observer still learn even with DoH in place?</li>
+          <li>Why is attempting AXFR against a domain you don't control off-limits here, technically and legally?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a5">
+      <h4>A.5 — Capstone: netwatch</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk me through OSI-layer tagging for one finding, live — show the actual layers your tool attributes to a flagged DNS-rebinding event and justify each one.</li>
+          <li>Trigger ARP poisoning against your lab right now — show me the conflicting-binding detection fire, and explain what your tool does if the "poisoning" is actually a legitimate DHCP lease migrating a host to a new MAC (e.g. a VM restart) — how do you avoid a false positive there?</li>
+          <li>Show me your IP fragment reassembly with out-of-order fragments — what happens if a fragment never arrives?</li>
+          <li>Your UDP amplification threshold — what is it, why that number, and show me a legitimate large DNS response that does NOT trigger a false positive.</li>
+          <li>Rogue DHCP detection — what's your window for "multiple servers observed," and could two legitimate redundant DHCP servers (a real, intentional HA setup) trigger a false positive? How would you tell them apart, or do you not currently?</li>
+          <li>Show the TLS downgrade detection live — what's your "known-good baseline" and what happens if you never captured one for a given host?</li>
+          <li>Walk through the HSTS-defeats-MITM demonstration — what specifically causes the browser (or your test client) to refuse the downgrade, and what would have happened on the victim's very first-ever connection to that site, before HSTS was cached (or absent HSTS preloading)?</li>
+          <li>A packet arrives that your parser doesn't recognize at all — what happens, and how do I verify it's logged rather than silently dropped?</li>
+          <li>Explain a finding where NAT makes attribution ambiguous — show me the exact caveat your report attaches to it, and why you can't resolve it from this capture point alone.</li>
+          <li>Why raw sockets and hand-rolled parsing instead of just using <code>scapy</code> to save weeks of work — what did you actually gain from doing it by hand that matters for a defensive tool like this?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases (apply across relevant modules)</span>
+        <ul class="edge-list">
+          <li>Fragmented IP packet with fragments arriving out of order: reassembled correctly.</li>
+          <li>Fragmented IP packet missing a fragment entirely: does not hang forever, times out and logs an incomplete-reassembly event.</li>
+          <li>Same source IP observed with two different TTLs within a short window: flagged as a possible spoofing indicator.</li>
+          <li>Legitimate large DNS response (e.g. a DNSSEC-signed zone answer) that is large but not attack traffic: does not falsely trigger the amplification module.</li>
+          <li>Two ARP replies for the same IP with different MACs within your detection window: flagged.</li>
+          <li>A host's MAC legitimately changing (e.g. VM restart with a new virtual NIC) is either correctly distinguished from poisoning or the limitation is explicitly documented.</li>
+          <li>Two distinct DHCP servers responding to the same DISCOVER: flagged as rogue DHCP.</li>
+          <li>A burst of DISCOVER messages from many distinct MACs in a short window: flagged as starvation.</li>
+          <li>A DNS response with a short TTL resolving to <code>127.0.0.1</code> or a private RFC1918 address: flagged as a rebinding indicator.</li>
+          <li>An AXFR request observed on the wire: flagged regardless of whether the server granted or refused it.</li>
+          <li>An ICMP echo request with an oversized or non-standard payload: flagged as a possible tunneling indicator; a normal <code>ping</code> with default payload size: not flagged.</li>
+          <li>A TLS handshake offering only TLS 1.0/1.1 where a prior baseline showed 1.3 available: flagged as a downgrade.</li>
+          <li>A packet type outside all implemented parsers: logged as unclassified, never silently dropped, never crashes the sentinel.</li>
+          <li>Traffic sourced from an RFC1918 address observed on the interface designated "external": flagged as a segmentation/NAT-boundary violation.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Networking Depth · AppSec Mastery Roadmap · Stage 0, Subject 2 · 1/1
+</footer>
+
+</body>
+</html>

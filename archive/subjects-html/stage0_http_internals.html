@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTTP Internals — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 0</div>
+  <h1>HTTP Internals</h1>
+  <div class="subtitle">Subject 3 of 6 — Foundations Reset</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Build the protocol by hand, then attack the security semantics layered on top of it — headers, cookies, CORS, CSP, and the auth flows that live or die by them — until every response your browser trusts is a response you can explain byte by byte.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — httpanatomy0</a></li>
+          <li><a href="#ex01">Ex. 01 — headersec0</a></li>
+          <li><a href="#ex02">Ex. 02 — cookielab</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: httpsentinel</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"A browser trusts a server the way a stranger trusts a business card — entirely, and for reasons that have nothing to do with the paper stock."</p>
+    <p>HTTP itself has almost no security model. Everything that keeps the modern web from being a free-for-all — same-origin policy, cookie flags, CORS, CSP — is a set of conventions bolted on afterward, enforced by the client, and routinely misconfigured by the server. You cannot audit what you have only ever consumed through a library.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>This subject moves from "I sent a request with <code>requests</code>" to "I wrote the client and the server, and separately, the tool that finds the fourteen ways people misconfigure the security semantics on top of both." You will parse and construct raw HTTP/1.1 over a socket, build a header-security auditor, break a deliberately misconfigured session/cookie implementation, and end by building a single tool that audits headers, cookies, CORS, and redirect/host-header handling against a live target.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input, an unreachable host, or unexpected data. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline), applies to every exercise.</strong> Functions do one thing and are named for what they do. No magic numbers — ports, offsets, thresholds, and protocol constants are named constants, never bare literals. No block of code you cannot explain, unprompted, line by line, during defense. Every non-obvious line carries a comment explaining why, not what.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of the form "this detects X" or "this parses Y correctly" must be backed by a reproducible capture, transcript, or log — captured in your turn-in. Assertions without evidence are treated as unmet requirements during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct. A single mandatory-part flaw — even a minor one — zeroes the bonus evaluation for that exercise, no exceptions.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> Exercises 00–02 target hosts and apps you build or own. The capstone may audit any host you own, plus DVWA/Juice Shop/WebGoat instances you run locally — never a third party without written authorization.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.6</div>
+      <div class="body"><strong>Global forbidden list.</strong> Unless an exercise explicitly says otherwise: no Nikto, no automated header-scanning SaaS, no <code>securityheaders.com</code> API as a substitute for your own logic. Reading their output for comparison after your own tool runs is fine.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">httpanatomy0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>http_internals/ex00/</dd>
+        <dt>Files</dt><dd>httpserver.py, httpclient.py, README.md</dd>
+        <dt>Allowed</dt><dd>socket, standard library only</dd>
+        <dt>Forbidden</dt><dd>requests, http.client, any HTTP library</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A minimal HTTP/1.1 client and server pair built directly on TCP sockets, handling request/response anatomy, methods, status lines, headers, and both content-length and chunked transfer encoding by hand.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Server: accepts a connection, parses the request line (method, target, version), parses headers into a case-insensitive map, and correctly reads a body using either <code>Content-Length</code> or <code>Transfer-Encoding: chunked</code> — implementing chunk-size-line parsing yourself.</li>
+          <li>Client: constructs a well-formed request by hand (request line, headers, blank line, body) for GET, POST, HEAD, OPTIONS, and TRACE, and parses the response status line, headers, and body symmetrically.</li>
+          <li>Server responds correctly to HEAD (headers only, no body) and OPTIONS (an <code>Allow</code> header listing supported methods) — and your README explains, from an attacker's perspective, what an unexpectedly-enabled TRACE or unrestricted OPTIONS response can leak.</li>
+          <li>Server returns at least 200, 301, 302, 400, 403, 404, and 500 in the right situations, and the client correctly follows a 301/302 redirect chain up to a configurable hop limit (never infinitely).</li>
+          <li>Keep-alive: the server correctly reuses one TCP connection for multiple sequential requests when <code>Connection: keep-alive</code> is negotiated, and closes cleanly on <code>Connection: close</code>.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any HTTP parsing/construction library, including <code>http.client</code>, <code>http.server</code>, or <code>requests</code>.</li>
+          <li>Treating the body as "everything until the socket closes" instead of respecting <code>Content-Length</code>/chunked framing — this is exactly the class of bug behind real request-smuggling vulnerabilities.</li>
+          <li>A 500 response leaking a Python traceback to the client.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: request-line parsing, header parsing, body framing, and response construction each in their own function; status codes referenced by named constants, never bare integers.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>HTTP/1.0 vs 1.1 negotiation handling; a pipelining demonstration showing why HTTP/1.1 pipelining is fragile enough that browsers abandoned it.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">headersec0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>http_internals/ex01/</dd>
+        <dt>Files</dt><dd>headersec0.py, README.md</dd>
+        <dt>Allowed</dt><dd>requests or raw sockets, ssl standard module</dd>
+        <dt>Forbidden</dt><dd>securityheaders.com API, Nikto, any prebuilt header-audit library</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A CLI that fetches a URL, follows redirects, and produces a structured, color-coded report of every security-relevant header and cookie flag present, missing, or misconfigured, plus the TLS version/cipher in use.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Reports presence/absence and value of: <code>Strict-Transport-Security</code> (and whether <code>includeSubDomains</code>/<code>preload</code> are set), <code>Content-Security-Policy</code>, <code>X-Content-Type-Options</code>, <code>X-Frame-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>.</li>
+          <li>For every <code>Set-Cookie</code> header, parses and reports <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code> (and flags the absence of <code>SameSite</code> as defaulting to <code>Lax</code> in modern browsers, explaining what that does and does not prevent), <code>Domain</code>, and <code>Path</code>.</li>
+          <li>Reports the full redirect chain followed to reach the final response, flagging any hop that downgrades HTTPS→HTTP.</li>
+          <li>Reports negotiated TLS version and cipher suite for the final host.</li>
+          <li>Severity-ranks findings (e.g. missing HSTS on an HTTPS site is higher severity than a missing <code>Permissions-Policy</code>) with your ranking justified in writing, not just asserted.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Calling an external header-scanning API and relabeling its output as your own analysis.</li>
+          <li>Flagging a header as "missing" without checking case-insensitively — HTTP headers are case-insensitive and a naive exact-match check produces false positives.</li>
+          <li>Ignoring multiple <code>Set-Cookie</code> headers on one response (a common parsing bug when using low-level socket reads).</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: fetch/parse/classify/report as separate functions; a single table of header-name → check-function rather than one long if/elif chain.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>CSP directive-level analysis (flagging <code>unsafe-inline</code>/<code>unsafe-eval</code>/wildcard sources specifically, not just "CSP present"); batch mode over a list of hosts producing a comparison table.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">cookielab</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>http_internals/ex02/</dd>
+        <dt>Files</dt><dd>app.py, ANALYSIS.md, evidence/</dd>
+        <dt>Allowed</dt><dd>Flask, Burp Suite Community, your own instrumentation</dd>
+        <dt>Forbidden</dt><dd>any session-management library beyond Flask's own default session handling for the "before" state</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A minimal Flask app with intentionally broken session/cookie security, exploited by hand via Burp/devtools, then fixed field by field with a before/after comparison.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>The "before" app ships with at least three real misconfigurations: a session cookie missing <code>HttpOnly</code>, a session ID that does not rotate on login (session fixation), and a cookie scoped with a <code>Domain</code> broader than necessary.</li>
+          <li>A working session-fixation exploit demonstrated end to end: attacker sets a known session ID in the victim's browser before login, victim logs in, attacker reuses the same ID to inherit the authenticated session — captured with Burp/devtools evidence at every step.</li>
+          <li>A working demonstration that the missing <code>HttpOnly</code> flag lets a simulated injected script (in your own test page, not a real XSS) read <code>document.cookie</code> and exfiltrate the session value.</li>
+          <li>Each vulnerability fixed one at a time in an "after" version, with the exact diff shown and a before/after Burp capture proving the fix closes the exploit.</li>
+          <li>A written explanation of what <code>SameSite=Strict</code> versus <code>Lax</code> would each have additionally prevented in this specific app's login flow.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Fixing all three issues simultaneously with no isolated before/after evidence per issue.</li>
+          <li>Claiming the session-fixation fix works because "the docs say session.regenerate() is called" without capturing the actual session ID changing across the login boundary.</li>
+          <li>Testing this against anything other than your own local instance.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the "before" and "after" apps are separate files/branches, not one app with a feature flag; ANALYSIS.md follows vulnerability → exploit → root cause → fix → verification per issue.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Add and then defeat a CSRF vulnerability in the same app using a crafted auto-submitting HTML form, then fix it with a synchronizer token.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> full request/response anatomy (to correctly parse edge-case responses), every cookie security attribute, CORS preflight mechanics, CSP directive semantics, auth-flow awareness (where tokens live and how they can be stolen), and the open-redirect/Host-header-injection surface that request smuggling and cache poisoning research builds on. No exercise above combines more than two of these; a CORS finding is meaningless without understanding cookies (is the response credentialed?), and a CSP finding is meaningless without understanding what inline-script blocking actually defeats. The tool does not produce a coherent report on partial knowledge — it produces a pile of unrelated true/false flags.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">httpsentinel</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>http_internals/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A single audit tool that combines header/cookie security analysis with CORS misconfiguration testing, CSP bypass reasoning, open-redirect detection, and Host-header-injection probing against a target you own or run locally — producing one structured report an engineering team could act on.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Everything from <code>headersec0</code> (Exercise 01), refactored into this tool as its baseline module.</li>
+          <li>CORS module: sends preflight and simple requests with varying <code>Origin</code> headers (including <code>null</code>, a reflected arbitrary origin, and a subdomain), and reports whether <code>Access-Control-Allow-Origin</code> is reflected/wildcarded, and critically, whether <code>Access-Control-Allow-Credentials: true</code> is combined with an overly permissive origin — the specific combination that turns a CORS misconfiguration into an authenticated data leak.</li>
+          <li>CSP module: parses the policy (if any) into directives and flags <code>unsafe-inline</code>, <code>unsafe-eval</code>, wildcard (<code>*</code>) sources, and the complete absence of <code>script-src</code>/<code>default-src</code>, with a plain-language note on what each specific gap actually enables.</li>
+          <li>Open-redirect module: given a list of parameter names commonly used for redirects (e.g. <code>next</code>, <code>redirect</code>, <code>url</code>, <code>return</code>), tests each against the target and reports any that redirect to an attacker-controlled external domain unchecked.</li>
+          <li>Host-header-injection module: sends requests with a manipulated <code>Host</code> header (and, separately, <code>X-Forwarded-Host</code>) and detects whether the response (e.g. a password-reset link, a canonical-URL tag, a redirect) reflects the attacker-controlled value — with a written explanation of the password-reset-poisoning attack this enables.</li>
+          <li>One consolidated report per target: every finding tagged by category (headers/cookies/CORS/CSP/redirect/host-injection), severity, and the exact request/response evidence that produced it.</li>
+          <li>Demonstrated end to end against DVWA or Juice Shop running locally, with at least one real finding per module — or, for a module with no finding, an explicit "checked, not present" line, never silence.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any existing header/CORS/CSP scanner wrapped and relabeled.</li>
+          <li>Flagging every CORS response with any <code>Access-Control-Allow-Origin</code> as a vulnerability without checking the credentials combination — that is the actual bug, not the header's mere presence.</li>
+          <li>Testing the open-redirect or Host-header modules against anything but your own local instances.</li>
+          <li>A module that silently no-ops on an unexpected response shape instead of reporting "inconclusive."</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: one module per finding category, a shared HTTP-fetch layer reused by all modules (not five copies of request logic), and a single reporting function that all modules feed into.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>A CSP bypass-payload suggester for a given weak policy (e.g. a JSONP endpoint on an allowed script-src host); a diff mode comparing two scans of the same target over time.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">http_internals/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live against a target the evaluator selects (your own local instance or DVWA/Juice Shop they stand up). For the capstone, the evaluator may add a header/cookie/CORS/CSP misconfiguration to their own test instance not covered by your demonstrated findings and expects your tool to either catch it or produce an honest "not covered by this module" rather than silence.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — httpanatomy0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me, live, a request whose body length is declared by <code>Content-Length</code> and one declared by chunked encoding — walk through exactly how your parser knows where each body ends.</li>
+          <li>What happens if a request declares both <code>Content-Length</code> and <code>Transfer-Encoding: chunked</code> with conflicting values? What does your server do, and why does this exact ambiguity matter for request smuggling?</li>
+          <li>Why is an open TRACE method historically dangerous (Cross-Site Tracing), even though modern browsers block it from JavaScript?</li>
+          <li>Show your redirect-chain following — what stops it from looping forever on a server that redirects A→B→A?</li>
+          <li>What is the actual difference, on the wire, between a HEAD and a GET response?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — headersec0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Point this at a site missing <code>SameSite</code> entirely — what does your tool report, and what does the browser actually do by default in 2026?</li>
+          <li>Walk me through your CSP directive parser on a real policy string — where do you split on semicolons vs spaces, and what happens on a malformed directive?</li>
+          <li>Why does a missing <code>X-Content-Type-Options: nosniff</code> matter specifically for a file-upload feature?</li>
+          <li>Show a host where your tool follows an HTTPS→HTTP downgrade redirect — what would an on-path attacker do with that hop?</li>
+          <li>Justify your severity ranking for at least two findings, live, without your notes.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — cookielab</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me the exact session ID before and after login in your fixation exploit — where in Flask's session handling does the rotation (or lack of it) actually happen?</li>
+          <li>Your XSS-flag demo reads <code>document.cookie</code> — what specifically about <code>HttpOnly</code> stops this in a real attack, and what does it not stop?</li>
+          <li>What is the practical difference between narrowing the cookie's <code>Domain</code> and narrowing its <code>Path</code> — give a concrete scenario where each one matters.</li>
+          <li>If this app also had a subdomain takeover somewhere under its cookie's <code>Domain</code> scope, what would that let an attacker do to your fixed cookie?</li>
+          <li>Show your before/after Burp captures side by side for one vulnerability, live.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: httpsentinel</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Show me the specific CORS response where credentials-plus-reflected-origin fires — what could an attacker actually steal with that combination, concretely, for this target?</li>
+          <li>Walk through your CSP parser on a policy using both <code>default-src</code> and a more specific <code>script-src</code> — which one governs script execution, and does your tool get that precedence right?</li>
+          <li>Your open-redirect module found (or didn't find) a vulnerable parameter — show me the exact request/response, and explain why a redirect to an attacker domain is a real security issue and not just a UX quirk.</li>
+          <li>Demonstrate the Host-header-injection finding live — trace exactly where the reflected value would end up in a real password-reset email.</li>
+          <li>Why does this tool need to understand cookies at all to correctly evaluate a CORS finding?</li>
+          <li>What would this tool report on a target that's completely well-configured — show me that a clean bill of health is actually a positive assertion per check, not just an empty output.</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>Target with no CSP at all: flagged as a finding, not silently skipped.</li>
+          <li>Target with a CSP that has <code>default-src 'none'</code> and nothing else: correctly interpreted as restrictive, not flagged as broken.</li>
+          <li>CORS preflight (OPTIONS) response that differs from the actual request response: both captured and reconciled.</li>
+          <li><code>Access-Control-Allow-Origin: *</code> with no credentials header: correctly classified as lower severity than reflected-origin-plus-credentials.</li>
+          <li>A redirect parameter that only accepts relative paths: correctly classified as not vulnerable.</li>
+          <li>A redirect parameter vulnerable only to protocol-relative URLs (<code>//evil.com</code>): still detected.</li>
+          <li>Host header reflected into a <code>Location</code> header but the app also validates against an allow-list: correctly classified as not vulnerable, with evidence.</li>
+          <li>Multiple <code>Set-Cookie</code> headers on one response: all parsed, none dropped.</li>
+          <li>A target that times out or refuses connection mid-scan: reported as inconclusive for that module, tool does not crash.</li>
+          <li>Self-referential CORS check (target reflects the tool's own request Origin back exactly): correctly distinguished from a genuinely permissive wildcard policy.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  HTTP Internals · AppSec Mastery Roadmap · Stage 0, Subject 3 of 6 · 1/1
+</footer>
+
+</body>
+</html>

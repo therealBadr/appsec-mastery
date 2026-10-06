@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Handling Vulnerabilities and Cloud SSRF — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 2</div>
+  <h1>File Handling Vulnerabilities and Cloud SSRF</h1>
+  <div class="subtitle">Subject 4 of 7 — Hands-On Web Security + Code Review</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Every feature that touches a filesystem path or a filename supplied by the user is a potential escape hatch out of the directory the developer imagined. Every feature that fetches a URL on a server running inside a cloud provider is a potential escape hatch into the provider's own control plane.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Chapter 00 — Foreword</a></li>
+      <li><a href="#ch1">Chapter I — Introduction</a></li>
+      <li><a href="#ch2">Chapter II — General Instructions</a></li>
+      <li><a href="#ch3">Chapter III — Mandatory Part</a>
+        <ol class="toc-sub">
+          <li><a href="#ex00">Ex. 00 — uploadbypass0</a></li>
+          <li><a href="#ex01">Ex. 01 — lfi_logpoison0</a></li>
+          <li><a href="#ex02">Ex. 02 — imdsv2_bypass0</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch4">Chapter IV — Capstone: filessrf_auditor</a></li>
+      <li><a href="#ch5">Chapter V — Submission &amp; Peer-Evaluation</a></li>
+      <li><a href="#appA">Appendix A — Evaluation Scale</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Chapter 00</div>
+    <h2>Foreword</h2>
+    <p class="foreword">"A path is not a string with a security policy attached. "../" doesn't violate any rule the filesystem enforces — it violates an assumption the developer forgot to check."</p>
+    <p>File upload, path traversal, and LFI/RFI are treated as beginner vulnerabilities the same way XSS is, and for the same wrong reason — the proof-of-concept is simple, so people stop there. This subject insists on real impact each time: an uploaded web shell that executes, a traversed path that reads a real secret, and — because this roadmap targets remote-friendly, cloud-native employers — an SSRF that reaches a hardened, IMDSv2-only metadata endpoint the way Exercise 02 of Server-Side Injection deliberately did not yet cover.</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>Introduction</h2>
+    <p>You will bypass file-upload restrictions to get a web shell executing, exploit path traversal and local file inclusion (including LFI-to-RCE via log poisoning) against a vulnerable PHP-style include pattern, and defeat IMDSv2's token-based hardening through an SSRF chain that a naive metadata-endpoint block would not catch. The capstone is a file-handling-and-SSRF auditor combining all three.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>General Instructions</h2>
+
+    <div class="rule">
+      <div class="tag">II.1</div>
+      <div class="body"><strong>Crash policy.</strong> Your programs must never crash, hang indefinitely, or exit uncleanly on malformed input. Any behavior not explicitly specified is undefined behavior — free to do anything <em>except</em> crash, hang, or corrupt state.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.2</div>
+      <div class="body"><strong>Norm (code-quality baseline).</strong> Functions do one thing and are named for what they do. No magic numbers. No block of code you cannot explain, unprompted, line by line, during defense.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.3</div>
+      <div class="body"><strong>Evidence, not assertions.</strong> Every claim of exploitability or of a fix working must be backed by a reproducible request/response, log, or capture in your turn-in.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.4</div>
+      <div class="body"><strong>Bonus rule.</strong> Bonus parts are evaluated only if the mandatory part is 100% functional and correct.</div>
+    </div>
+    <div class="rule">
+      <div class="tag">II.5</div>
+      <div class="body"><strong>Scope.</strong> All exploitation targets DVWA, Juice Shop, WebGoat, PortSwigger Academy labs, HackTheBox/lab machines, or an application you wrote — never a third party without written authorization.</div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Mandatory Part</h2>
+
+    <article class="exercise" id="ex00">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 00</span>
+        <span class="ex-name">uploadbypass0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>file_handling_cloud_ssrf/ex00/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>a file-upload feature you build with progressively stronger (but still bypassable) restrictions</dd>
+        <dt>Forbidden</dt><dd>any automated upload-bypass fuzzer</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A file-upload feature defended by three progressively stronger but still-bypassable restrictions — client-side-only validation, then extension blocklisting, then content-type checking — each defeated in turn, ending in an uploaded web shell that actually executes.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Layer 1 (client-side only): a upload form validating file extension only in JavaScript, bypassed by sending the upload request directly (Burp/curl), skipping the browser entirely.</li>
+          <li>Layer 2 (server-side extension blocklist): the server rejects <code>.php</code>/<code>.py</code> (matching your backend) by extension, bypassed via an alternate executable extension the blocklist misses (e.g. <code>.phtml</code>, case variation, double extensions like <code>shell.php.jpg</code> if your server's handler config is naive about it) or a null-byte-style trick if your stack is vulnerable to one.</li>
+          <li>Layer 3 (content-type / magic-byte check): the server checks the uploaded file's declared <code>Content-Type</code> and/or magic bytes, bypassed by crafting a file that is simultaneously a valid image (passing the magic-byte check) and valid executable code in your backend language (a genuine polyglot, or a magic-byte-prepended script your server's handler still executes based on extension).</li>
+          <li>Full impact: the uploaded file, once reachable at a predictable/discovered URL, executes as code on the server (a minimal web shell responding to a command parameter), demonstrated with a command run and its output returned — not just "the file uploaded successfully."</li>
+          <li>The correct fix applied and verified: store uploads outside the webroot (or in a location with execution disabled at the web-server config level), re-derive the filename/extension server-side from an allowlist of permitted types, and re-check actual file content (not just declared type) — your polyglot shown uploading successfully but never executing.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any automated upload-bypass tool.</li>
+          <li>Stopping at "the file uploaded" without demonstrating actual code execution.</li>
+          <li>A fix that's just "a better blocklist" — the mandatory fix is architectural (execution-disabled storage + allowlist).</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: each of the three bypass layers demonstrated as a distinct, reproducible step.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>A race-condition variant: upload a malicious file and access it in the brief window between upload completion and any asynchronous malware/content scan completing, if you add one to your target.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex01">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 01</span>
+        <span class="ex-name">lfi_logpoison0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>file_handling_cloud_ssrf/ex01/</dd>
+        <dt>Files</dt><dd>vuln_app.py, EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>a PHP-style (or equivalent) include-based app you build, access to your own server logs</dd>
+        <dt>Forbidden</dt><dd>any automated LFI exploitation tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A deliberately vulnerable "include this page fragment by name" feature, exploited for path traversal to read arbitrary local files, then escalated to remote code execution via log poisoning — planting attacker-controlled PHP code inside a log file the vulnerable include can be tricked into including.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>A vulnerable endpoint that includes a file based on user input with insufficient path restriction (e.g. <code>include($_GET['page'] . '.php')</code> or a Python/Flask equivalent using unsanitized path joining).</li>
+          <li>Path traversal to read a real local file outside the intended directory (e.g. your app's own config file containing a real, planted secret) using <code>../</code> sequences, including demonstrating at least one traversal-filter bypass (e.g. double-encoding, or a naive single-pass <code>str.replace('../', '')</code> defeated by an overlapping payload like <code>....//</code>).</li>
+          <li>LFI-to-RCE via log poisoning: send a request (e.g. as a crafted <code>User-Agent</code> header) containing PHP/executable code that gets written verbatim into a log file your application or web server writes to, then use the LFI to include that log file, causing the planted code to execute — with the full chain demonstrated and a command's output returned.</li>
+          <li>A written explanation of exactly why file inclusion is more dangerous than file reading: an "include" doesn't just display a file's contents, it <em>executes</em> them if they contain valid code in the host language — the same execute-vs-parse distinction that ran through SSTI and deserialization, applied here to the filesystem layer.</li>
+          <li>The correct fix applied and verified: replace the free-form include with an allowlist of permitted page names mapped to fixed file paths (no user-controlled path construction at all), with your traversal and log-poisoning payloads shown failing.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any automated LFI tool.</li>
+          <li>Stopping at file disclosure without attempting the log-poisoning RCE escalation.</li>
+          <li>A fix that just adds more traversal-sequence filtering instead of eliminating user-controlled path construction entirely.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: traversal, log-poisoning-injection, and log-poisoning-inclusion each demonstrated as separate, clearly evidenced steps.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>A PHP-wrapper-style data-URI or base64-filter RCE variant (or your language's equivalent trick) as an alternative LFI-to-RCE path not relying on log poisoning.</p>
+      </div>
+    </article>
+
+    <article class="exercise" id="ex02">
+      <div class="exercise-head">
+        <span class="ex-num">Exercise 02</span>
+        <span class="ex-name">imdsv2_bypass0</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>file_handling_cloud_ssrf/ex02/</dd>
+        <dt>Files</dt><dd>EXPLOIT.md, evidence/</dd>
+        <dt>Allowed</dt><dd>a real or faithfully simulated IMDSv2 endpoint in your lab, an SSRF-vulnerable app you build</dd>
+        <dt>Forbidden</dt><dd>any automated cloud-SSRF exploitation tool</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> An SSRF against a target hardened with IMDSv2 (token-required metadata access, specifically designed to defeat simple SSRF) — demonstrating why IMDSv2 stops a naive SSRF but not one with the right request-shape control, and why network-layer restriction remains the real fix.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Set up (or faithfully simulate) an IMDSv2-style metadata endpoint requiring a <code>PUT</code> request to a token endpoint (with a custom header like <code>X-aws-ec2-metadata-token-ttl-seconds</code>) to obtain a session token, which must then be presented via a custom header (e.g. <code>X-aws-ec2-metadata-token</code>) on subsequent <code>GET</code> requests to actually read metadata/credentials — the real hardening IMDSv2 adds over IMDSv1.</li>
+          <li>Demonstrate that a "simple" SSRF — one that can only control the target <em>URL</em> of a GET request the server makes on the attacker's behalf — genuinely fails against IMDSv2, because it cannot also control the HTTP method or set the custom token headers required. This negative result must be demonstrated, not just asserted, since it's the whole reason IMDSv2 is considered a real mitigation.</li>
+          <li>Demonstrate a specific SSRF variant that <em>can</em> defeat IMDSv2: an application feature that gives the attacker more request control than a simple GET-a-URL proxy — for example, a webhook/HTTP-client feature that lets the attacker specify method and custom headers (not just a URL), or a two-step SSRF chain where the vulnerable feature can be made to issue the token-fetch PUT and a separate step relays it — with the full token-fetch-then-metadata-read chain completed and simulated credentials extracted.</li>
+          <li>A written comparison table: what IMDSv1 allowed a bare URL-only SSRF to do, what IMDSv2 additionally requires, and precisely what application-level condition has to be true for an SSRF to still defeat IMDSv2 despite the hardening.</li>
+          <li>The correct, complete fix applied and verified: network-level enforcement (e.g. blocking the metadata IP at the host firewall/network policy for anything but the specific processes that legitimately need it, or requiring IMDSv2 with a hop-limit of 1 to prevent proxying from a container) layered on top of IMDSv2 itself, explicitly framed as defense in depth — IMDSv2 alone is a mitigation for a specific SSRF shape, not a complete fix for SSRF as a vulnerability class.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any automated cloud-SSRF exploitation tool.</li>
+          <li>Claiming IMDSv2 is "defeated" without first honestly demonstrating the simple-SSRF case failing against it — the negative result is a mandatory part of the exercise, not optional context.</li>
+          <li>Testing against a real cloud provider's actual metadata endpoint outside an instance you provisioned yourself for this exercise.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: the token-fetch and metadata-read steps of your exploit chain kept as separate, individually-evidenced functions.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus</span>
+        <p>Demonstrate the hop-limit mitigation specifically: show a containerized app where a same-host SSRF can still reach the metadata endpoint but a request proxied through an additional hop (e.g. from inside a container to the host) is correctly blocked once the metadata service's IMDSv2 hop-limit is set to 1.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Capstone</h2>
+
+    <div class="capstone-note">
+      <strong>This exercise forces together</strong> upload-bypass technique layering (Exercise 00), traversal/inclusion detection with OOB-safe confirmation (Exercise 01), and request-shape-aware SSRF/metadata risk assessment (Exercise 02) — specifically the discipline, carried from Exercise 02, of never claiming an SSRF/metadata finding without demonstrating the actual request-shape control required, since a shallow tool that just tries a bare metadata-IP URL and calls it "vulnerable" or "not vulnerable" gets the IMDSv1-vs-v2 distinction wrong in both directions.
+    </div>
+
+    <article class="exercise" id="capstone">
+      <div class="exercise-head">
+        <span class="ex-num">Capstone</span>
+        <span class="ex-name">filessrf_auditor</span>
+      </div>
+      <dl class="exercise-meta">
+        <dt>Turn-in dir</dt><dd>file_handling_cloud_ssrf/capstone/</dd>
+        <dt>Files</dt><dd>src/, README.md, evidence/</dd>
+        <dt>Grading</dt><dd>mandatory-only; bonus per §II.7</dd>
+      </dl>
+      <div class="block block-description">
+        <span class="block-label">Description</span>
+        <p><strong>Description.</strong> A single auditor covering file-upload restriction strength, LFI/path-traversal probing, and SSRF-to-cloud-metadata risk assessment (including IMDSv1-vs-v2-aware testing) against a target application — the three exercises' techniques combined into one coherent pre-engagement recon tool.</p>
+      </div>
+      <div class="block block-mandatory">
+        <span class="block-label">Mandatory</span>
+        <ul>
+          <li>Upload-restriction probe: given a target upload endpoint, attempts the layered bypass techniques from Exercise 00 (extension blocklist bypass, polyglot content) in increasing sophistication, stopping and reporting at the first layer that isn't defeated, and reporting full compromise (with OOB or direct-execution confirmation, not just "upload accepted") if all layers fall.</li>
+          <li>LFI/traversal probe: given a target parameter suspected of file-path use, attempts traversal sequences (including at least one filter-bypass encoding) and confirms via OOB or a planted-file-content match (not merely an altered response length) — explicitly does not attempt the log-poisoning RCE escalation automatically (too destructive/stateful for an automated default), but reports the finding and flags it as a manual-follow-up candidate for that escalation.</li>
+          <li>SSRF/metadata risk module: given a target parameter suspected of server-side URL fetching, first confirms basic SSRF via your OOB listener (reusing the Server-Side Injection capstone's pattern), then — only on confirmed SSRF — assesses what request-shape control the vulnerable feature actually grants (URL only, or method+headers too), and reports an accurate IMDSv1-only-vulnerable vs. IMDSv2-also-vulnerable vs. metadata-inaccessible classification based on that assessed control, never guessing.</li>
+          <li>A unified severity model across all three modules consistent with the roadmap so far: confirmed RCE/credential-theft > confirmed access to sensitive local data or internal network resources > confirmed-but-contained finding > untested.</li>
+          <li>One consolidated report covering all three modules per target, with the evidence trail for every finding.</li>
+          <li>Demonstrated end to end against your Exercise 00/01/02 vulnerable and fixed targets, correctly classifying each, including correctly distinguishing the IMDSv1-only-vulnerable case from the IMDSv2-defeating case based on actually-assessed request-shape control rather than a guess.</li>
+        </ul>
+      </div>
+      <div class="block block-forbidden">
+        <span class="block-label">Forbidden</span>
+        <ul>
+          <li>Any automated upload/LFI/SSRF tool doing the core work for you.</li>
+          <li>Automatically attempting the log-poisoning RCE escalation as part of the default LFI scan — flagged for manual follow-up instead, consistent with the "don't auto-exploit a fingerprinted finding" discipline from the Server-Side Injection capstone.</li>
+          <li>Guessing the IMDSv1-vs-v2 classification instead of deriving it from an actually-assessed request-shape capability.</li>
+        </ul>
+      </div>
+      <div class="block block-norm">
+        <span class="block-label">Norm</span>
+        <p>See §II.2, plus: upload-probe, LFI-probe, and SSRF/metadata-risk each in their own module sharing the OOB-listener layer.</p>
+      </div>
+      <div class="block block-bonus">
+        <span class="block-label">Bonus (§II.7)</span>
+        <p>Extend the upload-restriction probe with a magic-byte polyglot generator that automatically produces a valid-image-plus-executable-code file for a small set of common web-server/language combinations.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Submission and Peer-Evaluation</h2>
+    <p>Turn in this subject as a single git repository:</p>
+    <pre class="filetree">file_handling_cloud_ssrf/
+├── ex00/
+├── ex01/
+├── ex02/
+└── capstone/</pre>
+    <p>Each exercise is defended live against your own targets. The capstone is run live against a target set the evaluator selects, and its IMDSv1-vs-v2 classification must be justified from evidence shown in the run, not from a hardcoded assumption about the target.</p>
+  </section>
+
+  <section class="chapter" id="appA">
+    <div class="chapter-label">Appendix A</div>
+    <h2>Evaluation Scale (Defense Guide)</h2>
+    <p class="appendix-intro">Companion to Chapter III/IV. Not part of the subject proper — this is the scale an evaluator uses. Read it as a self-test before your defense.</p>
+
+    <div class="appendix-block" id="a0">
+      <h4>A.0 — uploadbypass0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through all three bypass layers live, from client-side-only validation through to a working shell.</li>
+          <li>Show your polyglot file — explain exactly which bytes satisfy the magic-byte check and which make it executable code.</li>
+          <li>Why does storing uploads outside the webroot close this completely, architecturally, rather than just making it harder?</li>
+          <li>What's the difference between validating a file's declared content-type and actually verifying its content — why does only the second one matter?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a1">
+      <h4>A.1 — lfi_logpoison0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through your traversal-filter bypass live — what exactly did the naive filter miss?</li>
+          <li>Explain the log-poisoning chain end to end — why does the log file end up containing executable code at all, and why does the include statement treat it as code rather than as log text?</li>
+          <li>Why is "include" fundamentally more dangerous than "read" here — tie this back to the execute-vs-parse distinction from earlier subjects.</li>
+          <li>Why does an allowlist of fixed page-name-to-path mappings close this permanently, versus any amount of traversal-sequence filtering?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a2">
+      <h4>A.2 — imdsv2_bypass0</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Walk through the honest negative result first — show a simple URL-only SSRF failing against IMDSv2, live, and explain exactly why.</li>
+          <li>Then walk through your successful bypass — what specific extra request control did the vulnerable feature give you that the simple case didn't?</li>
+          <li>Why is network-layer restriction still necessary even with IMDSv2 enabled — what threat does IMDSv2 not address at all?</li>
+          <li>Explain the hop-limit concept and why it specifically matters for containerized workloads.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="appendix-block" id="a3">
+      <h4>A.3 — Capstone: filessrf_auditor</h4>
+      <div class="sub defense">
+        <span class="sub-label">Defense questions</span>
+        <ol class="defense-list">
+          <li>Run all three modules against your vulnerable targets live, narrating each finding's evidence.</li>
+          <li>Walk through the SSRF module's request-shape assessment specifically — show me how it decides IMDSv1-only vs. also-defeats-IMDSv2 for a given finding.</li>
+          <li>Why does the LFI module stop short of the log-poisoning escalation by default — same reasoning as an earlier capstone's stop-short decision; name it.</li>
+          <li>Run everything against your fixed targets and confirm zero false positives.</li>
+          <li>What would a naive version of this tool (bare metadata-IP URL fetch, binary vulnerable/not) get wrong compared to yours?</li>
+        </ol>
+      </div>
+      <div class="sub edge">
+        <span class="sub-label">Test / edge cases</span>
+        <ul class="edge-list">
+          <li>An upload endpoint that defeats the first bypass layer but falls to the second: correctly reported at the specific layer reached, not a binary pass/fail.</li>
+          <li>A traversal payload that succeeds in reading a file but the file has no distinguishing planted marker (can't confirm via content match): tool reports "likely traversal, unconfirmed content" rather than a false-confident claim.</li>
+          <li>An SSRF-vulnerable feature that only supports GET with no header control, tested against an IMDSv2-protected endpoint: correctly classified as "SSRF confirmed, metadata inaccessible under IMDSv2" — not silently reported as a full metadata-compromise finding.</li>
+          <li>A metadata endpoint entirely unreachable from the network segment the SSRF lands in (properly network-segmented target): correctly reported as such, distinct from "IMDSv2 blocked it."</li>
+          <li>An upload endpoint accepting the polyglot file but storing it with execution genuinely disabled (correct fix already in place): reported as upload-accepted-but-non-executable, a clean/low-severity result, not conflated with full compromise.</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer class="endcap">
+  File Handling Vulnerabilities and Cloud SSRF · AppSec Mastery Roadmap · Stage 2, Subject 4 of 7 · 1/1
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  secrets-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Secret scan (the same rules as the pre-commit hook)
+        run: python tools/scan_secrets.py
+      - run: pip install -r requirements.txt
+      - run: python tools/curriculum.py refresh
+      - name: Build (strict)
+        run: mkdocs build --strict

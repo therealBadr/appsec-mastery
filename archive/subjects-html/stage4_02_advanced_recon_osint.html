@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Reconnaissance and OSINT — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Stage 4</div>
+  <h1>Advanced Reconnaissance and OSINT</h1>
+  <div class="subtitle">Subject 2 of 6 — Real-World Readiness and Portfolio</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Bash and Python for Security built a minimal subdomain enumerator and recon pipeline from raw sockets. This subject scales that instinct into the full professional recon discipline — ASN mapping, GitHub dorking, and open-source intelligence gathering — because in both bug bounty and real pentest engagements, the attack surface you never found is the one that gets missed entirely.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Foreword</a></li>
+      <li><a href="#ch1">Introduction</a></li>
+      <li><a href="#ch2">Theory</a>
+        <ol class="toc-sub">
+          <li><a href="#t0">Passive subdomain enumeration</a></li>
+          <li><a href="#t1">ASN and IP-range mapping</a></li>
+          <li><a href="#t2">GitHub/code-host dorking</a></li>
+          <li><a href="#t3">OSINT for social/organizational attack surface</a></li>
+        </ol>
+      </li>
+      <li><a href="#ch3">Practical Outputs</a></li>
+      <li><a href="#ch4">Common Delusions</a></li>
+      <li><a href="#ch5">Exit Gate</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Foreword</div>
+    <p class="foreword">"Most real-world breaches don't start with a zero-day. They start with a forgotten subdomain, a leaked key in a public repo, or a staging environment nobody remembered to take down."</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Introduction</div>
+    <h2>Why This Subject</h2>
+    <p>Reconnaissance is unglamorous compared to exploitation, which is exactly why it's where a huge fraction of real findings live — an attacker (or a hunter) who maps a target's full attack surface more thoroughly than the target's own security team consistently finds what everyone else missed.</p>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Theory</div>
+    <h2>What You Must Understand</h2>
+    <div class="topic-block" id="t0">
+      <h4>Passive subdomain enumeration</h4>
+      <div class="tbody">
+        <p>Discovering subdomains without ever sending the target a single probe request — Certificate Transparency logs, DNS aggregators, and search-engine dorking — extending your Bash and Python for Security capstone's bonus CT-log module into a primary technique.</p>
+<ul>
+          <li>Certificate Transparency (crt.sh and similar) surfaces every certificate ever issued for a domain, including subdomains a company forgot existed</li>
+          <li>DNS aggregator services (e.g. SecurityTrails-style historical DNS data) reveal infrastructure that has since moved but left a footprint</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t1">
+      <h4>ASN and IP-range mapping</h4>
+      <div class="tbody">
+        <p>Identifying a target organization's full owned IP space via its Autonomous System Number registration — surfacing infrastructure with no DNS name pointing at it at all, which passive subdomain enumeration alone would never find.</p>
+<ul>
+          <li>WHOIS/RDAP lookups and BGP-route-viewing services map an organization's registered IP ranges</li>
+          <li>An IP range with no friendly hostname is often the least-monitored part of an organization's footprint — exactly where a forgotten admin panel or dev environment tends to live</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t2">
+      <h4>GitHub/code-host dorking</h4>
+      <div class="tbody">
+        <p>Public code repositories — including a company's own public repos, and former employees' personal repos — as an OSINT source, directly relevant to Secrets Detection's lesson that a committed secret is permanent: someone else's leaked credential is exactly as usable as one you found through exploitation.</p>
+<ul>
+          <li>Search-operator dorking for company-specific config file patterns, internal hostnames, or credential-shaped strings across public repos</li>
+          <li>A former employee's personal repository can leak internal context (naming conventions, architecture hints, even credentials) the company itself never published</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic-block" id="t3">
+      <h4>OSINT for social/organizational attack surface</h4>
+      <div class="tbody">
+        <p>Publicly available information about an organization's technology stack, employees, and structure — job postings revealing exact technology versions in use, LinkedIn revealing org structure useful for a social-engineering-aware pentest (Stage 4's Full Pentest Methodology subject), and public breach-database cross-referencing for reused credentials.</p>
+<ul>
+          <li>A job posting listing "5 years of experience with [specific framework version]" is a direct technology-stack disclosure</li>
+          <li>This roadmap does not build active social-engineering skill (out of scope per the roadmap's own stated focus) — the value here is the passive intelligence, not a phishing-pretext exercise</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>Practical Outputs</h2>
+    <div class="outputs-block">
+      <span class="block-label lbl-mandatory">Practical Outputs</span>
+      <ul>
+          <li>A full passive recon report against a real, in-scope bug bounty target (reusing Bug Bounty Methodology's program) or your own domain: subdomains via CT logs and DNS aggregation, IP ranges via ASN mapping, with zero active probes sent to the target during this phase.</li>
+          <li>A GitHub/code-host dork sweep against a real organization's public footprint (yours, or an authorized target), with any findings responsibly triaged — a live credential found this way is reported through the same responsible-disclosure channel as any other finding, never exploited further.</li>
+          <li>A consolidated attack-surface map combining all sources into one document: every discovered asset, its source, and its apparent purpose/risk.</li>
+          <li>A written comparison of what active recon (your Bash and Python for Security pipeline) versus passive recon each surface, and why a real engagement needs both.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Common Delusions</h2>
+    <div class="delusions-block">
+      <span class="block-label lbl-delusions">Common Delusions at This Stage</span>
+      <ul>
+          <li>"Active scanning finds everything eventually." Passive sources surface forgotten/decommissioned-but-still-live infrastructure that active enumeration against current DNS records will never reach.</li>
+          <li>"OSINT is just googling." Systematic OSINT — ASN mapping, CT-log analysis, code-host dorking — is a repeatable methodology with real technique, not casual searching.</li>
+          <li>"A leaked secret found via GitHub dorking is fair game to use." It's a finding to report responsibly, identically to any other vulnerability — using it to access systems beyond proving impact crosses the same line Bug Bounty Methodology drew for any other finding.</li>
+        </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Exit Gate</h2>
+    <div class="exitgate-block">
+      <span class="block-label lbl-exitgate">Exit Gate — must do all of this without notes</span>
+      <ul>
+          <li>Produce a full passive attack-surface map for an unfamiliar domain using at least three independent source types.</li>
+          <li>Explain what ASN mapping surfaces that subdomain enumeration alone cannot.</li>
+          <li>Walk through a responsible-disclosure decision for a hypothetical credential found via code-host dorking.</li>
+          <li>Justify, for a real engagement, the specific balance of active versus passive recon you'd use and why.</li>
+        </ul>
+    </div>
+  </section>
+
+
+</div>
+
+<footer class="endcap">
+  Advanced Reconnaissance and OSINT · AppSec Mastery Roadmap · Stage 4, Subject 2 of 6 · 1/1
+</footer>
+
+</body>
+</html>

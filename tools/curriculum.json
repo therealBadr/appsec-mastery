@@ -1,0 +1,329 @@
+{
+ "stages": [
+  {
+   "n": 0,
+   "dir": "stage-0-foundations-reset",
+   "title": "Foundations Reset",
+   "tagline": "Rebuild the foundations: Linux, networking, HTTP, OS internals, databases and security scripting.",
+   "depth": "Full depth",
+   "subjects": [
+    {
+     "n": 1,
+     "slug": "linux-admin-depth",
+     "title": "Linux Administration Depth",
+     "html": "stage0_linux_admin_depth.html",
+     "planned_lessons": [
+      "The lab: bastion hosts, attack surface and a three-machine setup",
+      "SSH, layer by layer: transport, authentication, connection",
+      "Hardening sshd: what each directive changes, and what it does not",
+      "Users, groups and password hashes",
+      "Packet filtering with nftables",
+      "Brute-force defense: fail2ban and its limits",
+      "systemd: auditing what runs on your box",
+      "Patching: unattended-upgrades and what it cannot protect",
+      "Idempotent shell scripting",
+      "Logs: syslog, journald and text pipelines",
+      "/proc and sockets: finding what listens",
+      "Permissions, setuid and the filesystem hierarchy",
+      "Processes, signals and fork/exec",
+      "Linux capabilities and privilege separation",
+      "Scheduled-task persistence: cron, at and timers",
+      "Building a defensive daemon: the capstone",
+      "Writing a security-focused Linux reference"
+     ]
+    },
+    {
+     "n": 2,
+     "slug": "networking-depth",
+     "title": "Networking Depth",
+     "html": "stage0_networking_depth.html"
+    },
+    {
+     "n": 3,
+     "slug": "http-internals",
+     "title": "HTTP Internals",
+     "html": "stage0_http_internals.html"
+    },
+    {
+     "n": 4,
+     "slug": "os-internals",
+     "title": "OS Internals",
+     "html": "stage0_os_internals.html"
+    },
+    {
+     "n": 5,
+     "slug": "sql-db-internals",
+     "title": "SQL and Database Internals",
+     "html": "stage0_sql_db_internals.html"
+    },
+    {
+     "n": 6,
+     "slug": "bash-python-security",
+     "title": "Bash and Python for Security",
+     "html": "stage0_bash_python_security.html"
+    }
+   ]
+  },
+  {
+   "n": 1,
+   "dir": "stage-1-security-fundamentals",
+   "title": "Security Fundamentals",
+   "tagline": "The OWASP Top 10 and the core vulnerability classes, studied down to the mechanism.",
+   "depth": "Full depth",
+   "subjects": [
+    {
+     "n": 1,
+     "slug": "auth-session-security",
+     "title": "Authentication and Session Security",
+     "html": "stage1_01_auth_session_security.html"
+    },
+    {
+     "n": 2,
+     "slug": "crypto-fundamentals",
+     "title": "Cryptography Fundamentals for AppSec",
+     "html": "stage1_02_crypto_fundamentals.html"
+    },
+    {
+     "n": 3,
+     "slug": "applied-crypto-attacks",
+     "title": "Applied Cryptographic Attacks",
+     "html": "stage1_03_applied_crypto_attacks.html"
+    },
+    {
+     "n": 4,
+     "slug": "access-control-idor",
+     "title": "Access Control Models and IDOR",
+     "html": "stage1_04_access_control_idor.html"
+    },
+    {
+     "n": 5,
+     "slug": "serverside-injection",
+     "title": "Server-Side Injection: Command Injection, XXE and SSRF",
+     "html": "stage1_05_serverside_injection.html"
+    },
+    {
+     "n": 6,
+     "slug": "clientside-injection",
+     "title": "Client-Side Injection: XSS and CSRF",
+     "html": "stage1_06_clientside_injection.html"
+    },
+    {
+     "n": 7,
+     "slug": "securecoding-tls",
+     "title": "Secure Coding Principles and TLS Configuration",
+     "html": "stage1_07_securecoding_tls.html"
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "dir": "stage-2-hands-on-web-security",
+   "title": "Hands-On Web Security and Code Review",
+   "tagline": "Hands-on web exploitation, API and authorization abuse, race conditions and secure code review.",
+   "depth": "Full depth",
+   "subjects": [
+    {
+     "n": 1,
+     "slug": "advweb1-smuggling-deserialization",
+     "title": "Advanced Web Exploitation I: Request Smuggling and Deserialization",
+     "html": "stage2_01_advweb1_smuggling_deserialization.html"
+    },
+    {
+     "n": 2,
+     "slug": "advweb2-ssti-graphql",
+     "title": "Advanced Web Exploitation II: SSTI and GraphQL Security",
+     "html": "stage2_02_advweb2_ssti_graphql.html"
+    },
+    {
+     "n": 3,
+     "slug": "api-authorization",
+     "title": "Modern API Authorization: BOLA, BFLA, and Rate-Limit Abuse",
+     "html": "stage2_03_api_authorization.html"
+    },
+    {
+     "n": 4,
+     "slug": "file-handling-cloud-ssrf",
+     "title": "File Handling Vulnerabilities and Cloud SSRF",
+     "html": "stage2_04_file_handling_cloud_ssrf.html"
+    },
+    {
+     "n": 5,
+     "slug": "secure-code-review",
+     "title": "Secure Code Review Methodology",
+     "html": "stage2_05_secure_code_review.html"
+    },
+    {
+     "n": 6,
+     "slug": "burp-mastery-portswigger",
+     "title": "Burp Suite Mastery and the PortSwigger Gauntlet",
+     "html": "stage2_06_burp_mastery_portswigger.html"
+    },
+    {
+     "n": 7,
+     "slug": "race-conditions-business-logic",
+     "title": "Race Conditions and Business Logic Abuse",
+     "html": "stage2_07_race_conditions_business_logic.html"
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "dir": "stage-3-appsec-engineering",
+   "title": "Secure Development and AppSec Engineering",
+   "tagline": "Threat modeling, SAST/DAST/SCA, DevSecOps pipelines, containers, secrets and cloud basics.",
+   "depth": "Structured",
+   "subjects": [
+    {
+     "n": 1,
+     "slug": "threat-modeling",
+     "title": "Threat Modeling",
+     "html": "stage3_01_threat_modeling.html"
+    },
+    {
+     "n": 2,
+     "slug": "sast-engineering",
+     "title": "SAST Engineering",
+     "html": "stage3_02_sast_engineering.html"
+    },
+    {
+     "n": 3,
+     "slug": "dast-pipeline",
+     "title": "DAST and Dynamic Pipeline Integration",
+     "html": "stage3_03_dast_pipeline.html"
+    },
+    {
+     "n": 4,
+     "slug": "sca-supply-chain",
+     "title": "Software Composition Analysis and Supply Chain Security",
+     "html": "stage3_04_sca_supply_chain.html"
+    },
+    {
+     "n": 5,
+     "slug": "devsecops-pipeline",
+     "title": "DevSecOps Pipeline Engineering",
+     "html": "stage3_05_devsecops_pipeline.html"
+    },
+    {
+     "n": 6,
+     "slug": "container-kubernetes-security",
+     "title": "Container and Kubernetes Security",
+     "html": "stage3_06_container_kubernetes_security.html"
+    },
+    {
+     "n": 7,
+     "slug": "secrets-detection-management",
+     "title": "Secrets Detection and Management",
+     "html": "stage3_07_secrets_detection_management.html"
+    },
+    {
+     "n": 8,
+     "slug": "cloud-security-aws",
+     "title": "Cloud Security Fundamentals (AWS)",
+     "html": "stage3_08_cloud_security_aws.html"
+    },
+    {
+     "n": 9,
+     "slug": "incident-triage",
+     "title": "Incident Triage for Compromised Web Applications",
+     "html": "stage3_09_incident_triage.html"
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "dir": "stage-4-real-world-readiness",
+   "title": "Real-World Readiness and Portfolio",
+   "tagline": "Bug bounty, full pentest methodology, CVE reproduction, original tools and professional writing.",
+   "depth": "Structured",
+   "subjects": [
+    {
+     "n": 1,
+     "slug": "bug-bounty-methodology",
+     "title": "Bug Bounty Methodology",
+     "html": "stage4_01_bug_bounty_methodology.html"
+    },
+    {
+     "n": 2,
+     "slug": "advanced-recon-osint",
+     "title": "Advanced Reconnaissance and OSINT",
+     "html": "stage4_02_advanced_recon_osint.html"
+    },
+    {
+     "n": 3,
+     "slug": "pentest-methodology-reporting",
+     "title": "Full Penetration Test Methodology and Reporting",
+     "html": "stage4_03_pentest_methodology_reporting.html"
+    },
+    {
+     "n": 4,
+     "slug": "cve-reproduction-nday",
+     "title": "CVE Reproduction and N-Day Research",
+     "html": "stage4_04_cve_reproduction_nday.html"
+    },
+    {
+     "n": 5,
+     "slug": "tool-building-publishing",
+     "title": "Building and Publishing Original Security Tools",
+     "html": "stage4_05_tool_building_publishing.html"
+    },
+    {
+     "n": 6,
+     "slug": "security-writing-blogging",
+     "title": "Professional Security Writing and Blogging",
+     "html": "stage4_06_security_writing_blogging.html"
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "dir": "stage-5-advanced-specialization",
+   "title": "Advanced Specialization",
+   "tagline": "Mobile, cloud-native, API research, security architecture, supply-chain research and publishing.",
+   "depth": "Structured",
+   "subjects": [
+    {
+     "n": 1,
+     "slug": "mobile-appsec-android",
+     "title": "Mobile AppSec: Android",
+     "html": "stage5_01_mobile_appsec_android.html"
+    },
+    {
+     "n": 2,
+     "slug": "mobile-appsec-ios",
+     "title": "Mobile AppSec: iOS",
+     "html": "stage5_02_mobile_appsec_ios.html"
+    },
+    {
+     "n": 3,
+     "slug": "cloud-native-appsec",
+     "title": "Cloud-Native AppSec",
+     "html": "stage5_03_cloud_native_appsec.html"
+    },
+    {
+     "n": 4,
+     "slug": "api-security-research",
+     "title": "API Security Research",
+     "html": "stage5_04_api_security_research.html"
+    },
+    {
+     "n": 5,
+     "slug": "security-architecture-engineering",
+     "title": "Security Architecture and Engineering",
+     "html": "stage5_05_security_architecture_engineering.html"
+    },
+    {
+     "n": 6,
+     "slug": "supply-chain-security-research",
+     "title": "Supply Chain Security Research",
+     "html": "stage5_06_supply_chain_security_research.html"
+    },
+    {
+     "n": 7,
+     "slug": "research-publication-mentorship",
+     "title": "Security Research, Publication, and Mentorship",
+     "html": "stage5_07_research_publication_mentorship.html"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Study Routine — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+  .stats-strip{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;margin:-28px auto 50px;background:var(--navy);color:#f5f4ef;padding:22px 30px;border-radius:8px;max-width:760px;font-family:var(--mono);}
+  .stats-strip .stat{text-align:center;}
+  .stats-strip .stat .num{font-size:22px;font-weight:800;color:#8fd9d1;}
+  .stats-strip .stat .lbl{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#c8c6bd;}
+  table.sched{width:100%;border-collapse:collapse;font-size:14px;margin:16px 0 30px;}
+  table.sched th, table.sched td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;}
+  table.sched th{background:var(--navy);color:#f5f4ef;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;}
+  table.sched td.daycol{font-family:var(--mono);font-weight:700;background:var(--paper-alt);white-space:nowrap;}
+  table.sched tr:nth-child(even) td:not(.daycol){background:#fbfaf6;}
+  .block-card{border:1px solid var(--line);border-radius:8px;background:#fff;margin:20px 0;overflow:hidden;}
+  .block-card h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--navy);color:#f5f4ef;font-size:15px;display:flex;justify-content:space-between;align-items:baseline;}
+  .block-card h4 .dur{font-size:12px;color:#8fd9d1;font-weight:400;}
+  .block-card .bc-body{padding:16px 20px;}
+  .block-card .bc-body p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block-card .bc-body ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block-card .bc-body li{margin-bottom:6px;}
+  .checklist{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .checklist .block-label{color:var(--mandatory);font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .checklist ul{margin:10px 0 0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .warn-box{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14.5px;color:#5c1414;margin:20px 0;}
+  .warn-box strong{color:var(--forbidden);}
+  .cadence-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:18px 0;}
+  .cadence-card{border:1px solid var(--line);border-radius:8px;padding:16px 18px;background:#fff;}
+  .cadence-card .freq{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  .cadence-card p{margin:0;font-size:14px;color:var(--ink-soft);}
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap · Companion Document</div>
+  <h1>Weekly Study Routine</h1>
+  <div class="subtitle">Labs, CTFs, Notes, and Review — Without a Calendar Dictating the Stages</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    The 42 subjects have no weeks or months attached on purpose — a stage ends when you clear its exit gate,
+    not on a date. This document is the missing piece: how to structure the hours you actually have, around a
+    full-time job, so that time consistently turns into cleared exit gates instead of scattered effort. It
+    assumes roughly 12-18 hours a week of deep, undistracted study/build time — adjust the block counts, not
+    the block types, if your real number is different.
+  </p>
+</header>
+
+<div class="shell">
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#ch00">Foreword</a></li>
+      <li><a href="#ch1">The Weekly Time Budget</a></li>
+      <li><a href="#ch2">The Five Block Types</a></li>
+      <li><a href="#ch3">A Sample Week</a></li>
+      <li><a href="#ch4">Note-Taking System</a></li>
+      <li><a href="#ch5">Spaced Review and Retention</a></li>
+      <li><a href="#ch6">The Weekly Self-Audit</a></li>
+      <li><a href="#ch7">CTF and Lab Rotation</a></li>
+      <li><a href="#ch8">Sustainability and the Discipline Gap</a></li>
+    </ol>
+  </nav>
+
+  <div class="stats-strip">
+    <div class="stat"><div class="num">12-18h</div><div class="lbl">Target weekly hours</div></div>
+    <div class="stat"><div class="num">5</div><div class="lbl">Block types</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">Non-negotiable: docs before code</div></div>
+  </div>
+
+  <section class="chapter" id="ch00">
+    <div class="chapter-label">Foreword</div>
+    <p class="foreword">"Three hours building a tool beats three hours watching a course. Ask at the end of every session: what did I produce?"</p>
+    <p>That rule, carried over directly from the roadmap itself, is the organizing principle of this entire
+    document. Every block type below produces something — a working exploit, a fixed bug, a note file, a
+    writeup, a flag — because the roadmap's own diagnosis of failure isn't lack of intelligence, it's people
+    who stop producing when it gets hard and call the stopping "studying."</p>
+  </section>
+
+  <section class="chapter" id="ch1">
+    <div class="chapter-label">Chapter I</div>
+    <h2>The Weekly Time Budget</h2>
+    <p>Working full-time changes the shape of a study plan more than it changes the total hours available —
+    the failure mode isn't usually "not enough time," it's long, unscheduled weekend binges that produce a
+    burst of progress followed by a week of nothing. A weekday/weekend split, held consistently, beats an
+    ambitious plan abandoned by week three.</p>
+    <div class="cadence-grid">
+      <div class="cadence-card"><div class="freq">Weeknights (Mon-Fri)</div><p>1-2 focused hours after work, 4-5 nights a week. Short enough to actually happen consistently; long enough to finish one real unit of work (one exercise, one tool feature, one lab machine).</p></div>
+      <div class="cadence-card"><div class="freq">Weekend</div><p>One longer 3-5 hour deep block, once a week — reserved for capstones, full-audit exercises, and anything that doesn't fit cleanly into a weeknight interruption.</p></div>
+      <div class="cadence-card"><div class="freq">Buffer</div><p>Deliberately unscheduled. A week that runs long on a hard exercise borrows from this, not from sleep or from next week's plan.</p></div>
+      <div class="cadence-card"><div class="freq">Minimum viable week</div><p>If a week genuinely only allows 4-5 hours total, protect the note-taking and review blocks first — they're what keeps a slow week from becoming a forgotten one.</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <div class="chapter-label">Chapter II</div>
+    <h2>The Five Block Types</h2>
+    <p>Every study session is exactly one of these five things. Naming the type before you sit down (not
+    mid-session) is what keeps a "study block" from quietly turning into passive video-watching — the roadmap's
+    single most-named failure mode.</p>
+
+    <div class="block-card">
+      <h4>1. Build <span class="dur">the roadmap's core unit of work</span></h4>
+      <div class="bc-body">
+        <p>Writing code against a subject's mandatory-part checklist: an exercise, a capstone module, a fix
+        verified against your own exploit. This is where most weeknight and all weekend-deep-block hours go.</p>
+        <ul>
+          <li>Start every build session by re-reading the exercise's Mandatory/Forbidden blocks — not from memory</li>
+          <li>End every session with something that runs, even if incomplete — a half-finished function you can resume beats a mental model you have to reconstruct next time</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block-card">
+      <h4>2. Lab <span class="dur">applying a cleared subject against a new target</span></h4>
+      <div class="bc-body">
+        <p>PortSwigger Academy labs, HackTheBox machines, a CTF challenge, or DVWA/Juice Shop at a harder
+        setting — deliberately different targets from the ones a subject's own exercises used, so the skill
+        being tested is transfer, not memorized steps against one known app.</p>
+        <ul>
+          <li>One lab machine or 2-3 PortSwigger labs per weeknight block is a sustainable pace</li>
+          <li>A lab that stumps you for a full session is not wasted time if you write down exactly where you got stuck (see Chapter IV)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block-card">
+      <h4>3. Notes and Writeups <span class="dur">every session, not a separate week</span></h4>
+      <div class="bc-body">
+        <p>The roadmap's own rule: "every lab session ends with documentation... nothing written means nothing
+        learned." This isn't a distinct block so much as the last 10-15 minutes of every Build and Lab block —
+        protect that time explicitly rather than letting a session run long and eat it.</p>
+        <ul>
+          <li>A lab writeup: objective, environment, steps taken, what failed, root cause, fix, lesson</li>
+          <li>A wiki entry: topic → concept → how it works → why it matters for security → example → resources — never copy-pasted, always rewritten in your own words</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block-card">
+      <h4>4. Review <span class="dur">scheduled, not incidental</span></h4>
+      <div class="bc-body">
+        <p>Revisiting a cleared subject's exit gate cold, re-reading old notes, or re-running an old capstone
+        against a fresh target — the block type most people cut first under time pressure, and the one whose
+        absence produces the "I passed this six months ago but can't explain it now" failure the roadmap warns
+        against directly.</p>
+        <ul>
+          <li>Not new material — the point is retention, not progress</li>
+          <li>See Chapter V for a concrete spaced-repetition cadence</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block-card">
+      <h4>5. Portfolio <span class="dur">Stage 2 onward</span></h4>
+      <div class="bc-body">
+        <p>Publishing a tool, polishing a writeup for external readers, submitting a bug bounty report, or
+        working a Stage 4-5 output — distinct from Build because the bar here is "a stranger could use/read
+        this," not "it passed my own exercise's defense."</p>
+        <ul>
+          <li>Batch this into the weekend deep block — it rarely fits well into a 90-minute weeknight slot</li>
+          <li>One portfolio session every 2-3 weeks keeps the "build order" from the roadmap's own portfolio strategy actually moving</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <div class="chapter-label">Chapter III</div>
+    <h2>A Sample Week</h2>
+    <p>A template, not a mandate — the block <em>types</em> and their rough proportion matter far more than
+    which exact evening each one lands on. Adjust freely around your actual schedule.</p>
+    <table class="sched">
+      <tr><th>Day</th><th>Block</th><th>Focus</th></tr>
+      <tr><td class="daycol">Mon</td><td>Build (1.5h)</td><td>Current subject's next exercise, from a cold read of the Mandatory block</td></tr>
+      <tr><td class="daycol">Tue</td><td>Build (1.5h)</td><td>Continue same exercise, or start the write-up if it's done</td></tr>
+      <tr><td class="daycol">Wed</td><td>Lab (1.5h)</td><td>2-3 PortSwigger labs or one HTB machine in the current topic area</td></tr>
+      <tr><td class="daycol">Thu</td><td>Review (1h)</td><td>Re-derive one earlier exit-gate item cold, no notes, then check yourself against the original</td></tr>
+      <tr><td class="daycol">Fri</td><td>Build (1h) or rest</td><td>Light session or a full skip — protect the weekend block by not arriving depleted</td></tr>
+      <tr><td class="daycol">Sat</td><td>Deep block (3-5h)</td><td>Capstone work, a full-audit exercise, or a Portfolio session</td></tr>
+      <tr><td class="daycol">Sun</td><td>Notes + plan (1h)</td><td>Finish any open writeups; pick next week's exercise and lab targets in advance, not Monday morning</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="ch4">
+    <div class="chapter-label">Chapter IV</div>
+    <h2>Note-Taking System</h2>
+    <p>The roadmap specifies the structure; this section is how to actually run it week to week without the
+    wiki turning into an unmaintained pile.</p>
+    <div class="checklist">
+      <span class="block-label">Two note types, kept separate</span>
+      <ul>
+        <li><strong>The wiki</strong> (Obsidian, Notion, or plain markdown in a git repo) — durable, reference-shaped knowledge: topic → concept → how it works → why it matters for security → example → commands/resources. One page per concept, cross-linked. This is what you re-read during Review blocks.</li>
+        <li><strong>The lab log</strong> — one markdown file per lab/exercise session: objective, environment setup, steps taken (with real commands), what worked, what failed, root cause, fix, lessons learned. This is raw material; your strongest entries later become blog posts (Professional Security Writing).</li>
+      </ul>
+    </div>
+    <div class="checklist">
+      <span class="block-label">Weekly wiki maintenance (10 minutes, during the Sunday Notes+Plan block)</span>
+      <ul>
+        <li>Fold this week's lab-log lessons into the relevant wiki pages — a lab log that never gets distilled into the wiki produces notes nobody re-reads</li>
+        <li>Flag any wiki page you couldn't explain cleanly this week for extra attention in next week's Review block</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch5">
+    <div class="chapter-label">Chapter V</div>
+    <h2>Spaced Review and Retention</h2>
+    <p>A cleared exit gate is not a permanent state — the same "if you can't teach it, you don't know it yet"
+    standard applies to material from three months ago as much as to what you learned yesterday. A lightweight,
+    fixed cadence prevents the earliest, most foundational subjects (the ones every later capstone assumes)
+    from quietly eroding while attention moves forward.</p>
+    <div class="cadence-grid">
+      <div class="cadence-card"><div class="freq">+1 week</div><p>Re-attempt the exercise's hardest defense question cold. If it's shaky, that subject's wiki pages get priority in this week's Review block.</p></div>
+      <div class="cadence-card"><div class="freq">+1 month</div><p>Re-run one capstone tool against a fresh target you haven't used before. A tool that still works and a defense you can still give cleanly is real retention; anything else is a signal, not a failure.</p></div>
+      <div class="cadence-card"><div class="freq">+3 months</div><p>Re-read the subject's Common Delusions/exit gate cold, end to end, no notes. This is the check that catches "I passed it once" quietly decaying into "I used to know this."</p></div>
+      <div class="cadence-card"><div class="freq">Ongoing</div><p>Every new Stage 1+ subject that explicitly reuses an earlier subject's technique (most of them do — see each subject's synthesis notes) is itself free spaced review of the thing it's reusing.</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch6">
+    <div class="chapter-label">Chapter VI</div>
+    <h2>The Weekly Self-Audit</h2>
+    <p>Five minutes, same time every week (the Sunday Notes+Plan block is the natural home for it), answering
+    the roadmap's own review questions honestly rather than rhetorically.</p>
+    <div class="checklist">
+      <span class="block-label">Ask every week, in writing</span>
+      <ul>
+        <li>What did I try this week? What worked, what didn't?</li>
+        <li>What's the actual gap between where I am and what the current subject's exit gate requires?</li>
+        <li>If I'm behind where I expected, why — and what changes next week, specifically (not "try harder")?</li>
+        <li>What did I produce this week that I could show someone? If the honest answer is nothing, what block type got skipped, and why?</li>
+        <li>Is there a topic I've been quietly avoiding because it's uncomfortable rather than because it's genuinely lower priority?</li>
+      </ul>
+    </div>
+    <div class="warn-box">
+      <strong>This audit is diagnostic, not punitive.</strong> Its only job is catching drift early — a rough
+      week answered honestly and adjusted for is a working system; a rough week skipped or rationalized away is
+      how weeks turn into months with no forward motion, which the roadmap names directly as the actual reason
+      most people who fail at this stop.
+    </div>
+  </section>
+
+  <section class="chapter" id="ch7">
+    <div class="chapter-label">Chapter VII</div>
+    <h2>CTF and Lab Rotation</h2>
+    <p>CTFs and standalone lab machines are Lab-block material, not a separate hobby competing with the
+    roadmap — the roadmap's own warning against "random CTF addiction without depth" means rotation should be
+    deliberate, tied to what the current stage is actually building, not opportunistic flag-chasing.</p>
+    <div class="cadence-grid">
+      <div class="cadence-card"><div class="freq">Stage 0-1</div><p>PicoCTF and early HackTheBox "Starting Point" machines — fundamentals-heavy, forgiving difficulty curve while Stage 0-1's core vocabulary is still forming.</p></div>
+      <div class="cadence-card"><div class="freq">Stage 2</div><p>PortSwigger Academy (mandatory, per the roadmap) as the primary rotation, supplemented by 20+ HackTheBox web-focused machines and 20+ web CTF challenges, exactly as the roadmap's Stage 2 practical outputs specify.</p></div>
+      <div class="cadence-card"><div class="freq">Stage 3-4</div><p>HackTheBox Pro Labs (multi-host, closer to a real engagement) and live-scope bug bounty programs replace single-flag CTFs as the primary target — the skill being trained shifts from "find the flag" to "run a full methodology."</p></div>
+      <div class="cadence-card"><div class="freq">Always</div><p>Depth over breadth: the roadmap's own standard is "50 web challenges fully understood beats 500 shallow flags." A CTF write-up that doesn't survive a Review-block re-explanation wasn't actually understood the first time.</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch8">
+    <div class="chapter-label">Chapter VIII</div>
+    <h2>Sustainability and the Discipline Gap</h2>
+    <p>The roadmap's closing line about itself is worth repeating here specifically because a weekly routine
+    is where it either becomes true or doesn't: <em>the discipline gap is larger than the knowledge gap, and
+    most people who fail at this stop when it gets hard, not because they lack intelligence.</em> A routine's
+    entire job is making the hard weeks survivable without becoming quitting weeks.</p>
+    <div class="checklist">
+      <span class="block-label">What actually protects consistency, in practice</span>
+      <ul>
+        <li>A minimum viable week (Chapter I) that's genuinely achievable even when work/life is heavy — a small consistent week beats an ambitious plan abandoned entirely</li>
+        <li>Treating a stuck lab or a failed defense-question rehearsal as data for the weekly self-audit, not a verdict on your ability — the roadmap's own "fail forward" rule</li>
+        <li>Protecting the Sunday Notes+Plan block above almost everything else — a week that starts without a picked target drifts into passive consumption by Tuesday</li>
+        <li>Remembering this roadmap has no weeks or months attached on purpose — a slower week is not falling behind a schedule that was never real to begin with; it's just a slower week</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<footer class="endcap">
+  Weekly Study Routine · AppSec Mastery Roadmap Companion · 1/1
+</footer>
+
+</body>
+</html>

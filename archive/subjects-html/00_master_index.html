@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AppSec Mastery Roadmap — Subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#faf8f3;
+    --paper-alt:#f2efe6;
+    --ink:#1c1c1a;
+    --ink-soft:#4a4944;
+    --line:#ddd8ca;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --navy:#14171f;
+    --navy-soft:#2a2f3a;
+    --accent:#0f766e;
+    --accent-soft:#e6f2f1;
+    --mandatory:#15803d;
+    --mandatory-bg:#eef7ee;
+    --forbidden:#b91c1c;
+    --forbidden-bg:#fbecec;
+    --norm:#475569;
+    --norm-bg:#eef0f3;
+    --bonus:#b45309;
+    --bonus-bg:#fbf1e4;
+    --defense:#6d28d9;
+    --defense-bg:#f3edfc;
+    --edge:#0f766e;
+    --edge-bg:#e9f4f3;
+    --cert:#9d174d;
+    --cert-bg:#fdf0f5;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65;font-size:16px;}
+  header.cover{background:var(--navy);color:#f5f4ef;padding:64px 24px 48px;text-align:center;border-bottom:6px solid var(--accent);}
+  header.cover .eyebrow{font-family:var(--mono);letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#8fd9d1;margin-bottom:18px;}
+  header.cover h1{font-family:var(--mono);font-size:clamp(28px,5vw,52px);letter-spacing:.06em;margin:0 0 14px;font-weight:800;}
+  header.cover .subtitle{font-family:var(--mono);font-size:14px;color:#c8c6bd;margin-bottom:6px;}
+  header.cover .version{font-family:var(--mono);font-size:12px;color:#8b8a82;}
+  header.cover .summary{max-width:640px;margin:32px auto 0;font-family:var(--sans);font-style:italic;color:#dedcd3;font-size:15px;line-height:1.7;border-top:1px solid #333844;padding-top:24px;}
+  .shell{max-width:880px;margin:0 auto;padding:0 24px 100px;}
+  nav.toc{background:var(--paper-alt);border:1px solid var(--line);border-radius:6px;margin:-28px auto 56px;padding:28px 32px;max-width:832px;position:relative;z-index:2;}
+  nav.toc h2{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px;}
+  nav.toc li{margin-bottom:8px;font-size:14px;break-inside:avoid;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line);}
+  nav.toc a:hover{color:var(--accent);border-color:var(--accent);}
+  nav.toc .toc-sub{list-style:none;margin:4px 0 8px 4px;padding-left:12px;}
+  nav.toc .toc-sub li{font-size:12.5px;color:var(--ink-soft);}
+  section.chapter{margin-bottom:64px;}
+  .chapter-label{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  section.chapter h2{font-family:var(--mono);font-size:26px;margin:0 0 20px;padding-bottom:14px;border-bottom:2px solid var(--ink);}
+  section.chapter h3.sub{font-family:var(--mono);font-size:18px;margin:34px 0 12px;color:var(--navy-soft);}
+  section.chapter p{color:var(--ink-soft);}
+  .foreword{font-style:italic;font-size:19px;text-align:center;padding:36px 20px;color:var(--ink-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .tag{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);min-width:44px;}
+  .rule .body{color:var(--ink-soft);font-size:14.5px;}
+  .rule .body strong{color:var(--ink);}
+  .exercise{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:28px 0 48px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .exercise-head{background:var(--navy);color:#f5f4ef;padding:16px 22px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);}
+  .exercise-head .ex-num{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8fd9d1;}
+  .exercise-head .ex-name{font-size:19px;font-weight:700;}
+  .exercise-meta{display:grid;grid-template-columns:140px 1fr;row-gap:8px;column-gap:14px;padding:16px 22px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;}
+  .exercise-meta dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .exercise-meta dd{margin:0;color:var(--ink);}
+  .block{padding:18px 22px;border-bottom:1px solid var(--line);}
+  .block:last-child{border-bottom:none;}
+  .block-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;}
+  .block p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft);}
+  .block ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .block li{margin-bottom:7px;}
+  .block li strong, .block p strong{color:var(--ink);}
+  code{font-family:var(--mono);background:#efece2;padding:1px 5px;border-radius:3px;font-size:.9em;}
+  .block-description{background:#fff;}
+  .block-mandatory .block-label{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-mandatory{border-left:4px solid var(--mandatory);}
+  .block-forbidden .block-label{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-forbidden{border-left:4px solid var(--forbidden);}
+  .block-norm .block-label{color:var(--norm);background:var(--norm-bg);}
+  .block-norm{border-left:4px solid var(--norm);}
+  .block-bonus .block-label{color:var(--bonus);background:var(--bonus-bg);}
+  .block-bonus{border-left:4px solid var(--bonus);}
+  .capstone-note{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px;padding:18px 22px;font-size:14.5px;color:#0b3d38;margin-bottom:20px;}
+  .capstone-note strong{color:var(--accent);}
+  pre.filetree{font-family:var(--mono);font-size:13px;background:var(--navy);color:#e4e2d8;padding:20px 24px;border-radius:6px;overflow-x:auto;line-height:1.6;}
+  .appendix-intro{font-size:14px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--line);padding-left:16px;margin-bottom:30px;}
+  .appendix-block{border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;background:#fff;}
+  .appendix-block h4{font-family:var(--mono);margin:0;padding:14px 20px;background:var(--paper-alt);border-bottom:1px solid var(--line);font-size:14px;letter-spacing:.04em;}
+  .appendix-block .sub{padding:18px 20px;border-bottom:1px solid var(--line);}
+  .appendix-block .sub:last-child{border-bottom:none;}
+  .sub-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+  .defense .sub-label{color:var(--defense);}
+  .edge .sub-label{color:var(--edge);}
+  ol.defense-list{margin:12px 0 0;padding-left:22px;font-size:14px;color:var(--ink-soft);}
+  ol.defense-list li{margin-bottom:9px;}
+  ul.edge-list{margin:12px 0 0;padding-left:0;list-style:none;font-size:14px;color:var(--ink-soft);}
+  ul.edge-list li{margin-bottom:9px;padding-left:26px;position:relative;}
+  ul.edge-list li::before{content:"☐";position:absolute;left:0;color:var(--edge);font-size:14px;}
+  .lab-warning{background:var(--forbidden-bg);border:1px solid var(--forbidden);border-radius:6px;padding:16px 20px;font-size:14px;color:#5c1414;margin-bottom:24px;}
+  .lab-warning strong{color:var(--forbidden);}
+  footer.endcap{background:var(--navy);color:#9a9890;text-align:center;padding:26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin-top:60px;}
+  .topic-block{border:1px solid var(--line);border-radius:8px;background:#fff;margin:22px 0;overflow:hidden;}
+  .topic-block h4{font-family:var(--mono);margin:0;padding:14px 22px;background:var(--navy);color:#f5f4ef;font-size:15px;letter-spacing:.03em;}
+  .topic-block .tbody{padding:18px 22px;}
+  .topic-block .tbody p{margin:0 0 12px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft);}
+  .topic-block .tbody li{margin-bottom:7px;}
+  .outputs-block{border-left:4px solid var(--mandatory);background:var(--mandatory-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0 26px;}
+  .outputs-block .block-label{color:var(--mandatory);}
+  .exitgate-block{border-left:4px solid var(--navy);background:var(--paper-alt);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .exitgate-block .block-label{color:var(--navy-soft);}
+  .delusions-block{border-left:4px solid var(--forbidden);background:var(--forbidden-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .delusions-block .block-label{color:var(--forbidden);}
+  .cert-block{border-left:4px solid var(--cert);background:var(--cert-bg);border-radius:0 8px 8px 0;padding:16px 22px;margin:18px 0;}
+  .cert-block .block-label{color:var(--cert);}
+  .block-label.lbl-mandatory{color:var(--mandatory);background:var(--mandatory-bg);}
+  .block-label.lbl-exitgate{color:var(--navy-soft);background:var(--norm-bg);}
+  .block-label.lbl-delusions{color:var(--forbidden);background:var(--forbidden-bg);}
+  .block-label.lbl-cert{color:var(--cert);background:var(--cert-bg);}
+  @media print{
+    body{background:#fff;}
+    nav.toc{break-after:page;}
+    section.chapter{break-before:page;}
+    .exercise, .appendix-block, .topic-block{break-inside:avoid;}
+    header.cover{break-after:avoid;}
+  }
+  @media (max-width:640px){
+    nav.toc ol{columns:1;}
+    .exercise-meta{grid-template-columns:1fr;}
+  }
+
+  .stage-block{margin-bottom:56px;}
+  .stage-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:18px;}
+  .stage-head h2{font-family:var(--mono);font-size:24px;margin:0;}
+  .stage-head .stage-sub{color:var(--ink-soft);font-size:14.5px;}
+  .stage-head .depth-tag{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;padding:4px 10px;border-radius:3px;background:var(--accent-soft);color:var(--accent);}
+  .subj-grid{display:grid;grid-template-columns:1fr;gap:2px;}
+  .subj-row{display:grid;grid-template-columns:56px 1fr;gap:14px;align-items:baseline;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:6px;text-decoration:none;color:var(--ink);}
+  .subj-row:hover{border-color:var(--accent);}
+  .subj-row .subj-num{font-family:var(--mono);color:var(--accent);font-size:13px;}
+  .subj-row .subj-title{font-size:15px;}
+  .stats-strip{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;margin:-28px auto 50px;background:var(--navy);color:#f5f4ef;padding:22px 30px;border-radius:8px;max-width:760px;font-family:var(--mono);}
+  .stats-strip .stat{text-align:center;}
+  .stats-strip .stat .num{font-size:26px;font-weight:800;color:#8fd9d1;}
+  .stats-strip .stat .lbl{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#c8c6bd;}
+  table.cert-table{width:100%;border-collapse:collapse;font-size:14.5px;margin:16px 0 30px;}
+  table.cert-table th, table.cert-table td{border:1px solid var(--line);padding:10px 14px;text-align:left;}
+  table.cert-table th{background:var(--paper-alt);font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.05em;}
+  .howto{background:var(--paper-alt);border:1px solid var(--line);border-radius:8px;padding:20px 26px;margin:20px 0;}
+  .howto p{color:var(--ink-soft);font-size:14.5px;margin:0 0 10px;}
+
+</style>
+</head>
+<body>
+<header class="cover">
+  <div class="eyebrow">AppSec Mastery Roadmap</div>
+  <h1>Master Index</h1>
+  <div class="subtitle">All 42 Subjects, Stage 0 &#8594; Stage 5</div>
+  <div class="version">Version 1.0 — September 2026</div>
+  <p class="summary">
+    Every subject below follows the same "42 school" contract: read it, build it, defend it without notes.
+    Stages 0-2 are full-depth (mandatory/forbidden/norm/bonus exercises, a capstone, and a defense-and-edge-case
+    appendix). Stages 3-5 use a lighter, structured format (theory, practical outputs, common delusions, and an
+    exit gate) suited to material that is broader and more architectural than exploit-driven. Click any subject
+    to open it — keep every file in the same folder as this index for the links to resolve.
+  </p>
+</header>
+
+<div class="shell">
+
+  <div class="stats-strip">
+    <div class="stat"><div class="num">42</div><div class="lbl">Subjects</div></div>
+    <div class="stat"><div class="num">6</div><div class="lbl">Stages</div></div>
+    <div class="stat"><div class="num">20</div><div class="lbl">Full-depth</div></div>
+    <div class="stat"><div class="num">22</div><div class="lbl">Structured</div></div>
+  </div>
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+          <li><a href="#stage0">Stage 0 — Foundations Reset</a></li>
+          <li><a href="#stage1">Stage 1 — Security Fundamentals (OWASP Top 10 + Core Vuln Classes)</a></li>
+          <li><a href="#stage2">Stage 2 — Hands-On Web Security + Code Review</a></li>
+          <li><a href="#stage3">Stage 3 — Secure Development / AppSec Engineering</a></li>
+          <li><a href="#stage4">Stage 4 — Real-World Readiness and Portfolio</a></li>
+          <li><a href="#stage5">Stage 5 — Advanced Specialization</a></li>
+      <li><a href="#certs">Certification Checkpoints</a></li>
+      <li><a href="#howto">How to Use This Roadmap</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="stage0">
+    <div class="stage-head">
+      <h2>Stage 0 — Foundations Reset</h2>
+      <span class="stage-sub">6 subjects</span>
+      <span class="depth-tag">Full depth</span>
+    </div>
+    <div class="subj-grid">
+          <a class="subj-row" href="stage0_linux_admin_depth.html"><span class="subj-num">1</span><span class="subj-title">Linux Administration Depth</span></a>
+          <a class="subj-row" href="stage0_networking_depth.html"><span class="subj-num">2</span><span class="subj-title">Networking Depth</span></a>
+          <a class="subj-row" href="stage0_http_internals.html"><span class="subj-num">3</span><span class="subj-title">HTTP Internals</span></a>
+          <a class="subj-row" href="stage0_os_internals.html"><span class="subj-num">4</span><span class="subj-title">OS Internals</span></a>
+          <a class="subj-row" href="stage0_sql_db_internals.html"><span class="subj-num">5</span><span class="subj-title">SQL and Database Internals</span></a>
+          <a class="subj-row" href="stage0_bash_python_security.html"><span class="subj-num">6</span><span class="subj-title">Bash and Python for Security</span></a>
+    </div>
+  </section>
+  <section class="chapter" id="stage1">
+    <div class="stage-head">
+      <h2>Stage 1 — Security Fundamentals (OWASP Top 10 + Core Vuln Classes)</h2>
+      <span class="stage-sub">7 subjects</span>
+      <span class="depth-tag">Full depth</span>
+    </div>
+    <div class="subj-grid">
+          <a class="subj-row" href="stage1_01_auth_session_security.html"><span class="subj-num">1</span><span class="subj-title">Authentication and Session Security</span></a>
+          <a class="subj-row" href="stage1_02_crypto_fundamentals.html"><span class="subj-num">2</span><span class="subj-title">Cryptography Fundamentals for AppSec</span></a>
+          <a class="subj-row" href="stage1_03_applied_crypto_attacks.html"><span class="subj-num">3</span><span class="subj-title">Applied Cryptographic Attacks</span></a>
+          <a class="subj-row" href="stage1_04_access_control_idor.html"><span class="subj-num">4</span><span class="subj-title">Access Control Models and IDOR</span></a>
+          <a class="subj-row" href="stage1_05_serverside_injection.html"><span class="subj-num">5</span><span class="subj-title">Server-Side Injection: Command Injection, XXE and SSRF</span></a>
+          <a class="subj-row" href="stage1_06_clientside_injection.html"><span class="subj-num">6</span><span class="subj-title">Client-Side Injection: XSS and CSRF</span></a>
+          <a class="subj-row" href="stage1_07_securecoding_tls.html"><span class="subj-num">7</span><span class="subj-title">Secure Coding Principles and TLS Configuration</span></a>
+    </div>
+  </section>
+  <section class="chapter" id="stage2">
+    <div class="stage-head">
+      <h2>Stage 2 — Hands-On Web Security + Code Review</h2>
+      <span class="stage-sub">7 subjects</span>
+      <span class="depth-tag">Full depth</span>
+    </div>
+    <div class="subj-grid">
+          <a class="subj-row" href="stage2_01_advweb1_smuggling_deserialization.html"><span class="subj-num">1</span><span class="subj-title">Advanced Web Exploitation I: Request Smuggling and Deserialization</span></a>
+          <a class="subj-row" href="stage2_02_advweb2_ssti_graphql.html"><span class="subj-num">2</span><span class="subj-title">Advanced Web Exploitation II: SSTI and GraphQL Security</span></a>
+          <a class="subj-row" href="stage2_03_api_authorization.html"><span class="subj-num">3</span><span class="subj-title">Modern API Authorization: BOLA, BFLA, and Rate-Limit Abuse</span></a>
+          <a class="subj-row" href="stage2_04_file_handling_cloud_ssrf.html"><span class="subj-num">4</span><span class="subj-title">File Handling Vulnerabilities and Cloud SSRF</span></a>
+          <a class="subj-row" href="stage2_05_secure_code_review.html"><span class="subj-num">5</span><span class="subj-title">Secure Code Review Methodology</span></a>
+          <a class="subj-row" href="stage2_06_burp_mastery_portswigger.html"><span class="subj-num">6</span><span class="subj-title">Burp Suite Mastery and the PortSwigger Gauntlet</span></a>
+          <a class="subj-row" href="stage2_07_race_conditions_business_logic.html"><span class="subj-num">7</span><span class="subj-title">Race Conditions and Business Logic Abuse</span></a>
+    </div>
+  </section>
+  <section class="chapter" id="stage3">
+    <div class="stage-head">
+      <h2>Stage 3 — Secure Development / AppSec Engineering</h2>
+      <span class="stage-sub">9 subjects</span>
+      <span class="depth-tag">Structured</span>
+    </div>
+    <div class="subj-grid">
+          <a class="subj-row" href="stage3_01_threat_modeling.html"><span class="subj-num">1</span><span class="subj-title">Threat Modeling</span></a>
+          <a class="subj-row" href="stage3_02_sast_engineering.html"><span class="subj-num">2</span><span class="subj-title">SAST Engineering</span></a>
+          <a class="subj-row" href="stage3_03_dast_pipeline.html"><span class="subj-num">3</span><span class="subj-title">DAST and Dynamic Pipeline Integration</span></a>
+          <a class="subj-row" href="stage3_04_sca_supply_chain.html"><span class="subj-num">4</span><span class="subj-title">Software Composition Analysis and Supply Chain Security</span></a>
+          <a class="subj-row" href="stage3_05_devsecops_pipeline.html"><span class="subj-num">5</span><span class="subj-title">DevSecOps Pipeline Engineering</span></a>
+          <a class="subj-row" href="stage3_06_container_kubernetes_security.html"><span class="subj-num">6</span><span class="subj-title">Container and Kubernetes Security</span></a>
+          <a class="subj-row" href="stage3_07_secrets_detection_management.html"><span class="subj-num">7</span><span class="subj-title">Secrets Detection and Management</span></a>
+          <a class="subj-row" href="stage3_08_cloud_security_aws.html"><span class="subj-num">8</span><span class="subj-title">Cloud Security Fundamentals (AWS)</span></a>
+          <a class="subj-row" href="stage3_09_incident_triage.html"><span class="subj-num">9</span><span class="subj-title">Incident Triage for Compromised Web Applications</span></a>
+    </div>
+  </section>
+  <section class="chapter" id="stage4">
+    <div class="stage-head">
+      <h2>Stage 4 — Real-World Readiness and Portfolio</h2>
+      <span class="stage-sub">6 subjects</span>
+      <span class="depth-tag">Structured</span>
+    </div>
+    <div class="subj-grid">
+          <a class="subj-row" href="stage4_01_bug_bounty_methodology.html"><span class="subj-num">1</span><span class="subj-title">Bug Bounty Methodology</span></a>
+          <a class="subj-row" href="stage4_02_advanced_recon_osint.html"><span class="subj-num">2</span><span class="subj-title">Advanced Reconnaissance and OSINT</span></a>
+          <a class="subj-row" href="stage4_03_pentest_methodology_reporting.html"><span class="subj-num">3</span><span class="subj-title">Full Penetration Test Methodology and Reporting</span></a>
+          <a class="subj-row" href="stage4_04_cve_reproduction_nday.html"><span class="subj-num">4</span><span class="subj-title">CVE Reproduction and N-Day Research</span></a>
+          <a class="subj-row" href="stage4_05_tool_building_publishing.html"><span class="subj-num">5</span><span class="subj-title">Building and Publishing Original Security Tools</span></a>
+          <a class="subj-row" href="stage4_06_security_writing_blogging.html"><span class="subj-num">6</span><span class="subj-title">Professional Security Writing and Blogging</span></a>
+    </div>
+  </section>
+  <section class="chapter" id="stage5">
+    <div class="stage-head">
+      <h2>Stage 5 — Advanced Specialization</h2>
+      <span class="stage-sub">7 subjects</span>
+      <span class="depth-tag">Structured</span>
+    </div>
+    <div class="subj-grid">
+          <a class="subj-row" href="stage5_01_mobile_appsec_android.html"><span class="subj-num">1</span><span class="subj-title">Mobile AppSec: Android</span></a>
+          <a class="subj-row" href="stage5_02_mobile_appsec_ios.html"><span class="subj-num">2</span><span class="subj-title">Mobile AppSec: iOS</span></a>
+          <a class="subj-row" href="stage5_03_cloud_native_appsec.html"><span class="subj-num">3</span><span class="subj-title">Cloud-Native AppSec</span></a>
+          <a class="subj-row" href="stage5_04_api_security_research.html"><span class="subj-num">4</span><span class="subj-title">API Security Research</span></a>
+          <a class="subj-row" href="stage5_05_security_architecture_engineering.html"><span class="subj-num">5</span><span class="subj-title">Security Architecture and Engineering</span></a>
+          <a class="subj-row" href="stage5_06_supply_chain_security_research.html"><span class="subj-num">6</span><span class="subj-title">Supply Chain Security Research</span></a>
+          <a class="subj-row" href="stage5_07_research_publication_mentorship.html"><span class="subj-num">7</span><span class="subj-title">Security Research, Publication, and Mentorship</span></a>
+    </div>
+  </section>
+
+  <section class="chapter" id="certs">
+    <div class="chapter-label">Reference</div>
+    <h2>Certification Checkpoints</h2>
+    <p>Readiness-gated, never date-gated — buy a certification once its gate is honestly cleared, not to force readiness.</p>
+    <table class="cert-table">
+      <tr><th>Cert</th><th>Cost (confirm current)</th><th>Gate before buying</th></tr>
+      <tr><td>eJPT</td><td>~$249</td><td>Pass Stage 1 exit gate (Secure Coding Principles and TLS Configuration's DVWA full sweep)</td></tr>
+      <tr><td>PNPT</td><td>~$499</td><td>Pass Stage 3 exit gate / clear Full Penetration Test Methodology and Reporting</td></tr>
+      <tr><td>OSCP</td><td>~$1,699</td><td>Solving novel problems consistently, post-Stage 4 — never to force readiness, only once demonstrated</td></tr>
+    </table>
+    <p><strong>Skip:</strong> CEH (theory-heavy, vendor-driven), CISSP (governance cert, irrelevant at this stage),
+    Security+ (only if a specific employer requires it), GCIH/GSEC (worth it only if an employer pays).</p>
+  </section>
+
+  <section class="chapter" id="howto">
+    <div class="chapter-label">Reference</div>
+    <h2>How to Use This Roadmap</h2>
+    <div class="howto">
+      <p><strong>Order.</strong> Work the stages in sequence — each one's capstone assumes the depth of everything before it. Within Stage 0-2, the subjects are also ordered deliberately; within Stage 3-5, the order is a strong default but more interchangeable once Stage 2 is cleared.</p>
+      <p><strong>Pace.</strong> There are no weeks or months in these documents on purpose — a stage ends when you clear its exit gate, not on a date. See the accompanying weekly-routine document for how to structure study time, labs, CTFs, and note-taking without a rigid calendar dictating when a stage "should" be done.</p>
+      <p><strong>Portfolio.</strong> Every capstone and every practical output in Stage 0-2 is designed to become a GitHub artifact or a writeup. By the end of Stage 2 your GitHub should already read as a stronger portfolio than most junior security applicants'.</p>
+      <p><strong>Defense.</strong> Treat every exit gate literally — if you can't do it without notes, the stage isn't actually done, whatever the calendar says.</p>
+    </div>
+  </section>
+
+</div>
+
+<footer class="endcap">
+  AppSec Mastery Roadmap · Master Index · 42 Subjects
+</footer>
+
+</body>
+</html>
